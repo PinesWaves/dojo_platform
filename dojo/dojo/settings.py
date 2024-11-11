@@ -27,6 +27,9 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 DEBUG = bool(os.environ.get("DEBUG", default=0))
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+CSRF_TRUSTED_ORIGINS = ['https://localhost', 'https://127.0.0.1']
+SESSION_COOKIE_SECURE = True   # Solo en producción con HTTPS
+CSRF_COOKIE_SECURE = True      # Solo en producción con HTTPS
 
 
 # Application definition
