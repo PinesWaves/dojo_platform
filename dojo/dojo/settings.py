@@ -138,6 +138,72 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# ------------------------------------- LOGGING ---------------------------------------
+# logging_level = "DEBUG" if DEBUG else "INFO"
+# logging_path = BASE_DIR / "logs"
+#
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'filters': {
+#         'require_debug_false': {'()': 'django.utils.log.RequireDebugFalse'},
+#         'require_debug_true': {'()': 'django.utils.log.RequireDebugTrue'},
+#     },
+#     'formatters': {
+#         'main_formatter': {
+#             'format': '[%(asctime)s] {%(filename)s:%(lineno)d} '
+#                       '%(levelname)s:%(name)s %(message)s ',
+#             'datefmt': '%Y-%m-%d %H:%M:%S',
+#         }
+#     },
+#     'handlers': {
+#         'console': {
+#             'level': 'DEBUG',
+#             'filters': ['require_debug_true'],
+#             'class': 'logging.StreamHandler',
+#             'formatter': 'main_formatter',
+#         },
+#         'production_file': {
+#             'level': 'INFO',
+#             'class': 'logging.handlers.TimeRotatingFileHandler',
+#             'filename': os.path.join(logging_path, 'main.log'),
+#             'when': 'D',
+#             'backupCount': 0,
+#             'formatter': 'main_formatter',
+#             'filters': ['require_debug_false'],
+#         },
+#         'debug_file': {
+#             'level': 'DEBUG',
+#             'class': 'logging.handlers.RotatingFileHandler',
+#             'filename': os.path.join(logging_path, 'main_debug.log'),
+#             'maxBytes': 1024 * 1024 * 5,
+#             'backupCount': 7,
+#             'formatter': 'main_formatter',
+#             'filters': ['require_debug_true'],
+#         }
+#     },
+#     'loggers': {
+#         'django.request': {
+#             'level': 'ERROR',
+#             'handlers': ['console'],
+#             'propagate': True,
+#         },
+#         'django.db.backends': {
+#             'level': 'ERROR',
+#             'handlers': ['console', 'debug_file'],
+#             'propagate': False,
+#         },
+#         'django': {
+#             'level': logging_level,
+#             'handlers': ['console', 'debug_file', 'production_file'],
+#         },
+#         'application': {
+#             'level': logging_level,
+#             'handlers': ['console', 'debug_file', 'production_file'],
+#         }
+#     }
+# }
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
