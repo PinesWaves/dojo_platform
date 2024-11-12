@@ -1,17 +1,51 @@
 from datetime import datetime
 
-from django.shortcuts import render
-from django.views.generic import TemplateView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import User
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic import CreateView, UpdateView, DeleteView, TemplateView
+from django.shortcuts import get_object_or_404, render
+from django.contrib.auth import get_user_model
+from .forms import UserRegisterForm, UserUpdateForm
+from .models import Category
 
+User = get_user_model()
 
-class Register(CreateView):
+# Vista de Registro
+class RegisterView(CreateView):
     model = User
+    form_class = UserRegisterForm
     template_name = 'login_register/register.html'
     success_url = reverse_lazy('login')
+
+# Vista de Actualización de Usuario
+class UpdateUserView(LoginRequiredMixin, UpdateView):
+    model = User
+    form_class = UserUpdateForm
+    template_name = 'user_management/update_user.html'
+    success_url = reverse_lazy('attendance')
+
+    def get_object(self, queryset=None):
+        # Sensei puede editar cualquier usuario, otros solo su propio perfil
+        user = get_object_or_404(User, pk=self.kwargs['pk'])
+        if self.request.user.categoria == Category.SENSEI or self.request.user == user:
+            return user
+        return self.request.user
+
+# Vista de Desactivación de Usuario (solo Sensei)
+class DeleteUserView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = User
+    template_name = 'user_management/delete_user.html'
+    success_url = reverse_lazy('login')
+
+    def test_func(self):
+        return self.request.user.categoria == Category.SENSEI
+
+    def form_valid(self, form):
+        user = self.get_object()
+        user.is_active = False  # Desactivar usuario en vez de eliminar
+        user.save()
+        return super().form_valid(form)
+
 
 
 class RecoverPass(TemplateView):
@@ -28,32 +62,12 @@ class ForgotPass(TemplateView):
     success_url = reverse_lazy('/')
 
 
-class CreateUser(LoginRequiredMixin, CreateView):
-    model = User
-    fields = ['email', 'first_name', 'last_name', 'password']
-    template_name = 'create_user.html'
-    success_url = reverse_lazy('user_list')
-
-
-class UpdateUser(LoginRequiredMixin, UpdateView):
-    model = User
-    fields = ['email', 'first_name', 'last_name', 'password']
-    template_name = 'update_user.html'
-    success_url = reverse_lazy('user_list')
-
-
 def deactivate_user(email, **extra_fields):
     # email = self.normalize_email(email)
     user = User(email=email, **extra_fields)
     user.is_active = False
     user.date_deactivated = datetime.now()
     user.save()
-
-
-class DeleteUser(LoginRequiredMixin, DeleteView):
-    model = User
-    template_name = 'delete_user.html'
-    success_url = reverse_lazy('user_list')
 
 
 def user_list(request):
