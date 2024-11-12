@@ -24,7 +24,7 @@ RUN pacman -S --noconfirm \
     wget
 
 # Set environment variables for Python installation
-ENV PYTHON_VERSION=3.11.9
+ENV PYTHON_VERSION=3.12.7
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
@@ -36,8 +36,8 @@ RUN wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VER
     make -j$(nproc) && \
     make altinstall
 
-# Set Python 3.11.9 as the default Python version
-RUN ln -sf /usr/local/bin/python3.11 /usr/bin/python
+# Set Python 3.12.7 as the default Python version
+RUN ln -sf /usr/local/bin/python3.12 /usr/bin/python
 
 # Verify the default Python version
 RUN python --version
