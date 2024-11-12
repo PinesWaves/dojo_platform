@@ -1,10 +1,8 @@
 import datetime
 
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from config.config_vars import ranges
-from django_countries.fields import CountryField
 
 
 class IDType(models.TextChoices):

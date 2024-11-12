@@ -33,7 +33,8 @@ class UserRegisterForm(forms.ModelForm):
         fields = [
             'first_name', 'last_name', 'id_type', 'id_number', 'birth_date', 'birth_place', 'profession', 'eps',
             'phone_number', 'address', 'city', 'country', 'email', 'parent', 'parent_phone_number', 'category',
-            'password1', 'password2',
+            'password1', 'password2', 'accept_inf_cons', 'medical_cond', 'drug_cons', 'allergies', 'other_activities',
+            'cardio_prob', 'injuries', 'physical_limit', 'lost_cons', 'physical_cond', 'sec_recom', 'agreement'
         ]
         exclude = ['accept_regulations', 'accept_inf_cons']
 
