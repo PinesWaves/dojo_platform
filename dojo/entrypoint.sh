@@ -24,7 +24,7 @@ python manage.py collectstatic --noinput
 
 # Start the Django server
 #python manage.py runserver 0.0.0.0:8000
-exec gunicorn dojo.wsgi:application --bind 0.0.0.0:8000 --workers 3
+exec gunicorn dojo.wsgi:application --bind 0.0.0.0:8000 --workers 3 --reload
 
 # Execute the command specified as arguments to this script
 exec "$@"
