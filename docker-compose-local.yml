@@ -21,23 +21,12 @@ services:
     volumes:
       - .:/app
       - ./dojo/static/:/app/static/
-    expose:
-      - "8000"
+      - ./dojo/logs:/app/dojo/logs
+    ports:
+      - "8000:8000"
     env_file:
       - .env
     depends_on:
       - db
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-      - "443:443"  # Expone el puerto 443 para HTTPS
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/ssl:/etc/nginx/ssl
-      - ./dojo/static/:/app/static/
-    depends_on:
-      - web
 volumes:
   pgdata:

@@ -1,44 +1,44 @@
 services:
   db:
-    image: postgres:16
     restart: always
+    image: postgres:16
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgres/data
     ports:
       - "5432:5432"
-
   web:
+    restart: always
     build:
       context: .
       dockerfile: Dockerfile
-    restart: always
     working_dir: /app/dojo
-    entrypoint: ["./entrypoint.sh"]
+    tty: true
+    entrypoint: ["./entrypoint_prod.sh"]
     volumes:
       - .:/app
+      - ./dojo/static/:/app/static/
+      - ./dojo/logs:/app/dojo/logs
     expose:
       - "8000"
     env_file:
-      - .env.production  # Archivo de variables de entorno para producción
+      - .env
     depends_on:
       - db
-
   nginx:
     image: nginx:latest
-    container_name: nginx_server
     ports:
       - "80:80"
-      - "443:443"
+      - "443:443"  # Expone el puerto 443 para HTTPS
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/ssl:/etc/nginx/ssl
+      - ./dojo/static/:/app/static/
     depends_on:
       - web
-
 volumes:
   pgdata:
