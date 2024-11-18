@@ -1,24 +1,40 @@
 #!/bin/sh
 
-# Salir inmediatamente si un comando falla
+# Exit immediately if a command exits with a non-zero status
 set -e
 
 if [ "$DATABASE" = "postgres" ]; then
-    echo "Esperando a que PostgreSQL esté disponible..."
+    echo "Waiting for postgres..."
 
     while ! nc -z "${DOJO_DB_HOST}" "${DOJO_DB_PORT}"; do
       sleep 0.1
     done
 
-    echo "PostgreSQL iniciado"
+    echo "PostgreSQL started"
 fi
 
-# Crear y aplicar migraciones de Django
+mkdir -p /app/dojo/logs
+chmod -R 777 /app/dojo/logs
+
+# Run create migrations
 python manage.py makemigrations
+
+# Run Django migrations
 python manage.py migrate --noinput
 
-# Recoger archivos estáticos
+# Collect static files (optional)
 python manage.py collectstatic --noinput
 
-# Iniciar Gunicorn en modo producción
-exec gunicorn myproject.wsgi:application --bind 0.0.0.0:8000 --workers 3
+# Start the Django server
+#python manage.py runserver 0.0.0.0:8000
+gunicorn dojo.wsgi:application \
+    --bind 0.0.0.0:8000 \
+    --workers 3 \
+    --reload \
+    --access-logfile - \
+    --error-logfile - \
+    --capture-output \
+    --log-level debug
+
+# Execute the command specified as arguments to this script
+exec "$@"
