@@ -20,3 +20,6 @@ ranges = [
     ('9d', '9th Dan'),  # Black
     ('10d', '10th Dan'),  # Black
 ]
+
+regulations = "https://drive.google.com/file/d/1ZpVOlsm9EvjMCfV0xy3tbckCbaJ33lFd/view?usp=drive_link"
+informed_consent = "https://drive.google.com/file/d/1ZpVOlsm9EvjMCfV0xy3tbckCbaJ33lFd/view?usp=drive_link"
