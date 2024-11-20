@@ -16,10 +16,9 @@ Including another URLconf
 """
 from django.urls import path, include
 
-from application.views import Dashboard, TemplateView
+from application.views import SenseiDashboard, StudentDashboard
 
 urlpatterns = [
-    path('dashboard', Dashboard.as_view(), name='dashboard'),
-    path('dashboard/sensei/', TemplateView.as_view(template_name="pages/sensei_dashboard.html"), name='sensei_dashboard'),
-    path('dashboard/student/', TemplateView.as_view(template_name="pages/student_dashboard.html"), name='student_dashboard'),
+    path('sensei/', SenseiDashboard.as_view(), name='sensei_dashboard'),
+    path('student/', StudentDashboard.as_view(), name='student_dashboard'),
 ]

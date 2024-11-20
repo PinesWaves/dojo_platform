@@ -1,15 +1,56 @@
 import logging
 from datetime import datetime
 
+from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views import View
 from django.views.generic import CreateView, UpdateView, DeleteView, TemplateView
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth import get_user_model
 from .forms import UserRegisterForm, UserUpdateForm
 from .models import Category
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
+
+# Vista de login
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.urls import reverse_lazy
+from django.http import HttpResponse
+
+class CustomLoginView(View):
+    template_name = 'login_register/login.html'
+
+    def get(self, request):
+        user = request.user
+        if user.is_authenticated:  # Redirige si ya está autenticado
+            if user.is_superuser or user.category == Category.SENSEI:
+                return redirect(reverse_lazy('sensei_dashboard'))  # Redirigir al dashboard del sensei
+            elif user.category == Category.ESTUDIANTE:
+                return redirect(reverse_lazy('student_dashboard'))  # Redirigir al dashboard del estudiante
+        return render(request, self.template_name)
+
+    def post(self, request):
+        id_number = request.POST.get('id_number')
+        password = request.POST.get('password')
+
+        user = authenticate(request, id_number=id_number, password=password)
+        breakpoint()
+        if user:
+            login(request, user)
+            if user.is_superuser or user.category == Category.SENSEI:
+                return redirect(reverse_lazy('sensei_dashboard'))  # Redirigir al dashboard del sensei
+            elif user.category == Category.ESTUDIANTE:
+                return redirect(reverse_lazy('student_dashboard'))  # Redirigir al dashboard del estudiante
+            else:
+                return redirect(reverse_lazy('login'))  # Página por defecto
+
+        return render(request, self.template_name, {
+            'error': 'Invalid id or password',
+        })
+
 
 # Vista de Registro
 class RegisterView(CreateView):
@@ -46,7 +87,6 @@ class DeleteUserView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         user.is_active = False  # Desactivar usuario en vez de eliminar
         user.save()
         return super().form_valid(form)
-
 
 
 class RecoverPass(TemplateView):

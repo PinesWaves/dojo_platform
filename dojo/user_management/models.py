@@ -37,27 +37,34 @@ class PhysicalConditions(models.TextChoices):
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError('The Email field must be set')
+    def create_user(self, id_number, password=None, **extra_fields):
+        """
+        Crea y guarda un usuario con el número de ID y la contraseña proporcionados.
+        """
+        if not id_number:
+            raise ValueError('The ID number field must be set')
 
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
+        user = self.model(id_number=id_number, **extra_fields)
+        user.set_password(password)  # Establece la contraseña de manera segura
+        user.save(using=self._db)  # Guarda el usuario en la base de datos
         return user
 
-    def create_superuser(self, email, password=None, **extra_fields):
+    def create_superuser(self, id_number, password=None, **extra_fields):
+        """
+        Crea y guarda un superusuario con el número de ID y la contraseña proporcionados.
+        """
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
+        # Verificar que las propiedades esenciales para el superusuario estén establecidas
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True')
 
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True')
 
-        return self.create_user(email, password, **extra_fields)
+        # Crear un superusuario usando el método `create_user`
+        return self.create_user(id_number, password, **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -73,7 +80,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         choices=Category.choices,
         default=Category.ESTUDIANTE
     )
-    id_number = models.CharField(max_length=30, unique=True, null=False, blank=False, default=0)
+    id_number = models.CharField(max_length=30, unique=True, null=False, blank=False)
     birth_date = models.DateField(default=datetime.datetime(2000, 1, 1))
     birth_place = models.CharField(max_length=30, default='')
     profession = models.CharField(max_length=30, default='')
@@ -117,7 +124,3 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
-
-    @property
-    def is_sensei(self):
-        return self.category == Category.SENSEI

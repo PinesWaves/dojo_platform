@@ -1,7 +1,8 @@
 from django import forms
 from django.core.exceptions import ValidationError
-
+from config.config_vars import regulations, informed_consent
 from .models import User, Category
+from django.utils.safestring import mark_safe
 
 
 class UserRegisterForm(forms.ModelForm):
@@ -17,13 +18,13 @@ class UserRegisterForm(forms.ModelForm):
     )
 
     accept_regulations = forms.BooleanField(
-        label="I accept the Regulations",
+        label=mark_safe(f'I accept the <a href="{regulations}" target="_blank">Regulations</a>'),
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input', 'style': 'margin-left: 10px'}),
         required=True
     )
 
     accept_inf_cons = forms.BooleanField(
-        label="I accept the Informed Consent",
+        label=mark_safe(f'I accept the <a href="{informed_consent}" target="_blank">Informed consent</a>'),
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input', 'style': 'margin-left: 10px'}),
         required=True
     )
