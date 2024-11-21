@@ -17,6 +17,7 @@ services:
       dockerfile: Dockerfile
     working_dir: /app/dojo
     tty: true
+    stdin_open: true
     entrypoint: ["./entrypoint.sh"]
     volumes:
       - .:/app
