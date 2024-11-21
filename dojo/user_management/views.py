@@ -37,7 +37,7 @@ class CustomLoginView(View):
         password = request.POST.get('password')
 
         user = authenticate(request, id_number=id_number, password=password)
-        breakpoint()
+
         if user:
             login(request, user)
             if user.is_superuser or user.category == Category.SENSEI:
@@ -48,7 +48,7 @@ class CustomLoginView(View):
                 return redirect(reverse_lazy('login'))  # Página por defecto
 
         return render(request, self.template_name, {
-            'error': 'Invalid id or password',
+            'error': 'Invalid credentials',
         })
 
 

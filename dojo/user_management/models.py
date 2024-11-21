@@ -1,4 +1,7 @@
+import base64
 import datetime
+from io import BytesIO
+from PIL import Image
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
@@ -34,6 +37,12 @@ class PhysicalConditions(models.TextChoices):
     BUENO = 'B', 'Bueno'
     ACEPTABLE = 'A', 'Aceptable'
     NECESITA_MEJORAR = 'I', 'Necesita mejorar'
+
+
+class Genders(models.TextChoices):
+    MALE = 'M', 'Male'
+    FEMALE = 'F', 'Female'
+    NA = 'NA', 'N/A'
 
 
 class UserManager(BaseUserManager):
@@ -83,6 +92,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     id_number = models.CharField(max_length=30, unique=True, null=False, blank=False)
     birth_date = models.DateField(default=datetime.datetime(2000, 1, 1))
     birth_place = models.CharField(max_length=30, default='')
+    gender = models.CharField(choices=Genders.choices, default=Genders.NA, null=True, blank=True)
     profession = models.CharField(max_length=30, default='')
     eps = models.CharField(max_length=50, default='')
     phone_number = models.CharField(max_length=15, default='')
@@ -90,6 +100,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     city = models.CharField(max_length=30, default='')
     country = models.CharField(max_length=30, default='')
     email = models.EmailField(max_length=255, null=False, blank=False)
+    picture = models.TextField(null=True, blank=True, default=None)
     level = models.CharField(choices=ranges, default=ranges[0])
     parent = models.CharField(max_length=60, null=True, blank=True, default='')
     parent_phone_number = models.CharField(max_length=15, null=True, blank=True, default='')
@@ -124,3 +135,13 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
+
+    def save_picture(self, image_file):
+        """Convert the image to Base64 and save it."""
+        buffer = BytesIO()
+        image = Image.open(image_file)
+        image.save(buffer, format=image.format)  # Preserve original format
+        buffer.seek(0)
+        encoded_image = base64.b64encode(buffer.read()).decode('utf-8')
+        self.picture = encoded_image
+        self.save()
