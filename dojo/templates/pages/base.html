@@ -215,12 +215,22 @@
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
-
+          {% if user.is_superuser or user.category == 'S' %}
           <li class="nav-item">
-            <a href="{% url 'logout' %}" class="nav-link">
-              <i class="nav-icon fas fa-sign-out-alt"></i>
-              <p>Logout</p>
+            <a href="{% url 'student_dashboard' %}" class="nav-link">
+              <i class="nav-icon fas fa-book-reader"></i>
+              <p>Student dashboard</p>
             </a>
+          </li>
+          {% endif %}
+          <li class="nav-item">
+            <form action="{% url 'logout' %}" method="post">
+              {% csrf_token %}
+              <button type="submit" class="nav-link">
+                <i class="nav-icon fas fa-sign-out-alt"></i>
+                Logout
+              </button>
+            </form>
           </li>
         </ul>
       </nav>

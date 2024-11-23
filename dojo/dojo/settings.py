@@ -30,6 +30,7 @@ ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 CSRF_TRUSTED_ORIGINS = ['https://localhost', 'https://127.0.0.1']
 SESSION_COOKIE_SECURE = True   # Solo en producción con HTTPS
 CSRF_COOKIE_SECURE = True      # Solo en producción con HTTPS
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 
 # Application definition
@@ -208,3 +209,4 @@ LOGGING = {
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+LOGIN_URL = '/login/'
