@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.urls import path, include
 
-from application.views import SenseiDashboard, StudentDashboard
+from dashboard.views import SenseiDashboard, StudentDashboard
 
 urlpatterns = [
     path('sensei/', SenseiDashboard.as_view(), name='sensei_dashboard'),

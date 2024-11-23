@@ -10,6 +10,7 @@ class SenseiDashboard(LoginRequiredMixin, TemplateView):
     template_name = "pages/sensei_dashboard.html"
 
     def get(self, request, *args, **kwargs):
+
         return render(request, self.template_name)
 
 
