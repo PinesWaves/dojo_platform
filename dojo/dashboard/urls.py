@@ -16,9 +16,11 @@ Including another URLconf
 """
 from django.urls import path, include
 
-from dashboard.views import SenseiDashboard, StudentDashboard
+from dashboard.views import SenseiDashboard, StudentDashboard, ManageTrainingsView, ManageStudentsView
 
 urlpatterns = [
-    path('sensei/', SenseiDashboard.as_view(), name='sensei_dashboard'),
+    path('', SenseiDashboard.as_view(), name='sensei_dashboard'),
+    path('manage_trainings/', ManageTrainingsView.as_view(), name='manage_trainings'),
+    path('manage_students/', ManageStudentsView.as_view(), name='manage_students'),
     path('student/', StudentDashboard.as_view(), name='student_dashboard'),
 ]
