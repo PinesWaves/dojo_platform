@@ -27,6 +27,9 @@
   <!-- summernote -->
   <link rel="stylesheet" href="{% static 'plugins/summernote/summernote-bs4.min.css' %}">
   <link rel="icon" href="{% static 'img/icon.png' %}">
+
+  {% block csslibs %}{% endblock %}
+
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
@@ -218,6 +221,12 @@
             </a>
           </li>
           <li class="nav-item">
+            <a href="{% url 'manage_students' %}" class="nav-link">
+              <i class="nav-icon fas fa-users"></i>
+              <p>Manage students</p>
+            </a>
+          </li>
+          <li class="nav-item">
             <a href="{% url 'student_dashboard' %}" class="nav-link">
               <i class="nav-icon fas fa-book-reader"></i>
               <p>Student dashboard</p>
@@ -290,6 +299,8 @@
 <script src="{% static 'plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
 <!-- AdminLTE App -->
 <script src="{% static 'dist/js/adminlte.js' %}"></script>
+
+{% block script %}{% endblock %}
 <!-- AdminLTE for demo purposes -->
 {#<script src="{% static 'plugins/js/demo.js' %}"></script>#}
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
