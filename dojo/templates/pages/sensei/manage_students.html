@@ -37,15 +37,15 @@
               Actions
             </h3>
           </div>
-          <div class="card-body col-lg-3">
-            <form action="{% url 'manage_students' %}" method="post">{% csrf_token %}
+          <div class="card-body">
+            <form class="col-lg-3" action="{% url 'manage_students' %}" method="post">{% csrf_token %}
               <div class="form-group">
                 <label for="reg_time">Activate registration form until:</label>
                 <div class="input-group date" id="timepicker" data-target-input="nearest">
                   <div class="input-group-prepend" data-target="#timepicker" data-toggle="datetimepicker">
                       <div class="input-group-text"><i class="far fa-clock"></i></div>
                   </div>
-                  <input type="text" class="form-control datetimepicker-input" data-target="#timepicker" name="reg_time"/>
+                  <input type="text" class="form-control datetimepicker-input" data-target="#timepicker" name="expiration_datetime"/>
                   <div class="input-group-append">
                     <button type="submit" class="btn btn-primary btn-block">Activate</button>
                   </div>
@@ -56,10 +56,12 @@
             </form>
             {% if reg_url != '' %}
               <label for="reg_time">
-                There is an active registration url until {{ reg_time }}:
-                <a href="{{ reg_url }}"></a>
+                Active registration url(s):<br>
+                {% for time, url in time_url %}
+                  <a href="{{ url }}">{{ time }} - {{ url }}</a><br>
+                {% endfor %}
               </label>
-            {% endif %} 
+            {% endif %}
           </div>
         </div>
       </div>
@@ -530,10 +532,9 @@
         "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
       }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
 
-      //Timepicker
-      $('#timepicker').datetimepicker({
-        format: 'LT'
-      })
+      //Date and time picker
+      $('#timepicker').datetimepicker({ icons: { time: 'far fa-clock' } });
+
     });
   </script>
 {% endblock %}

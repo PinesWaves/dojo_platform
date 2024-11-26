@@ -9,7 +9,7 @@ from django.views.generic import CreateView, UpdateView, DeleteView, TemplateVie
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth import get_user_model
 from .forms import UserRegisterForm, UserUpdateForm
-from .models import Category
+from .models import Category, Token
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -58,6 +58,24 @@ class RegisterView(CreateView):
     form_class = UserRegisterForm
     template_name = 'login_register/register.html'
     success_url = reverse_lazy('login')
+
+    def dispatch(self, request, *args, **kwargs):
+        token = self.kwargs.get('token')
+
+        # Check if the token exists and is valid
+        try:
+            registration_token = Token.objects.get(token=token)
+            if not registration_token.is_valid():
+                return redirect(reverse_lazy('login'))  # "Invalid or expired token
+        except Token.DoesNotExist:
+            return redirect(reverse_lazy('login'))  # "Invalid or expired token
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        # Process the form
+        return super().form_valid(form)
+
 
 # Vista de Actualización de Usuario
 class UpdateUserView(LoginRequiredMixin, UpdateView):
@@ -109,8 +127,3 @@ def deactivate_user(email, **extra_fields):
     user.is_active = False
     user.date_deactivated = datetime.now()
     user.save()
-
-
-def user_list(request):
-    users = User.objects.all()
-    return render(request, 'user_list.html', {'users': users})

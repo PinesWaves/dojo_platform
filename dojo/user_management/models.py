@@ -1,10 +1,13 @@
 import base64
-import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 from PIL import Image
+from django.utils.timezone import now
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.http import HttpResponseForbidden
+
 from config.config_vars import ranges
 
 
@@ -90,7 +93,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=Category.ESTUDIANTE
     )
     id_number = models.CharField(max_length=30, unique=True, null=False, blank=False)
-    birth_date = models.DateField(default=datetime.datetime(2000, 1, 1))
+    birth_date = models.DateField(default=datetime(2000, 1, 1))
     birth_place = models.CharField(max_length=30, default='')
     gender = models.CharField(choices=Genders.choices, default=Genders.NA, null=True, blank=True)
     profession = models.CharField(max_length=30, default='')
@@ -145,3 +148,33 @@ class User(AbstractBaseUser, PermissionsMixin):
         encoded_image = base64.b64encode(buffer.read()).decode('utf-8')
         self.picture = encoded_image
         self.save()
+
+
+class Token(models.Model):
+    token = models.CharField(max_length=100, unique=True)  # The generated token
+    created_at = models.DateTimeField(auto_now_add=True)  # Timestamp for token creation
+    expires_at = models.DateTimeField()  # Expiration timestamp
+
+    def is_valid(self):
+        """Check if the token is still valid."""
+        return now() + timedelta(minutes=1) <= self.expires_at
+
+    def dispatch(self, request, *args, **kwargs):
+        token = self.kwargs.get('token')
+
+        # Check if the token exists and is valid
+        try:
+            registration_token = Token.objects.get(token=token)
+            if not registration_token.is_valid():
+                return HttpResponseForbidden("Invalid or expired token.")
+        except Token.DoesNotExist:
+            return HttpResponseForbidden("Invalid or expired token.")
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        # token = self.kwargs.get('token')
+        # Mark the token as used or delete it
+        # Token.objects.filter(token=token).delete()
+
+        return super().form_valid(form)

@@ -1,5 +1,7 @@
 import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta
+from secrets import token_urlsafe
+
 import bcrypt
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
@@ -9,7 +11,7 @@ import logging
 
 from dashboard.models import Training, Dojo
 from dojo.mixins.view_mixins import UserCategoryRequiredMixin
-from user_management.models import User
+from user_management.models import User, Token
 
 logger = logging.getLogger(__name__)
 
@@ -48,19 +50,26 @@ class ManageStudentsView(LoginRequiredMixin, UserCategoryRequiredMixin, Template
         sensei = request.user
         dojo = Dojo.objects.filter(sensei=sensei)
         self.ctx['students'] = dojo.students if dojo else []
-        self.ctx['reg_url'] = ''
+        self.ctx['time_url'] = [
+            (t.expires_at, reverse('signup', kwargs={'token': t.token}))
+            for t in Token.objects.all()
+        ]
         return render(request, self.template_name, context=self.ctx)
 
     def post(self, request, *args, **kwargs):
-        if request.POST['reg_time']:
-            reg_time = request.POST['reg_time']
-            salt = bcrypt.gensalt()
-            hashed = bcrypt.hashpw(datetime.now().strftime('%Y%m%d%H%M%S'), salt)
-            register_code = hashlib.sha256(hashed.encode()).hexdigest()[:10]
+        if expiration_datetime := request.POST['expiration_datetime']:
+            expiration_datetime = datetime.strptime(expiration_datetime, '%m/%d/%Y %I:%M %p')
+            register_code = token_urlsafe(30)
+
+            # Save the token to the database
+            Token.objects.create(
+                token=register_code,
+                expires_at=expiration_datetime
+            )
+
             register_url = reverse('signup', kwargs={'token': register_code})
-            self.ctx['reg_url'] = register_url
+            self.ctx['time_url'] = register_url
         else:
-            self.ctx['reg_url'] = ''
-        breakpoint()
+            self.ctx['time_url'] = ''
 
         return render(request, self.template_name, context=self.ctx)
