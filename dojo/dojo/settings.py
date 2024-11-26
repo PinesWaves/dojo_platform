@@ -122,7 +122,7 @@ AUTH_USER_MODEL = 'user_management.User'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Bogota'
 
 USE_I18N = True
 
