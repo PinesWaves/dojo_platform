@@ -1,9 +1,8 @@
-import hashlib
 from datetime import datetime, timedelta
 from secrets import token_urlsafe
 
-import bcrypt
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.management import call_command
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic import TemplateView
@@ -47,6 +46,7 @@ class ManageStudentsView(LoginRequiredMixin, UserCategoryRequiredMixin, Template
     ctx = dict()
 
     def get(self, request, *args, **kwargs):
+        call_command('cleanup_expired_tokens', verbosity=0)
         sensei = request.user
         dojo = Dojo.objects.filter(sensei=sensei)
         self.ctx['students'] = dojo.students if dojo else []
@@ -54,10 +54,12 @@ class ManageStudentsView(LoginRequiredMixin, UserCategoryRequiredMixin, Template
             (t.expires_at, reverse('signup', kwargs={'token': t.token}))
             for t in Token.objects.all()
         ]
+        if not self.ctx['time_url']:
+            self.ctx['time_url'] = None
         return render(request, self.template_name, context=self.ctx)
 
     def post(self, request, *args, **kwargs):
-        if expiration_datetime := request.POST['expiration_datetime']:
+        if expiration_datetime := request.POST.get('expiration_datetime'):
             expiration_datetime = datetime.strptime(expiration_datetime, '%m/%d/%Y %I:%M %p')
             register_code = token_urlsafe(30)
 
@@ -67,9 +69,15 @@ class ManageStudentsView(LoginRequiredMixin, UserCategoryRequiredMixin, Template
                 expires_at=expiration_datetime
             )
 
-            register_url = reverse('signup', kwargs={'token': register_code})
-            self.ctx['time_url'] = register_url
-        else:
-            self.ctx['time_url'] = ''
+        if request.POST.get('_method') == 'delete':
+            url = request.POST['url']
+            token = url.split('/')[2]
+            Token.objects.filter(token=token).delete()
+
+        self.ctx['time_url'] = [
+            (t.expires_at, reverse('signup', kwargs={'token': t.token}))
+            for t in Token.objects.all()
+        ]
+
 
         return render(request, self.template_name, context=self.ctx)
