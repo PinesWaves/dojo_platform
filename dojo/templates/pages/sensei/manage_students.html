@@ -34,7 +34,7 @@
           <div class="card-header">
             <h3 class="card-title">
               <i class="fas fa-edit"></i>
-              Actions
+              Activate registration form
             </h3>
           </div>
           <div class="card-body">
@@ -54,13 +54,25 @@
               </div>
               <!-- /.form group -->
             </form>
-            {% if reg_url != '' %}
-              <label for="reg_time">
-                Active registration url(s):<br>
-                {% for time, url in time_url %}
-                  <a href="{{ url }}">{{ time }} - {{ url }}</a><br>
-                {% endfor %}
-              </label>
+
+            <label for="url">
+              Active registration url(s):<br>
+            </label>
+            {% if time_url is not none %}
+            {% for time, url in time_url %}
+            <form action="{% url 'manage_students' %}" method="post">{% csrf_token %}
+              <div class="form-group">
+                <input type="hidden" name="_method" value="delete">
+                <input type="hidden" value="{{ url }}" name="url{{ loop.index }}">
+                <div class="d-flex col-sm-6">
+                  <button type="submit" class="btn btn-danger btn-block btn-xs col-sm-1">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                  <a class="col-lg-11" href="{{ url }}">{{ time }} - {{ url }}</a><br>
+                </div>
+              </div>
+            </form>
+            {% endfor %}
             {% endif %}
           </div>
         </div>
@@ -70,7 +82,10 @@
       <div class="row">
         <div class="card col-12">
           <div class="card-header">
-            <h3 class="card-title">List of students</h3>
+            <h3 class="card-title">
+              <i class="nav-icon fas fa-users"></i>
+              List of students
+            </h3>
           </div>
           <div class="card-body">
             <table id="example1" class="table table-bordered table-striped">
