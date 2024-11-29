@@ -5,30 +5,35 @@ import qrcode
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import models
+from secrets import token_urlsafe
 import bcrypt
 
 from user_management.models import User, Category
 
 
+class TechniqueCategory(models.TextChoices):
+    ARTICULAR = 'CA', 'Calentamiento Articular'
+    ESTIRAMIENTO = 'ES', 'Estiramiento'
+    KIHON = 'KI', 'Kihon'
+    KUMITE = 'KU', 'Kumite'
+
+
 class Technique(models.Model):
     name = models.CharField(max_length=100)
-    image = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
+    image = models.ImageField(upload_to='techniques/', blank=True, null=True)
+    category = models.CharField(choices=TechniqueCategory.choices, default=TechniqueCategory.KIHON)
 
 
 class Training(models.Model):
     date = models.DateField(auto_now=True)
-    status = models.BooleanField(default=True)
-    training_code = models.CharField(max_length=100, blank=True)
-    qr_image = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
-    attendants = models.ManyToManyField(User, related_name="trainings")
+    status = models.BooleanField(default=True)  # completed or not
+    # training_code = models.CharField(max_length=100, blank=True)
+    # qr_image = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
+    attendants = models.ManyToManyField(User, related_name="trainings", blank=True)
     techniques = models.ManyToManyField(Technique, related_name="techniques")
 
     def save(self, *args, **kwargs):
-        if not self.training_code:  # Solo generar si no existe un código
-            # Generar el código basado en fecha y salt
-            salt = bcrypt.gensalt()
-            hashed = bcrypt.hashpw(datetime.now().strftime('%Y%m%d%H%M%S'), salt)
-            self.training_code = hashlib.sha256(hashed.encode()).hexdigest()[:10]
+        self.training_code = token_urlsafe(30)
 
         # Generar el QR a partir del código
         qr = qrcode.QRCode(version=1, box_size=10, border=5)

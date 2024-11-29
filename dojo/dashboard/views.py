@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 import logging
 
-from dashboard.models import Training, Dojo
+from dashboard.models import Training, Dojo, Technique
 from dojo.mixins.view_mixins import UserCategoryRequiredMixin
 from user_management.models import User, Token
 
@@ -39,6 +39,23 @@ class ManageTrainingsView(LoginRequiredMixin, UserCategoryRequiredMixin, Templat
             "trainings": trainings,
         }
         return render(request, self.template_name, context=ctx)
+
+    def post(self, request, *args, **kwargs):
+        train = Training(
+            date=request.POST['date'],
+            status=request.POST['status'],
+        )
+        for t_id in request.POST['techniques']:
+            technique = Technique.objects.get(pk=t_id)
+            train.techniques.add(technique)
+        train.save()
+
+        trainings = Training.objects.all()
+        ctx = {
+            "trainings": trainings,
+        }
+        return render(request, self.template_name, context=ctx)
+
 
 
 class ManageStudentsView(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
