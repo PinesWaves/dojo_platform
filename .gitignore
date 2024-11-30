@@ -2,5 +2,4 @@
 .dojo
 .env
 */logs
-media/techniques/*.png
-media/qr_codes/*.png
+/dojo/media/*.png
