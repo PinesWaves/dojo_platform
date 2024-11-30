@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 import logging
 
-from dashboard.models import Training, Dojo, Technique
+from dashboard.models import Training, Dojo, Technique, TechniqueCategory
 from dojo.mixins.view_mixins import UserCategoryRequiredMixin
 from user_management.models import User, Token
 
@@ -34,28 +34,68 @@ class ManageTrainingsView(LoginRequiredMixin, UserCategoryRequiredMixin, Templat
     template_name = "pages/sensei/manage_trainings.html"
 
     def get(self, request, *args, **kwargs):
-        trainings = Training.objects.all()
+        trainings = Training.objects.filter(status=True)
+        techniques = Technique.objects.all()
         ctx = {
             "trainings": trainings,
+            "techniques": techniques,
         }
         return render(request, self.template_name, context=ctx)
 
     def post(self, request, *args, **kwargs):
         train = Training(
-            date=request.POST['date'],
-            status=request.POST['status'],
+            date=request.POST['training_date'],
+            status=request.POST['training_status'],
         )
         for t_id in request.POST['techniques']:
             technique = Technique.objects.get(pk=t_id)
             train.techniques.add(technique)
         train.save()
 
-        trainings = Training.objects.all()
+        trainings = Training.objects.filter(status=True)
+        techniques = Technique.objects.all()
         ctx = {
             "trainings": trainings,
+            "techniques": techniques,
         }
         return render(request, self.template_name, context=ctx)
 
+
+class ManageTechniquesView(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
+    template_name = "pages/sensei/manage_techniques.html"
+
+    def get(self, request, *args, **kwargs):
+        techniques = Technique.objects.all()
+        categories = TechniqueCategory.choices
+        ctx = {
+            "techniques": techniques,
+            "categories": categories,
+        }
+        return render(request, self.template_name, context=ctx)
+
+    def post(self, request, *args, **kwargs):
+        name = request.POST.get('technique_name')
+        image = request.FILES.get('technique_image')
+        category = request.POST.get('technique_category')
+        if not name or category not in dict(TechniqueCategory.choices):
+            return render(request, self.template_name, {
+                'error': 'Invalid data submitted.',
+                'technique_categories': TechniqueCategory.choices
+            })
+
+        Technique.objects.create(
+            name=name,
+            image=image,
+            category=category,
+        )
+
+        techniques = Technique.objects.all()
+        categories = TechniqueCategory.choices
+        ctx = {
+            "techniques": techniques,
+            "categories": categories,
+        }
+        return render(request, self.template_name, context=ctx)
 
 
 class ManageStudentsView(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):

@@ -20,15 +20,15 @@ class TechniqueCategory(models.TextChoices):
 
 class Technique(models.Model):
     name = models.CharField(max_length=100)
-    image = models.ImageField(upload_to='techniques/', blank=True, null=True)
+    image = models.ImageField(upload_to='techniques/', blank=True, null=True, default='techniques/default_technique.jpg')
     category = models.CharField(choices=TechniqueCategory.choices, default=TechniqueCategory.KIHON)
 
 
 class Training(models.Model):
     date = models.DateField(auto_now=True)
-    status = models.BooleanField(default=True)  # completed or not
-    # training_code = models.CharField(max_length=100, blank=True)
-    # qr_image = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
+    status = models.BooleanField(default=True)  # True: Active (not finished); False: finished
+    training_code = models.CharField(max_length=100, blank=True)
+    qr_image = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
     attendants = models.ManyToManyField(User, related_name="trainings", blank=True)
     techniques = models.ManyToManyField(Technique, related_name="techniques")
 
@@ -46,7 +46,6 @@ class Training(models.Model):
         qr_image.save(buffer, format="PNG")
         buffer.seek(0)
         self.qr_image.save(f"{self.training_code}.png", File(buffer), save=False)
-
         super().save(*args, **kwargs)
 
 

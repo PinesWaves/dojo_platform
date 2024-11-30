@@ -1,0 +1,113 @@
+{% extends 'pages/sensei/base.html' %}
+{% load static %}
+{% block dashboard_content %}
+<!-- Content Header (Page header) -->
+<div class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="m-0">Manage techniques</h1>
+      </div><!-- /.col -->
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="{% url 'sensei_dashboard' %}">Dashboard</a></li>
+          <li class="breadcrumb-item active">Techniques</li>
+        </ol>
+      </div><!-- /.col -->
+    </div><!-- /.row -->
+  </div><!-- /.container-fluid -->
+</div>
+<!-- /.content-header -->
+
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+    <!-- Main row -->
+    <div class="row">
+      <!-- Left col -->
+      <section class="col-lg-3 connectedSortable">
+        <div class="card card-danger">
+          <div class="card-header">
+            <h3 class="card-title">Create technique</h3>
+          </div>
+          <!-- /.card-header -->
+          <!-- form start -->
+          <form action="{% url 'manage_techniques' %}" method="post" enctype="multipart/form-data" >{% csrf_token %}
+            <div class="card-body">
+              <div class="form-group col-sm-12">
+                <input type="text" class="form-control" id="technique_name" name="technique_name" placeholder="Enter technique name"/>
+              </div>
+              <div class="form-group col-sm-12">
+                <div class="input-group">
+                  <div class="custom-file">
+                    <label class="custom-file-label" for="technique_image">Select image</label>
+                    <input type="file" class="custom-file-input" id="technique_image" name="technique_image"/>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group col-sm-12">
+                <select class="form-control" id="technique_category" name="technique_category">
+                  {% for val, name in categories %}
+                  <option value="{{ val }}">{{ name}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="card-footer">
+              <button type="submit" class="btn btn-danger">Submit</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+    <div class="row">
+      <section class="col-lg-12 connectedSortable">
+        <div class="card card-danger">
+          <div class="card-header">
+            <h3 class="card-title">Techniques list</h3>
+          </div>
+          <div class="card-body">
+            <div class="row">
+            {% for t in techniques %}
+              <div class="col-md-3 col-lg-3 col-xl-3">
+                <div class="card mb-2">
+                  <img class="card-img-top" src="{{ t.image.url }}" alt="{{ t.name }}">
+                  <div class="card-img-overlay d-flex flex-column justify-content-end">
+                    <h5 class="card-title text-primary text-white bg-black"><b>{{ t.name }}</b></h5>
+                    <p class="card-text text-white pb-2 pt-1 bg-black"><b>{{ t.get_category_display }}</b></p>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <!-- /.row (main row) -->
+  </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+{% endblock %}
+{% block script %}
+  <!-- DataTables  & Plugins -->
+  <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'plugins/jszip/jszip.min.js' %}"></script>
+  <script src="{% static 'plugins/pdfmake/pdfmake.min.js' %}"></script>
+  <script src="{% static 'plugins/pdfmake/vfs_fonts.js' %}"></script>
+  <script src="{% static 'plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+  <script>
+    $(function () {
+      //Date and time picker
+      $('#timepicker').datetimepicker({ icons: { time: 'far fa-clock' } });
+
+    });
+  </script>
+{% endblock %}
