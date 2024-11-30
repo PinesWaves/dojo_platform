@@ -1,4 +1,5 @@
 {% extends 'pages/sensei/base.html' %}
+{% load static %}
 {% block dashboard_content %}
 <!-- Content Header (Page header) -->
 <div class="content-header">
@@ -24,37 +25,85 @@
     <!-- Main row -->
     <div class="row">
       <!-- Left col -->
-      <section class="col-lg-7 connectedSortable">
+      <section class="col-lg-3 connectedSortable">
         <div class="card card-primary">
           <div class="card-header">
             <h3 class="card-title">Create training - {% now 'Y b j' %}</h3>
           </div>
           <!-- /.card-header -->
           <!-- form start -->
-          <form>
+          <form action="{% url 'manage_trainings' %}" method="post">{% csrf_token %}
             <div class="card-body">
               <div class="form-group">
-                <label for="exampleInputEmail1">Email address</label>
-                <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+                <label for="training_date">Date</label>
+                <div class="input-group date" id="timepicker" data-target-input="nearest">
+                  <input type="text" class="form-control datetimepicker-input" data-target="#timepicker" id="training_date" name="training_date" placeholder="Enter training date"/>
+                  <div class="input-group-prepend" data-target="#timepicker" data-toggle="datetimepicker">
+                      <div class="input-group-text"><i class="far fa-clock"></i></div>
+                  </div>
+                </div>
               </div>
               <div class="form-group">
-                <label for="exampleInputPassword1">Password</label>
-                <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                <label for="training_status">Status</label>
+                <select class="form-control" id="training_status" name="training_status">
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
+                </select>
               </div>
-
+              <div class="form-group">
+                <label for="training_techniques">Techniques</label>
+                <select class="form-control" id="training_techniques" name="training_techniques">
+                  {% for t in techniques %}
+                  <option value="t.id">{{ t.name}}</option>
+                  {% endfor %}
+                </select>
+              </div>
             </div>
             <!-- /.card-body -->
-
             <div class="card-footer">
               <button type="submit" class="btn btn-primary">Submit</button>
             </div>
           </form>
         </div>
       </section>
-      <!-- /.Left col -->
+
+      <section class="col-lg-3 connectedSortable">
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">Active trainings</h3>
+          </div>
+          <div class="card-body">
+            {% for t in training %}
+            <img class="img-fluid pad" src="{{ t.qr_image.url }}" alt="training" width="200">
+            {% endfor %}
+          </div>
+        </div>
+      </section>
     </div>
     <!-- /.row (main row) -->
   </div><!-- /.container-fluid -->
 </section>
 <!-- /.content -->
+{% endblock %}
+{% block script %}
+  <!-- DataTables  & Plugins -->
+  <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'plugins/jszip/jszip.min.js' %}"></script>
+  <script src="{% static 'plugins/pdfmake/pdfmake.min.js' %}"></script>
+  <script src="{% static 'plugins/pdfmake/vfs_fonts.js' %}"></script>
+  <script src="{% static 'plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+  <script>
+    $(function () {
+      //Date and time picker
+      $('#timepicker').datetimepicker({ icons: { time: 'far fa-clock' } });
+
+    });
+  </script>
 {% endblock %}

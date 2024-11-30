@@ -33,7 +33,7 @@
           <div class="icon">
             <i class="fas fa-running"></i>
           </div>
-          <a href="{% url 'manage_trainings' %}" class="small-box-footer">Create <i class="fas fa-arrow-circle-right"></i></a>
+          <a href="{% url 'manage_trainings' %}" class="small-box-footer">Manage <i class="fas fa-arrow-circle-right"></i></a>
         </div>
       </div>
 
@@ -48,7 +48,22 @@
           <div class="icon">
             <i class="ion ion-person-add"></i>
           </div>
-          <a href="{% url 'manage_students' %}" class="small-box-footer">Create <i class="fas fa-arrow-circle-right"></i></a>
+          <a href="{% url 'manage_students' %}" class="small-box-footer">Manage <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box bg-danger">
+          <div class="inner">
+            <h3>Techniques</h3>
+
+            <p>Manage techniques</p>
+          </div>
+          <div class="icon">
+            <i class="fas fa-user-ninja"></i>
+          </div>
+          <a href="{% url 'manage_techniques' %}" class="small-box-footer">Manage <i class="fas fa-arrow-circle-right"></i></a>
         </div>
       </div>
     </div>
