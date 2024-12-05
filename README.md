@@ -25,3 +25,6 @@ ngrok http 443
 ```
 
 Create superuser
+```sh
+python manage.py createsuperuser
+```
