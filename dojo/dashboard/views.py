@@ -2,7 +2,9 @@ from datetime import datetime, timedelta
 from secrets import token_urlsafe
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.core.management import call_command
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic import TemplateView
@@ -43,14 +45,40 @@ class ManageTrainingsView(LoginRequiredMixin, UserCategoryRequiredMixin, Templat
         return render(request, self.template_name, context=ctx)
 
     def post(self, request, *args, **kwargs):
-        train = Training(
-            date=request.POST['training_date'],
-            status=request.POST['training_status'],
-        )
-        for t_id in request.POST['techniques']:
-            technique = Technique.objects.get(pk=t_id)
-            train.techniques.add(technique)
-        train.save()
+        try:
+            training_date = request.POST.get('training_date')
+            if not training_date:
+                raise ValidationError("Training date is required.")
+
+            try:
+                # Ensure date is in the correct format
+                training_date = datetime.strptime(training_date, '%m/%d/%Y %I:%M %p')
+            except ValueError:
+                raise ValidationError("Invalid date format. Use MM/DD/YYYY HH:MM AM/PM.")
+
+            # Validate `training_status`
+            training_status = request.POST.get('training_status', 'on')  # Default to 'off' if missing
+            if training_status not in ['on', 'off']:
+                raise ValidationError("Invalid training status value.")
+            training_status = True if training_status == 'on' else False
+
+            training_techniques = request.POST.getlist('training_techniques')
+
+            train = Training(
+                date=training_date,
+                status=training_status,
+            )
+            train.save()
+            for tc_id in training_techniques:
+                technique = Technique.objects.get(pk=tc_id)
+                train.techniques.add(technique)
+            train.save()
+        except ValidationError as e:
+            return JsonResponse({'error': str(e)}, status=400)
+        except Technique.DoesNotExist:
+            return JsonResponse({'error': 'One or more selected techniques do not exist.'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
         trainings = Training.objects.filter(status=True)
         techniques = Technique.objects.all()
