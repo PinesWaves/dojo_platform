@@ -1,12 +1,9 @@
-import hashlib
-from datetime import datetime
 from io import BytesIO
 import qrcode
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import models
 from secrets import token_urlsafe
-import bcrypt
 
 from user_management.models import User, Category
 
@@ -16,6 +13,9 @@ class TechniqueCategory(models.TextChoices):
     ESTIRAMIENTO = 'ES', 'Estiramiento'
     KIHON = 'KI', 'Kihon'
     KUMITE = 'KU', 'Kumite'
+    PRINCIPIANTE = 'PR', 'Principiante'
+    INTERMEDIO = 'I', 'Intermedio'
+    AVANZADO = 'AV', 'Avanzado'
 
 
 class Technique(models.Model):
