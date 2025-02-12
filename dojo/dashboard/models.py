@@ -25,7 +25,7 @@ class Technique(models.Model):
 
 
 class Training(models.Model):
-    date = models.DateTimeField(auto_now=True)
+    date = models.DateTimeField(auto_now=False)
     status = models.BooleanField(default=True)  # True: Active (not finished); False: finished
     training_code = models.CharField(max_length=100, blank=True)
     qr_image = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
