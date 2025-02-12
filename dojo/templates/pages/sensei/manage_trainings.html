@@ -74,8 +74,12 @@
             <h3 class="card-title">Trainings history</h3>
           </div>
           <div class="card-body">
-            {% for t in training %}
-            <img class="img-fluid pad" src="{{ t.qr_image.url }}" alt="training" width="200">
+            {% for t in trainings %}
+              {% if t.status %}
+              {{ t.date }}<br>
+              {{ t.status }}<br>
+              <img class="img-fluid pad" src="{{ t.qr_image.url }}" alt="training" width="200">
+              {% endif %} 
             {% endfor %}
             <table id="example1" class="table table-bordered table-striped">
               <thead>
@@ -90,8 +94,20 @@
               {% for t in trainings %}
                 <tr>
                   <td>{{ t.date }}</td>
-                  <td>{{ t.status }}</td>
-                  <td><a href="{{ t.qr_image.url }}">QR code</a></td>
+                  <td>
+                    {% if t.status %}
+                      Pending
+                    {% else %}
+                      Completed                      
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if t.qr_image %}
+                      <a href="{{ t.qr_image.url }}">QR code</a>
+                    {% else %}
+                      NA                      
+                    {% endif %} 
+                  </td>
                   <td>
                     {% for tc in t.techniques.all %}
                       {{ tc.name }}<br> 

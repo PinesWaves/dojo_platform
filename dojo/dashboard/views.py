@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from secrets import token_urlsafe
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -36,7 +36,16 @@ class ManageTrainingsView(LoginRequiredMixin, UserCategoryRequiredMixin, Templat
     template_name = "pages/sensei/manage_trainings.html"
 
     def get(self, request, *args, **kwargs):
-        trainings = Training.objects.filter(status=True)
+        trainings = Training.objects.all()
+        now = datetime.now(timezone.utc)
+        for t in trainings:
+            if now > t.date + timedelta(hours=2) and t.status:
+                t.status = False
+                if t.qr_image:
+                    t.qr_image.delete(save=False)
+                    t.qr_image = None
+                t.training_code = ''
+                t.save()
         techniques = Technique.objects.all()
         ctx = {
             "trainings": trainings,
