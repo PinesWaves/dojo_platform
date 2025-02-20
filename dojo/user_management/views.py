@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 
+import math
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -75,6 +76,21 @@ class RegisterView(CreateView):
     def form_valid(self, form):
         # Process the form
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        form_class = self.get_form_class()
+        form_instance = form_class()
+
+        form_fields = list(form_instance)  # Convert form fields to a list
+        total_sections = math.ceil(len(form_fields) / 6)  # Calculate total sections
+        section_range = range(1, total_sections + 1)  # Create a range for iteration
+
+        context.update({
+            'form_fields': form_fields,  # List of fields to iterate over
+            'section_range': section_range,  # Range for section iteration
+        })
+        return context
 
 
 # Vista de Actualización de Usuario

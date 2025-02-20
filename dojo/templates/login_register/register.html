@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AdminLTE 3 | Registration Page</title>
+  <title>Seishin JKA Dojo | Registration Page</title>
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
   <!-- Font Awesome -->
@@ -18,35 +18,37 @@
 <body class="hold-transition register-page">
 <div class="register-box">
   <div class="register-logo">
-    <a href="../../index2.html"><b>Admin</b>LTE</a>
+    <a href="{% url 'login' %}">
+      <img src="{% static 'img/banner-black.png' %}" alt="">
+    </a>
   </div>
 
   <div class="card">
     <div class="card-body register-card-body">
       <p class="login-box-msg">Register a new membership</p>
-
       <form method="post">
-        {% csrf_token %}
-        {% for field in form %}
-          <div class="form-group">
-            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field }}
+        <div class="card card-primary card-outline card-tabs">
+          <div class="card-body">
+            <div class="tab-content" id="registration-tabContent">
+            {% csrf_token %}
+            {% for section_num in section_range %}
+              <h3>Section {{ section_num }}</h3>
+              <div class="tab-pane fade show active" id="section-{{ section_num }}" role="tabpanel" aria-labelledby="section-{{ section_num }}-tab">
+              {% for field in form_fields|slice:":6" %}
+                <div class="form-group">
+                  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  {{ field }}
+                </div>
+              {% endfor %}
+              </div>
+            {% endfor %}
+            </div>
           </div>
-        {% endfor %}
+        </div>
+        <br>
         <button type="submit" class="btn btn-primary">Register</button>
       </form>
 
-      {#      <div class="social-auth-links text-center">#}
-      {#        <p>- OR -</p>#}
-      {#        <a href="#" class="btn btn-block btn-primary">#}
-      {#          <i class="fab fa-facebook mr-2"></i>#}
-      {#          Sign up using Facebook#}
-      {#        </a>#}
-      {#        <a href="#" class="btn btn-block btn-danger">#}
-      {#          <i class="fab fa-google-plus mr-2"></i>#}
-      {#          Sign up using Google+#}
-      {#        </a>#}
-      {#      </div>#}
       <br>
       <a href="{% url 'login' %}" class="text-center">I already have a membership</a>
     </div>
