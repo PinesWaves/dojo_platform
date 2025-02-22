@@ -79,16 +79,18 @@ class RegisterView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        form_class = self.get_form_class()
-        form_instance = form_class()
-
+        form_instance = self.get_form_class()()  # Create a blank form instance
         form_fields = list(form_instance)  # Convert form fields to a list
-        total_sections = math.ceil(len(form_fields) / 6)  # Calculate total sections
-        section_range = range(1, total_sections + 1)  # Create a range for iteration
+
+        total_sections = math.ceil(len(form_fields) / 6)  # Calculate the number of sections
+        sectioned_fields = [
+            (i + 1, form_fields[i * 6: (i + 1) * 6])  # (section_number, [fields])
+            for i in range(total_sections)
+        ]  # Creates a list of tuples (1, [fields]), (2, [fields]) ...
 
         context.update({
-            'form_fields': form_fields,  # List of fields to iterate over
-            'section_range': section_range,  # Range for section iteration
+            'sectioned_fields': sectioned_fields,  # List of (section_number, fields)
+            'total_sections': total_sections,  # Number of sections
         })
         return context
 

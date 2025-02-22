@@ -6,7 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Seishin JKA Dojo | Registration Page</title>
   <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
   <!-- icheck bootstrap -->
@@ -24,34 +25,52 @@
   </div>
 
   <div class="card">
-    <div class="card-body register-card-body">
+    <div class="card-body card-danger card-outline register-card-body">
       <p class="login-box-msg">Register a new membership</p>
       <form method="post">
-        <div class="card card-primary card-outline card-tabs">
-          <div class="card-body">
-            <div class="tab-content" id="registration-tabContent">
-            {% csrf_token %}
-            {% for section_num in section_range %}
-              <h3>Section {{ section_num }}</h3>
-              <div class="tab-pane fade show active" id="section-{{ section_num }}" role="tabpanel" aria-labelledby="section-{{ section_num }}-tab">
-              {% for field in form_fields|slice:":6" %}
+        <div class="tab-content" id="registration-tabContent">
+          {% csrf_token %}
+          <div class="progress mb-3">
+            <div class="progress-bar bg-danger" role="progressbar" aria-valuenow="1" aria-valuemin="1"
+                 aria-valuemax="{{ sectioned_fields|length }}" style="width: 20%">
+            </div>
+          </div>
+          {% for section_num, fields in sectioned_fields %}
+            <div class="tab-pane fade {% if section_num == 1 %}show active{% endif %}"
+                 id="section-{{ section_num }}"
+                 role="tabpanel"
+                 aria-labelledby="section-{{ section_num }}-tab"
+                 data-section="{{ section_num }}">
+
+              {% for field in fields %}
                 <div class="form-group">
                   <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                   {{ field }}
                 </div>
               {% endfor %}
+              <div class="form-group">
+              {% if section_num == sectioned_fields|length %}
+                <button type="button" class="btn btn-danger prev-btn" data-prev="{{ section_num }}"><i
+                    class="fas fa-chevron-left"></i></button>
+                <button type="submit" class="btn btn-danger float-right">Register</button>
+              {% elif section_num == 1 %}
+                <button type="button" class="btn btn-danger next-btn float-right" data-next="{{ section_num }}"><i
+                    class="fas fa-chevron-right"></i></button>
+              {% else %}
+                <button type="button" class="btn btn-danger prev-btn" data-prev="{{ section_num }}"><i
+                    class="fas fa-chevron-left"></i></button>
+                <button type="button" class="btn btn-danger next-btn float-right" data-next="{{ section_num }}"><i
+                    class="fas fa-chevron-right"></i></button>
+              {% endif %}
               </div>
-            {% endfor %}
             </div>
-          </div>
+          {% endfor %}
         </div>
-        <br>
-        <button type="submit" class="btn btn-primary">Register</button>
       </form>
 
-      <br>
-      <a href="{% url 'login' %}" class="text-center">I already have a membership</a>
     </div>
+    <a href="{% url 'login' %}" class="text-center">I already have a membership</a>
+    <br>
     <!-- /.form-box -->
   </div><!-- /.card -->
 </div>
@@ -63,5 +82,32 @@
 <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 <!-- AdminLTE App -->
 <script src="{% static 'dist/js/adminlte.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $(".next-btn").click(function () {
+            var currentSection = $(this).data("next");
+            var nextSection = currentSection + 1;
+            $(".progress-bar").attr("aria-valuenow", nextSection);
+            $(".progress-bar").attr("style", "width:" + nextSection*100/$(".progress-bar").attr("aria-valuemax") + "%");
+
+            // Hide current tab and show next tab
+            $("#section-" + currentSection).removeClass("show active");
+            $("#section-" + nextSection).addClass("show active");
+        });
+
+        $(".prev-btn").click(function () {
+            var currentSection = $(this).data("prev");
+            var prevSection = currentSection - 1;
+            $(".progress-bar").attr("aria-valuenow", prevSection);
+            $(".progress-bar").attr("style", "width:" + prevSection*100/$(".progress-bar").attr("aria-valuemax") + "%");
+
+            // Hide current tab and show previous tab
+            $("#section-" + currentSection).removeClass("show active");
+            $("#section-" + prevSection).addClass("show active");
+        });
+
+
+    });
+</script>
 </body>
 </html>

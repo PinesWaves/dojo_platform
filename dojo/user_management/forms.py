@@ -19,13 +19,13 @@ class UserRegisterForm(forms.ModelForm):
 
     accept_regulations = forms.BooleanField(
         label=mark_safe(f'I accept the <a href="{regulations}" target="_blank">Regulations</a>'),
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input', 'style': 'margin-left: 10px'}),
+        widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
         required=True
     )
 
     accept_inf_cons = forms.BooleanField(
         label=mark_safe(f'I accept the <a href="{informed_consent}" target="_blank">Informed consent</a>'),
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input', 'style': 'margin-left: 10px'}),
+        widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
         required=True
     )
 
@@ -33,9 +33,9 @@ class UserRegisterForm(forms.ModelForm):
         model = User
         fields = [
             'first_name', 'last_name', 'id_type', 'id_number', 'birth_date', 'birth_place', 'profession', 'eps',
-            'phone_number', 'address', 'city', 'country', 'email', 'parent', 'parent_phone_number', 'category',
-            'password1', 'password2', 'accept_inf_cons', 'medical_cond', 'drug_cons', 'allergies', 'other_activities',
-            'cardio_prob', 'injuries', 'physical_limit', 'lost_cons', 'physical_cond', 'sec_recom', 'agreement'
+            'phone_number', 'address', 'city', 'country', 'email', 'parent', 'parent_phone_number', 'password1',
+            'password2', 'accept_inf_cons', 'medical_cond', 'drug_cons', 'allergies', 'other_activities', 'cardio_prob',
+            'injuries', 'physical_limit', 'lost_cons', 'physical_cond', 'sec_recom', 'agreement'
         ]
         exclude = ['accept_regulations', 'accept_inf_cons']
 
@@ -47,8 +47,8 @@ class UserRegisterForm(forms.ModelForm):
             field.widget.attrs['class'] = field.widget.attrs.get('class', '') + ' form-control'
 
         # Si no es un usuario Sensei, deshabilitar el campo `categoria`
-        if not self.request_user or not self.request_user.is_sensei:
-            self.fields['category'].disabled = True
+        # if not self.request_user or not self.request_user.is_sensei:
+        #     self.fields['category'].disabled = True
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
