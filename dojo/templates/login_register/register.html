@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -44,7 +45,9 @@
 
               {% for field in fields %}
                 <div class="form-group">
+                {% if field|widget_type != "CustomSwitchWidget" %}
                   <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {% endif %}
                   {{ field }}
                 </div>
               {% endfor %}
@@ -80,6 +83,9 @@
 <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
 <!-- Bootstrap 4 -->
 <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<!-- Tempusdominus Bootstrap 4 -->
+<script src="{% static 'plugins/moment/moment.min.js' %}"></script>
+<script src="{% static 'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
 <!-- AdminLTE App -->
 <script src="{% static 'dist/js/adminlte.min.js' %}"></script>
 <script>
@@ -106,7 +112,9 @@
             $("#section-" + prevSection).addClass("show active");
         });
 
-
+        $('#id_birth_date').datetimepicker({
+          format: 'L'
+        });
     });
 </script>
 </body>

@@ -1,8 +1,9 @@
 from django import forms
 from django.core.exceptions import ValidationError
+
+from config.widgets import CustomSwitchWidget
 from config.config_vars import regulations, informed_consent
 from .models import User, Category
-from django.utils.safestring import mark_safe
 
 
 class UserRegisterForm(forms.ModelForm):
@@ -16,28 +17,87 @@ class UserRegisterForm(forms.ModelForm):
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
         required=True
     )
+    cardio_prob = forms.BooleanField(
+        widget=CustomSwitchWidget(
+            label_text="Do you have any cardiovascular problems?",
+        ),
+        required=True
+    )
+
+    injuries = forms.BooleanField(
+        widget=CustomSwitchWidget(
+            label_text="Have you had any injuries in the last 6 months?",
+        ),
+        required=True
+    )
+
+    physical_limit = forms.BooleanField(
+        widget=CustomSwitchWidget(
+            label_text="Do you have any physical limitations?",
+        ),
+        required=True
+    )
+
+    lost_cons = forms.BooleanField(
+        widget=CustomSwitchWidget(
+            label_text="Have you lost consciousness or lost balance after feeling dizzy?",
+        ),
+        required=True
+    )
+
+    sec_recom = forms.BooleanField(
+        widget=CustomSwitchWidget(
+            label_text="I will follow the instructor's recommendations and safety rules during the classes.",
+        ),
+        required=True
+    )
+
+    agreement = forms.BooleanField(
+        widget=CustomSwitchWidget(
+            label_text="I have read, understand the questions, completed and answered the questionnaire with my acceptance?",
+        ),
+        required=True
+    )
 
     accept_regulations = forms.BooleanField(
-        label=mark_safe(f'I accept the <a href="{regulations}" target="_blank">Regulations</a>'),
-        widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
+        widget=CustomSwitchWidget(
+            label_text="I accept the ",
+            a_tag=('Regulations', regulations)
+        ),
         required=True
     )
 
     accept_inf_cons = forms.BooleanField(
-        label=mark_safe(f'I accept the <a href="{informed_consent}" target="_blank">Informed consent</a>'),
-        widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
+        widget=CustomSwitchWidget(
+            label_text="I accept the ",
+            a_tag=('Informed consent', informed_consent)
+        ),
+        required=True
+    )
+
+    birth_date = forms.DateField(
+        widget=forms.DateInput(attrs={'class': 'form-control datetimepicker-input', 'type': 'date'}),
         required=True
     )
 
     class Meta:
         model = User
         fields = [
-            'first_name', 'last_name', 'id_type', 'id_number', 'birth_date', 'birth_place', 'profession', 'eps',
-            'phone_number', 'address', 'city', 'country', 'email', 'parent', 'parent_phone_number', 'password1',
-            'password2', 'accept_inf_cons', 'medical_cond', 'drug_cons', 'allergies', 'other_activities', 'cardio_prob',
-            'injuries', 'physical_limit', 'lost_cons', 'physical_cond', 'sec_recom', 'agreement'
+            'first_name', 'last_name', 'id_type', 'id_number', 'birth_date', 'birth_place', 'profession',
+            'email', 'phone_number', 'country', 'city', 'address', 'parent', 'parent_phone_number', 'password1',
+            'password2', 'eps', 'physical_cond', 'medical_cond', 'drug_cons', 'allergies', 'other_activities',
+            'cardio_prob','injuries', 'physical_limit', 'lost_cons', 'sec_recom', 'agreement',
         ]
-        exclude = ['accept_regulations', 'accept_inf_cons']
+        labels = {
+            "cardio_prob": "",
+            "injuries": "",
+            "physical_limit": "",
+            "lost_cons": "",
+            "sec_recom": "",
+            "agreement": "",
+            "accept_regulations": "",
+            "accept_inf_cons": ""
+        }
 
     def __init__(self, *args, **kwargs):
         # Extraemos el usuario actual del contexto si es pasado
@@ -45,10 +105,6 @@ class UserRegisterForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs['class'] = field.widget.attrs.get('class', '') + ' form-control'
-
-        # Si no es un usuario Sensei, deshabilitar el campo `categoria`
-        # if not self.request_user or not self.request_user.is_sensei:
-        #     self.fields['category'].disabled = True
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
