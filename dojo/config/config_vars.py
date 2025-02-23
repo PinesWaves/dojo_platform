@@ -1,6 +1,6 @@
 ranges = [
-    ('10k', 'Beginner'),  # NA
-    ('9k', '9th kyu'),  # White
+    ('10k', 'Beginner'),  # White
+    ('9k', '9th kyu'),  # Yellow stripe
     ('8k', '8th kyu'),  # Yellow
     ('7k', '7th kyu'),  # Orange
     ('6k', '6th kyu'),  # Green
