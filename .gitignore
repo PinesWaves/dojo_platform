@@ -1,6 +1,7 @@
 .idea
 .dojo
 .env
+.env_prd
 */logs
 /dojo/media/techniques/*.png
 /dojo/media/qr_codes/*.png
