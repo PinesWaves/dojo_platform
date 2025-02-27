@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
-from config.widgets import CustomSwitchWidget
+from config.widgets import CustomSwitchWidget, CustomDatePickerWidget
 from config.config_vars import regulations, informed_consent
 from .models import User, Category
 
@@ -21,44 +21,38 @@ class UserRegisterForm(forms.ModelForm):
         widget=CustomSwitchWidget(
             label_text="Do you have any cardiovascular problems?",
         ),
-        required=True
+        required=False
     )
-
     injuries = forms.BooleanField(
         widget=CustomSwitchWidget(
             label_text="Have you had any injuries in the last 6 months?",
         ),
-        required=True
+        required=False
     )
-
     physical_limit = forms.BooleanField(
         widget=CustomSwitchWidget(
             label_text="Do you have any physical limitations?",
         ),
-        required=True
+        required=False
     )
-
     lost_cons = forms.BooleanField(
         widget=CustomSwitchWidget(
             label_text="Have you lost consciousness or lost balance after feeling dizzy?",
         ),
-        required=True
+        required=False
     )
-
     sec_recom = forms.BooleanField(
         widget=CustomSwitchWidget(
             label_text="I will follow the instructor's recommendations and safety rules during the classes.",
         ),
         required=True
     )
-
     agreement = forms.BooleanField(
         widget=CustomSwitchWidget(
             label_text="I have read, understand the questions, completed and answered the questionnaire with my acceptance?",
         ),
         required=True
     )
-
     accept_regulations = forms.BooleanField(
         widget=CustomSwitchWidget(
             label_text="I accept the ",
@@ -66,7 +60,6 @@ class UserRegisterForm(forms.ModelForm):
         ),
         required=True
     )
-
     accept_inf_cons = forms.BooleanField(
         widget=CustomSwitchWidget(
             label_text="I accept the ",
@@ -74,9 +67,10 @@ class UserRegisterForm(forms.ModelForm):
         ),
         required=True
     )
-
     birth_date = forms.DateField(
-        widget=forms.DateInput(attrs={'class': 'form-control datetimepicker-input', 'type': 'date'}),
+        widget=CustomDatePickerWidget(
+            label_text="Birth Date",
+        ),
         required=True
     )
 
@@ -89,6 +83,7 @@ class UserRegisterForm(forms.ModelForm):
             'cardio_prob','injuries', 'physical_limit', 'lost_cons', 'sec_recom', 'agreement',
         ]
         labels = {
+            "birth_date": "",
             "cardio_prob": "",
             "injuries": "",
             "physical_limit": "",
