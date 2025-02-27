@@ -1,6 +1,7 @@
 from django import forms
 from django.utils.safestring import mark_safe
 
+
 class CustomSwitchWidget(forms.CheckboxInput):
     def __init__(self, label_text, a_tag=(None, None), *args, **kwargs):
         self.label_text = label_text
@@ -24,3 +25,28 @@ class CustomSwitchWidget(forms.CheckboxInput):
         </div>
         '''
         return mark_safe(switch_html)
+
+
+class CustomDatePickerWidget(forms.DateInput):
+    def __init__(self, label_text, *args, **kwargs):
+        self.label_text = label_text
+        super().__init__(*args, **kwargs)
+
+    def render(self, name, value, attrs=None, renderer=None):
+        attrs = attrs or {}
+        datepicker_id = attrs.get("id", name)  # Get ID or use name
+        attrs["class"] = "form-control datetimepicker-input"
+        attrs["data-target"] = f"#{datepicker_id}"
+
+        checkbox_html = super().render(name, value, attrs)
+
+        custom_datepicker_html = f'''
+        <label>{self.label_text}</label>
+        <div class="input-group date" id="{datepicker_id}" data-target-input="nearest">
+            {checkbox_html}
+            <div class="input-group-append" data-target="#{datepicker_id}" data-toggle="datetimepicker">
+                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+            </div>
+        </div>
+        '''
+        return mark_safe(custom_datepicker_html)
