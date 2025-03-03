@@ -7,6 +7,20 @@ from .models import User, Category
 
 
 class UserRegisterForm(forms.ModelForm):
+    birth_date = forms.DateField(
+        widget=CustomDatePickerWidget(
+            label_text="Birth Date",
+        ),
+        required=True
+    )
+    country = forms.CharField(
+        widget=forms.Select(
+            attrs={
+                'class': 'selectpicker countrypicker',
+                # 'data-flag': 'true',
+                'data-default': 'CO',
+            }),
+    )
     password1 = forms.CharField(
         label="Password",
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
@@ -67,12 +81,6 @@ class UserRegisterForm(forms.ModelForm):
         ),
         required=True
     )
-    birth_date = forms.DateField(
-        widget=CustomDatePickerWidget(
-            label_text="Birth Date",
-        ),
-        required=True
-    )
 
     class Meta:
         model = User
@@ -80,26 +88,36 @@ class UserRegisterForm(forms.ModelForm):
             'first_name', 'last_name', 'id_type', 'id_number', 'birth_date', 'birth_place', 'profession',
             'email', 'phone_number', 'country', 'city', 'address', 'parent', 'parent_phone_number', 'password1',
             'password2', 'eps', 'physical_cond', 'medical_cond', 'drug_cons', 'allergies', 'other_activities',
-            'cardio_prob','injuries', 'physical_limit', 'lost_cons', 'sec_recom', 'agreement',
+            'cardio_prob', 'injuries', 'physical_limit', 'lost_cons', 'sec_recom', 'agreement',
         ]
         labels = {
-            "birth_date": "",
-            "cardio_prob": "",
-            "injuries": "",
-            "physical_limit": "",
-            "lost_cons": "",
-            "sec_recom": "",
-            "agreement": "",
-            "accept_regulations": "",
-            "accept_inf_cons": ""
+            'birth_date': '',
+            'physical_cond': 'Physical Condition',
+            'medical_cond': 'Medical Condition',
+            'drug_cons': 'Drug Consumption',
+            'eps': 'EPS',
+            'cardio_prob': '',
+            'injuries': '',
+            'physical_limit': '',
+            'lost_cons': '',
+            'sec_recom': '',
+            'agreement': '',
+            'accept_regulations': '',
+            'accept_inf_cons': ''
         }
 
     def __init__(self, *args, **kwargs):
         # Extraemos el usuario actual del contexto si es pasado
         self.request_user = kwargs.pop('request_user', None)
         super().__init__(*args, **kwargs)
-        for field in self.fields.values():
-            field.widget.attrs['class'] = field.widget.attrs.get('class', '') + ' form-control'
+        for field_name, field in self.fields.items():
+            class_attr = field.widget.attrs.get('class', 'form-control')
+            field.widget.attrs['class'] = class_attr
+            if 'form-control' not in class_attr:
+                field.widget.attrs['class'] += ' form-control'
+
+            if field_name in self.errors:
+                field.widget.attrs['class'] += ' is-invalid'
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
@@ -111,19 +129,18 @@ class UserRegisterForm(forms.ModelForm):
 
     def clean_category(self):
         category = self.cleaned_data['category']
-        # Verificar si el usuario actual tiene permiso para cambiar la categoría
         if 'category' in self.changed_data and not self.request_user.is_sensei:
             raise forms.ValidationError("Only users with category 'Sensei' can change the category.")
         return category
 
     def clean_accept_regulations(self):
-        accept = self.cleaned_data.get('accept_terms')
+        accept = self.cleaned_data.get('accept_regulations')
         if not accept:
             raise forms.ValidationError("You must accept the Regulations to continue.")
         return accept
 
     def clean_accept_inf_cons(self):
-        accept = self.cleaned_data.get('accept_terms')
+        accept = self.cleaned_data.get('accept_inf_cons')
         if not accept:
             raise forms.ValidationError("You must accept the Informed Consent to continue.")
         return accept

@@ -6,32 +6,87 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Seishin JKA Dojo | Registration Page</title>
+
   <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
   <!-- Tempus Dominus Bootstrap 4 CSS - For datepicker -->
   <link rel="stylesheet" href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
-
+  <!-- Country picker flags -->
+  <link rel="stylesheet" href="{% static 'plugins/bootstrap-select-country-4.2.0/css/bootstrap-select-country.min.css' %}">
   <!-- icheck bootstrap -->
   <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
   <!-- Theme style -->
   <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
   <link rel="icon" href="{% static 'img/icon.png' %}">
+
+  <style>
+    .dropdown-toggle.btn-default {
+      color: #292b2c;
+      background-color: #fff;
+      border-color: #ccc;
+    }
+    .bootstrap-select.show > .dropdown-menu > .dropdown-menu {
+      display: block;
+    }
+    .bootstrap-select > .dropdown-menu > .dropdown-menu li.hidden {
+      display: none;
+    }
+    .bootstrap-select > .dropdown-menu > .dropdown-menu li a {
+      display: block;
+      width: 100%;
+      padding: 3px 1.5rem;
+      clear: both;
+      font-weight: 400;
+      color: #292b2c;
+      text-align: inherit;
+      white-space: nowrap;
+      background: 0 0;
+      border: 0;
+      text-decoration: none;
+    }
+    .bootstrap-select > .dropdown-menu > .dropdown-menu li a:hover {
+      background-color: #f4f4f4;
+    }
+    .bootstrap-select > .dropdown-toggle {
+      width: 100%;
+    }
+    .dropdown-menu > li.active > a {
+      color: #fff !important;
+      background-color: #337ab7 !important;
+    }
+    .bootstrap-select .check-mark {
+      line-height: 14px;
+    }
+    .bootstrap-select .check-mark::after {
+      font-family: "FontAwesome", serif;
+      content: "\f00c";
+    }
+    .bootstrap-select button {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Make filled out selects be the same size as empty selects */
+    .bootstrap-select.btn-group .dropdown-toggle .filter-option {
+      display: inline !important;
+    }
+  </style>
 </head>
-<body class="hold-transition register-page">
+<body class="dark-mode hold-transition register-page">
 <div class="register-box">
   <div class="register-logo">
     <a href="{% url 'login' %}">
-      <img src="{% static 'img/banner-black.png' %}" alt="">
+      <img src="{% static 'img/banner.png' %}" alt="">
     </a>
   </div>
 
   <div class="card">
     <div class="card-body card-danger card-outline register-card-body">
       <p class="login-box-msg">Register a new membership</p>
-      <form id="registration_form" method="post">
+      <form id="registration_form" method="post" action="{% url 'signup' token %}">
+        {% csrf_token %}
         <div class="tab-content" id="registration-tabContent">
           {% csrf_token %}
           <div class="progress mb-3">
@@ -52,6 +107,13 @@
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                   {% endif %}
                   {{ field }}
+                  {% if field.errors %}
+                    <div class="invalid-feedback">
+                      {% for error in field.errors %}
+                        <p>{{ error }}</p>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
                 </div>
               {% endfor %}
               <div class="form-group">
@@ -95,6 +157,8 @@
 <script src="{% static 'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
 <!-- AdminLTE App -->
 <script src="{% static 'dist/js/adminlte.min.js' %}"></script>
+<!-- Country picker flags -->
+<script src="{% static 'plugins/bootstrap-select-country-4.2.0/js/bootstrap-select-country.min.js' %}"></script>
 <script>
     $(document).ready(function () {
         $(".next-btn").click(function () {
@@ -123,11 +187,13 @@
             format: 'L'
         });
 
-        $.validator.setDefaults({
-            submitHandler: function () {
-                alert("Form successful submitted!");
-            }
-        });
+        $('.countrypicker').countrypicker();
+
+        //$.validator.setDefaults({
+        //    submitHandler: function () {
+        //        alert("Form successful submitted!");
+        //    }
+        //});
         $('#registration_form').validate({
             rules: {
                 email: {
@@ -142,17 +208,11 @@
                     required: true
                 },
             },
-            messages: {
-                email: {
-                    required: "Please enter a email address",
-                    email: "Please enter a valid email address"
-                },
-                password: {
-                    required: "Please provide a password",
-                    minlength: "Your password must be at least 5 characters long"
-                },
-                terms: "Please accept our terms"
-            },
+            //messages: {
+            //    first_name: {
+            //        required: "Please enter your first name",
+            //    }
+            //},
             errorElement: 'span',
             errorPlacement: function (error, element) {
                 error.addClass('invalid-feedback');

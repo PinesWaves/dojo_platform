@@ -6,7 +6,7 @@ from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views import View
-from django.views.generic import CreateView, UpdateView, DeleteView, TemplateView
+from django.views.generic import CreateView, UpdateView, DeleteView, TemplateView, FormView
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth import get_user_model
 from .forms import UserRegisterForm, UserUpdateForm
@@ -26,12 +26,14 @@ class CustomLoginView(View):
 
     def get(self, request):
         user = request.user
+        error = request.session.pop('error', None)
+        msg = request.session.pop('msg', None)
         if user.is_authenticated:  # Redirige si ya está autenticado
             if user.is_superuser or user.category == Category.SENSEI:
                 return redirect(reverse_lazy('sensei_dashboard'))  # Redirigir al dashboard del sensei
             elif user.category == Category.ESTUDIANTE:
                 return redirect(reverse_lazy('student_dashboard'))  # Redirigir al dashboard del estudiante
-        return render(request, self.template_name)
+        return render(request, self.template_name, {'error': error, 'msg': msg})
 
     def post(self, request):
         id_number = request.POST.get('id_number')
@@ -54,32 +56,42 @@ class CustomLoginView(View):
 
 
 # Vista de Registro
-class RegisterView(CreateView):
+class RegisterView(FormView):
     model = User
     form_class = UserRegisterForm
     template_name = 'login_register/register.html'
     success_url = reverse_lazy('login')
 
-    def dispatch(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         token = self.kwargs.get('token')
 
         # Check if the token exists and is valid
         try:
             registration_token = Token.objects.get(token=token)
             if not registration_token.is_valid():
+                request.session['error'] = 'Invalid or expired token'
                 return redirect(reverse_lazy('login'))  # "Invalid or expired token
         except Token.DoesNotExist:
+            request.session['error'] = 'Invalid or expired token'
             return redirect(reverse_lazy('login'))  # "Invalid or expired token
 
-        return super().dispatch(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
-    def form_valid(self, form):
+    def form_valid(self, form, request):
         # Process the form
+        form.save()
+        self.request.session['error'] = None
+        self.request.session['msg'] = "Registration successful!"
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        print(form.errors)
+        self.object = None
+        return self.render_to_response(self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        form_instance = self.get_form_class()()  # Create a blank form instance
+        form_instance = kwargs['form'] if 'form' in kwargs else self.get_form_class()()  # Create a blank form instance
         form_fields = list(form_instance)  # Convert form fields to a list
 
         total_sections = math.ceil(len(form_fields) / 6)  # Calculate the number of sections
@@ -91,8 +103,23 @@ class RegisterView(CreateView):
         context.update({
             'sectioned_fields': sectioned_fields,  # List of (section_number, fields)
             'total_sections': total_sections,  # Number of sections
+            'token': self.kwargs.get('token'),  # Token passed in the URL
+            # 'error': form.errors.get('__all__'),  # Form errors
         })
         return context
+
+    def post(self, request, *args, **kwargs):
+        token = kwargs.get('token')
+        if not token:
+            request.session['error'] = 'Invalid or expired token'
+            return redirect(reverse_lazy('login'))
+
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form, request)
+        else:
+            return self.form_invalid(form)
+
 
 
 # Vista de Actualización de Usuario
