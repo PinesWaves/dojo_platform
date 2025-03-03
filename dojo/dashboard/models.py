@@ -56,6 +56,7 @@ class Dojo(models.Model):
     description = models.TextField()
     sensei: User = models.OneToOneField(User, related_name="sensei", on_delete=models.DO_NOTHING)
     students = models.ManyToManyField(User, related_name="students")
+    # TODO: add dojo_location, is_active, email, phone_number, address, city, country, created_at and updated_at fields
 
     def clean(self):
         """
