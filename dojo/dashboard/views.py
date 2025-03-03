@@ -142,8 +142,9 @@ class ManageStudentsView(LoginRequiredMixin, UserCategoryRequiredMixin, Template
     def get(self, request, *args, **kwargs):
         call_command('cleanup_expired_tokens', verbosity=0)
         sensei = request.user
-        dojo = Dojo.objects.filter(sensei=sensei)
-        self.ctx['students'] = dojo.students if dojo else []
+        #TODO: how to deal with a sensei with more than one dojo?
+        dojo = Dojo.objects.filter(sensei=sensei).first()
+        self.ctx['students'] = dojo.students.all() if dojo else []
         self.ctx['time_url'] = [
             (t.expires_at, reverse('signup', kwargs={'token': t.token}))
             for t in Token.objects.all()
