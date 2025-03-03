@@ -12,34 +12,34 @@ from config.config_vars import ranges
 
 
 class IDType(models.TextChoices):
-    CEDULA_CIUDADANIA = 'CC', 'Cédula de ciudadanía'
-    TARJETA_IDENTIDAD = 'TI', 'Tarjeta de Identidad'
-    CEDULA_EXTRANJERIA = 'CE', 'Cédula de extranjería'
-    PASAPORTE = 'PA', 'Pasaporte'
+    CEDULA_CIUDADANIA = 'CC', 'Citizenship card'
+    TARJETA_IDENTIDAD = 'TI', 'Identity Card'
+    CEDULA_EXTRANJERIA = 'CE', 'Alien Registration Card'
+    PASAPORTE = 'PA', 'Passport'
     OTRO = 'OT', 'Otro'
 
 
 class Category(models.TextChoices):
     SENSEI = 'S', 'Sensei'
-    ESTUDIANTE = 'E', 'Estudiante'
+    ESTUDIANTE = 'E', 'Student'
 
 
 class MedicalConditions(models.TextChoices):
-    ENFERMEDADES_CARDIACAS = 'EC', 'Enfermedades Cardiacas'
-    HIPERTENSION_ARTERIAL = 'HA', 'Hipertensión Arterial'
+    ENFERMEDADES_CARDIACAS = 'EC', 'Cardiac Diseases'
+    HIPERTENSION_ARTERIAL = 'HA', 'Arterial Hypertension'
     DIABETES = 'D', 'Diabetes'
-    ASMA_O_PROBLEMAS_RESPIRATORIOS = 'AoPR', 'Asma O Problemas Respiratorios'
-    EPILEPSIA_O_CONVULSIONES = 'EoC', 'Epilepsia O Convulsiones'
-    PROBLEMAS_MUSCULOESQUELETICOS = 'PME', 'Problemas Musculoesqueléticos (Ej. Esguinces, Fracturas)'
-    OTROS = 'OT', 'Otros'
-    NA = 'NA', 'No Aplica'
+    ASMA_O_PROBLEMAS_RESPIRATORIOS = 'AoPR', 'Asthma and respiratory problems'
+    EPILEPSIA_O_CONVULSIONES = 'EoC', 'Epilepsy or Seizures'
+    PROBLEMAS_MUSCULOESQUELETICOS = 'PME', 'Musculoskeletal Problems (e.g. Sprains, Fractures)'
+    OTROS = 'OT', 'Others'
+    NA = 'NA', 'No aplicable'
 
 
 class PhysicalConditions(models.TextChoices):
-    EXCELENTE = 'E', 'Excelente'
-    BUENO = 'B', 'Bueno'
-    ACEPTABLE = 'A', 'Aceptable'
-    NECESITA_MEJORAR = 'I', 'Necesita mejorar'
+    EXCELENTE = 'E', 'Excellent'
+    BUENO = 'B', 'Good'
+    ACEPTABLE = 'A', 'Acceptable'
+    NECESITA_MEJORAR = 'I', 'Needs improvement'
 
 
 class Genders(models.TextChoices):
@@ -93,12 +93,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=Category.ESTUDIANTE
     )
     id_number = models.CharField(max_length=30, unique=True, null=False, blank=False)
-    birth_date = models.DateField(default=datetime(2000, 1, 1))
+    birth_date = models.DateField(default=datetime(2000, 1, 1), null=False, blank=False)
     birth_place = models.CharField(max_length=30, default='')
     gender = models.CharField(choices=Genders.choices, default=Genders.NA, null=True, blank=True)
     profession = models.CharField(max_length=30, default='')
     eps = models.CharField(max_length=50, default='')
-    phone_number = models.CharField(max_length=15, default='')
+    phone_number = models.CharField(max_length=15, null=False, blank=False)
     address = models.CharField(max_length=255, default='')
     city = models.CharField(max_length=30, default='')
     country = models.CharField(max_length=30, default='')
