@@ -5,3 +5,4 @@
 */logs
 /dojo/media/techniques/*.png
 /dojo/media/qr_codes/*.png
+*/staticfiles/
