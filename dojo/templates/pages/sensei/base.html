@@ -187,14 +187,16 @@
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
-          {% if user.picture %}
-            <img src="data:image/png;base64,{{ user.picture }}" class="img-circle elevation-2" alt="User Image">
-          {% else %}
-            <img src="{% static 'dist/img/avatar.png' %}" class="img-circle elevation-2" alt="User Image">
-          {% endif %}
+            <img class="img-circle elevation-2"
+                 {% if user.picture %}
+                  src="{{ user.picture.url }}"
+                 {% else %}
+                  src="{% static 'dist/img/avatar.png' %}"
+                 {% endif %}
+                 alt="User Image">
         </div>
         <div class="info">
-          <a href="#" class="d-block">{{ user.first_name }} {{ user.last_name }}</a>
+          <a href="{% url 'manage_profile' %}?id={{ user.id }}" class="d-block">{{ user.first_name }} {{ user.last_name }}</a>
         </div>
       </div>
 
