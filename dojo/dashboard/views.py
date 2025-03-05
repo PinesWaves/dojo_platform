@@ -5,8 +5,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.http import JsonResponse
-from django.shortcuts import render
-from django.urls import reverse
+from django.shortcuts import render, redirect
+from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView
 import logging
 
@@ -21,18 +21,10 @@ class SenseiDashboard(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateVie
     template_name = "pages/sensei/dashboard.html"
 
     def get(self, request, *args, **kwargs):
-
         return render(request, self.template_name)
 
 
-class StudentDashboard(LoginRequiredMixin, TemplateView):
-    template_name = "pages/student/dashboard.html"
-
-    def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
-
-
-class ManageTrainingsView(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
+class ManageTrainings(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
     template_name = "pages/sensei/manage_trainings.html"
 
     def get(self, request, *args, **kwargs):
@@ -98,7 +90,7 @@ class ManageTrainingsView(LoginRequiredMixin, UserCategoryRequiredMixin, Templat
         return render(request, self.template_name, context=ctx)
 
 
-class ManageTechniquesView(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
+class ManageTechniques(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
     template_name = "pages/sensei/manage_techniques.html"
 
     def get(self, request, *args, **kwargs):
@@ -135,7 +127,7 @@ class ManageTechniquesView(LoginRequiredMixin, UserCategoryRequiredMixin, Templa
         return render(request, self.template_name, context=ctx)
 
 
-class ManageStudentsView(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
+class ManageStudents(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
     template_name = "pages/sensei/manage_students.html"
     ctx = dict()
 
@@ -176,3 +168,33 @@ class ManageStudentsView(LoginRequiredMixin, UserCategoryRequiredMixin, Template
 
 
         return render(request, self.template_name, context=self.ctx)
+
+
+class ManageProfile(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
+    template_name = "pages/sensei/manage_profile.html"
+
+    def get(self, request, *args, **kwargs):
+        id = request.GET.get('id')
+        if id:
+            student = User.objects.filter(pk=id).first()
+            if student:
+                return render(request, self.template_name, context={'student': student})
+        return redirect(reverse_lazy('manage_students'))
+
+
+class StudentDashboard(LoginRequiredMixin, TemplateView):
+    template_name = "pages/student/dashboard.html"
+
+    def get(self, request, *args, **kwargs):
+        trainings = Training.objects.filter(status=True)
+        ctx = {
+            "trainings": trainings,
+        }
+        return render(request, self.template_name, ctx)
+
+
+class StudentProfile(LoginRequiredMixin, TemplateView):
+    template_name = "pages/student/profile.html"
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
