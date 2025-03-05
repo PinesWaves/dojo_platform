@@ -21,6 +21,7 @@ RUN pacman -S --noconfirm \
     libtirpc \
 #    python-psycopg2 \
     openbsd-netcat \
+    gdal \
     wget
 
 # Set environment variables for Python installation
