@@ -22,15 +22,15 @@
     <div class="col-lg-6">
       <div class="card card-primary card-outline">
         <div class="card-body">
-          <h5 class="card-title">Card title</h5>
+          {% for t in trainings %}
+              {% if t.status %}
+              <h4>Training on {{ t.date }}</h4>
+              <img class="img-fluid pad" src="{{ t.qr_image.url }}" alt="training" width="400">
+              {% endif %}
+            {% endfor %}
           <p class="card-text">
-            Some quick example text to build on the card title and make up the bulk of the
-            card's
-            content.
+            Scan QR and confirm attendance
           </p>
-          <a class="card-link" href="#">Card link</a>
-          <a class="card-link" href="#">Another link</a>
-          <a class="btn btn-primary" href="#">Go somewhere</a>
         </div>
       </div><!-- /.card -->
     </div><!-- /.col-md-6 -->
