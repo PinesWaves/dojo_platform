@@ -8,7 +8,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.http import HttpResponseForbidden
 
-from config.config_vars import ranges
+from config.config_vars import Ranges
 
 
 class IDType(models.TextChoices):
@@ -103,8 +103,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     city = models.CharField(max_length=30, default='')
     country = models.CharField(max_length=30, default='')
     email = models.EmailField(max_length=255, null=False, blank=False)
-    picture = models.TextField(null=True, blank=True, default=None)
-    level = models.CharField(choices=ranges, default=ranges[0])
+    picture = models.ImageField(upload_to='profile_imgs/', blank=True, null=True)
+    level = models.CharField(choices=Ranges.choices, default=Ranges.K10)
     parent = models.CharField(max_length=60, null=True, blank=True, default='')
     parent_phone_number = models.CharField(max_length=15, null=True, blank=True, default='')
     accept_inf_cons = models.BooleanField(default=False)
