@@ -17,17 +17,21 @@ Including another URLconf
 from django.urls import path, include
 
 from dashboard.views import (
-    SenseiDashboard,
     StudentDashboard,
-    ManageTrainingsView,
-    ManageTechniquesView,
-    ManageStudentsView
+    StudentProfile,
+    SenseiDashboard,
+    ManageTrainings,
+    ManageTechniques,
+    ManageStudents,
+    ManageProfile
 )
 
 urlpatterns = [
     path('', SenseiDashboard.as_view(), name='sensei_dashboard'),
     path('student/', StudentDashboard.as_view(), name='student_dashboard'),
-    path('manage_trainings/', ManageTrainingsView.as_view(), name='manage_trainings'),
-    path('manage_techniques/', ManageTechniquesView.as_view(), name='manage_techniques'),
-    path('manage_students/', ManageStudentsView.as_view(), name='manage_students'),
+    path('student/profile', StudentProfile.as_view(), name='profile'),
+    path('manage_trainings/', ManageTrainings.as_view(), name='manage_trainings'),
+    path('manage_techniques/', ManageTechniques.as_view(), name='manage_techniques'),
+    path('manage_students/', ManageStudents.as_view(), name='manage_students'),
+    path('manage_profile/', ManageProfile.as_view(), name='manage_profile'),
 ]
