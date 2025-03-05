@@ -76,8 +76,7 @@
           <div class="card-body">
             {% for t in trainings %}
               {% if t.status %}
-              {{ t.date }}<br>
-              {{ t.status }}<br>
+              <h4>{{ t.date }}</h4>
               <img class="img-fluid pad" src="{{ t.qr_image.url }}" alt="training" width="200">
               {% endif %} 
             {% endfor %}
