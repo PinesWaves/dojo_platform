@@ -3,6 +3,7 @@ import qrcode
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import models
+from django.utils import timezone
 from secrets import token_urlsafe
 
 from user_management.models import User, Category
@@ -27,6 +28,7 @@ class Technique(models.Model):
 class Training(models.Model):
     date = models.DateTimeField(auto_now=False)
     status = models.BooleanField(default=True)  # True: Active (not finished); False: finished
+    location = models.CharField(max_length=100, default='')
     training_code = models.CharField(max_length=100, blank=True)
     qr_image = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
     attendants = models.ManyToManyField(User, related_name="trainings", blank=True)
@@ -55,8 +57,17 @@ class Dojo(models.Model):
     image = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
     description = models.TextField()
     sensei: User = models.OneToOneField(User, related_name="sensei", on_delete=models.DO_NOTHING)
-    students = models.ManyToManyField(User, related_name="students")
-    # TODO: add dojo_location, is_active, email, phone_number, address, city, country, created_at and updated_at fields
+    students = models.ManyToManyField(User, related_name="students", blank=True)
+    dojo_location = models.CharField(max_length=100, default='', null=False, blank=False)
+    is_active = models.BooleanField(default=True)
+    email = models.EmailField(max_length=255, default='', null=False, blank=False)
+    phone_number = models.CharField(max_length=15, null=True, blank=True)
+    address = models.CharField(max_length=100, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    country = models.CharField(max_length=100, null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
 
     def clean(self):
         """
