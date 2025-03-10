@@ -21,7 +21,11 @@ class SenseiDashboard(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateVie
     template_name = "pages/sensei/dashboard.html"
 
     def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
+        trainings = Training.objects.all().order_by('-date')
+        ctx = {
+            "trainings": trainings,
+        }
+        return render(request, self.template_name, ctx)
 
 
 class ManageTrainings(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
@@ -186,7 +190,7 @@ class StudentDashboard(LoginRequiredMixin, TemplateView):
     template_name = "pages/student/dashboard.html"
 
     def get(self, request, *args, **kwargs):
-        trainings = Training.objects.filter(status=True)
+        trainings = Training.objects.all().order_by('-date')
         ctx = {
             "trainings": trainings,
         }
