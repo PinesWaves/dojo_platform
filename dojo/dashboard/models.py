@@ -24,6 +24,9 @@ class Technique(models.Model):
     image = models.ImageField(upload_to='techniques/', blank=True, null=True, default='techniques/default_technique.jpg')
     category = models.CharField(choices=TechniqueCategory.choices, default=TechniqueCategory.KIHON)
 
+    def __str__(self):
+        return self.name
+
 
 class Training(models.Model):
     date = models.DateTimeField(auto_now=False)
