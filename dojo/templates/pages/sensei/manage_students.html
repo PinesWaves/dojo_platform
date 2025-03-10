@@ -159,7 +159,7 @@
                       <form action="{% url 'manage_students' %}" method="post">{% csrf_token %}
                         <div class="form-group">
                           <input type="hidden" name="_method" value="delete">
-                          <input type="hidden" value="{{ url }}" name="url{{ loop.index }}">
+                          <input type="hidden" value="{{ url }}" name="url{{ forloop.counter }}">
                           <div class="d-flex col-sm-6">
                             <td>
                               <button type="submit" class="btn btn-danger btn-block btn-xs col-sm-8">
