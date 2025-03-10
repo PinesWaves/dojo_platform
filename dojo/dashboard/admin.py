@@ -1,6 +1,6 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from .models import Dojo
+from .models import Dojo, Training
+
 
 @admin.register(Dojo)
 class DojoAdmin(admin.ModelAdmin):
@@ -16,5 +16,23 @@ class DojoAdmin(admin.ModelAdmin):
         (None, {
             'classes': ('wide',),
             'fields': ('name', 'image', 'sensei', 'description'),
+        }),
+    )
+
+
+@admin.register(Training)
+class TrainingAdmin(admin.ModelAdmin):
+    list_display = ('date', 'status', 'location', 'training_code')  # Customize columns
+    search_fields = ('location', 'training_code')  # Add search fields
+    list_filter = ('status', 'date')  # Add filters
+    ordering = ('date',)  # Default ordering
+    fieldsets = (
+        (None, {'fields': ('date', 'status', 'location', 'training_code', 'qr_image')}),
+        ('Relations', {'fields': ('attendants', 'techniques')}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('date', 'status', 'location', 'training_code', 'qr_image', 'attendants', 'techniques'),
         }),
     )
