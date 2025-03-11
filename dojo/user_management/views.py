@@ -54,7 +54,6 @@ class CustomLoginView(View):
             'error': 'Invalid credentials',
         })
 
-
 # Vista de Registro
 class RegisterView(FormView):
     model = User
@@ -77,7 +76,7 @@ class RegisterView(FormView):
 
         return super().get(request, *args, **kwargs)
 
-    def form_valid(self, form, request):
+    def form_valid(self, form):
         # Process the form
         form.save()
         self.request.session['error'] = None
@@ -151,7 +150,7 @@ class DeleteUserView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         user.save()
         return super().form_valid(form)
 
-
+# Vista de Recuperación de Contraseña
 class RecoverPass(TemplateView):
     model = User
     fields = ['password']
