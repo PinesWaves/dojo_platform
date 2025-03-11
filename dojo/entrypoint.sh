@@ -28,5 +28,8 @@ python manage.py collectstatic --noinput
 # Start the Django server
 python manage.py runserver 0.0.0.0:8000
 
+# Load dummy data
+python manage.py create_dataset
+
 # Execute the command specified as arguments to this script
 exec "$@"
