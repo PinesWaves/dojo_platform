@@ -55,7 +55,9 @@ WORKDIR /app/dojo
 # Copy Django project (assuming you have a local project to copy)
 COPY dojo /app/dojo
 
-RUN chmod +x /app/dojo/entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh
 
 # Install Django 4.2
 RUN pip install -r requirements.txt
@@ -66,4 +68,4 @@ EXPOSE 8000
 # Default command to run a bash shell
 # CMD ["bash"]
 
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
