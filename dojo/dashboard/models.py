@@ -30,6 +30,7 @@ class Technique(models.Model):
 
 class Training(models.Model):
     date = models.DateTimeField(auto_now=False)
+    #TODO: add Canceled status: change BooleanField to CharField with choices
     status = models.BooleanField(default=True)  # True: Active (not finished); False: finished
     location = models.CharField(max_length=100, default='')
     training_code = models.CharField(max_length=100, blank=True)
