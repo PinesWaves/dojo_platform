@@ -140,7 +140,7 @@ class ManageStudents(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView
         sensei = request.user
         #TODO: how to deal with a sensei with more than one dojo?
         dojo = Dojo.objects.filter(sensei=sensei).first()
-        self.ctx['students'] = dojo.students.all() if dojo else []
+        self.ctx['students'] = User.objects.filter(category='E') # dojo.students.all() if dojo else []
         self.ctx['time_url'] = [
             (t.expires_at, reverse('signup', kwargs={'token': t.token}))
             for t in Token.objects.all()
