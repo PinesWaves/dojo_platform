@@ -21,7 +21,7 @@ class SenseiDashboard(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateVie
     template_name = "pages/sensei/dashboard.html"
 
     def get(self, request, *args, **kwargs):
-        trainings = Training.objects.all().order_by('-date')
+        trainings = Training.objects.all().order_by('-date')[:6]
         ctx = {
             "trainings": trainings,
         }
