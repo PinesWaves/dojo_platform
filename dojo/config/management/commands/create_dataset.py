@@ -1,8 +1,9 @@
 import csv
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
 from user_management.models import User, Category
 from dashboard.models import Dojo, Training, Technique
+from django.utils import timezone
 
 
 class Command(BaseCommand):
@@ -25,6 +26,8 @@ class Command(BaseCommand):
             for row in reader:
                 User.objects.create_user(**row)
 
+        User.objects.create_superuser(first_name='jesus', last_name='rod', password='rosales3', id_number=1)
+
     def load_techniques(self):
         with open('test/data/techniques.csv', newline='') as csvfile:
             reader = csv.DictReader(csvfile)
@@ -43,10 +46,18 @@ class Command(BaseCommand):
                     i = 0
 
     def load_trainings(self):
-        with open('test/data/trainings.csv', newline='') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                tr = Training(**row)
+        today = datetime.now().date()
+        for i in range(1, 11):
+            for j in range(2):
+                tr = Training(
+                    date=timezone.make_aware(
+                        datetime(today.year, today.month, today.day, 17, 0) - timedelta(days=i - 1)
+                        if j == 0
+                        else datetime(today.year, today.month, today.day, 19, 0) - timedelta(days=i - 1)
+                    ),
+                    status=True if i == 1 else False,
+                    location='Seishin Dojo'
+                )
                 tr.save()
-                tr.techniques.set(Technique.objects.all())
                 tr.attendants.set(User.objects.all()[:10])
+                tr.techniques.set(Technique.objects.all())
