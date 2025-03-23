@@ -37,6 +37,10 @@ CSRF_TRUSTED_ORIGINS = [
 # CSRF_COOKIE_SECURE = True      # Solo en producción con HTTPS
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 GDAL_LIBRARY_PATH = '/usr/lib/libgdal.so'
+# Close session when the browser is closed
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+# Set session timeout to 30 minutes (1800 seconds)
+SESSION_COOKIE_AGE = 1800
 
 
 # Application definition
