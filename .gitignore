@@ -8,3 +8,4 @@
 /dojo/media/profile_imgs/*.png
 */staticfiles/
 __pycache__
+/dojo/test/data/*.csv

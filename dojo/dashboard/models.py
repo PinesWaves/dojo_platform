@@ -19,6 +19,12 @@ class TechniqueCategory(models.TextChoices):
     AVANZADO = 'AV', 'Avanzado'
 
 
+class TrainingStatus(models.TextChoices):
+    AGENDADO = 'A', 'Scheduled'
+    FINALIZADO = 'F', 'Estiramiento'
+    CANCELADO = 'C', 'Kihon'
+
+
 class Technique(models.Model):
     name = models.CharField(max_length=100)
     image = models.ImageField(upload_to='techniques/', blank=True, null=True, default='techniques/default_technique.jpg')
@@ -30,8 +36,7 @@ class Technique(models.Model):
 
 class Training(models.Model):
     date = models.DateTimeField(auto_now=False)
-    #TODO: add Canceled status: change BooleanField to CharField with choices
-    status = models.BooleanField(default=True)  # True: Active (not finished); False: finished
+    status = models.CharField(choices=TrainingStatus.choices, default=TrainingStatus.AGENDADO)
     location = models.CharField(max_length=100, default='')
     training_code = models.CharField(max_length=100, blank=True)
     qr_image = models.ImageField(upload_to='qr_codes/', blank=True, null=True)

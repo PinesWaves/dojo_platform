@@ -13,31 +13,31 @@ from config.config_vars import Ranges
 
 class IDType(models.TextChoices):
     CEDULA_CIUDADANIA = 'CC', 'Citizenship card'
-    TARJETA_IDENTIDAD = 'TI', 'Identity Card'
-    CEDULA_EXTRANJERIA = 'CE', 'Alien Registration Card'
+    TARJETA_IDENTIDAD = 'IC', 'Identity Card'
+    CEDULA_EXTRANJERIA = 'AR', 'Alien Registration Card'
     PASAPORTE = 'PA', 'Passport'
     OTRO = 'OT', 'Otro'
 
 
 class Category(models.TextChoices):
-    SENSEI = 'S', 'Sensei'
-    ESTUDIANTE = 'E', 'Student'
+    SENSEI = 'SE', 'Sensei'
+    ESTUDIANTE = 'ST', 'Student'
 
 
 class MedicalConditions(models.TextChoices):
-    ENFERMEDADES_CARDIACAS = 'EC', 'Cardiac Diseases'
-    HIPERTENSION_ARTERIAL = 'HA', 'Arterial Hypertension'
+    ENFERMEDADES_CARDIACAS = 'CD', 'Cardiac Diseases'
+    HIPERTENSION_ARTERIAL = 'AH', 'Arterial Hypertension'
     DIABETES = 'D', 'Diabetes'
-    ASMA_O_PROBLEMAS_RESPIRATORIOS = 'AoPR', 'Asthma and respiratory problems'
-    EPILEPSIA_O_CONVULSIONES = 'EoC', 'Epilepsy or Seizures'
-    PROBLEMAS_MUSCULOESQUELETICOS = 'PME', 'Musculoskeletal Problems (e.g. Sprains, Fractures)'
+    ASMA_O_PROBLEMAS_RESPIRATORIOS = 'AR', 'Asthma and respiratory problems'
+    EPILEPSIA_O_CONVULSIONES = 'ES', 'Epilepsy or Seizures'
+    PROBLEMAS_MUSCULOESQUELETICOS = 'MP', 'Musculoskeletal Problems (e.g. Sprains, Fractures)'
     OTROS = 'OT', 'Others'
     NA = 'NA', 'No aplicable'
 
 
 class PhysicalConditions(models.TextChoices):
     EXCELENTE = 'E', 'Excellent'
-    BUENO = 'B', 'Good'
+    BUENO = 'G', 'Good'
     ACEPTABLE = 'A', 'Acceptable'
     NECESITA_MEJORAR = 'I', 'Needs improvement'
 
@@ -83,12 +83,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=30, null=False, blank=False)
     last_name = models.CharField(max_length=30, null=False, blank=False)
     id_type = models.CharField(
-        max_length=2,
         choices=IDType.choices,
         default=IDType.CEDULA_CIUDADANIA
     )
     category = models.CharField(
-        max_length=1,
         choices=Category.choices,
         default=Category.ESTUDIANTE
     )
