@@ -14,7 +14,7 @@ from config.config_vars import Ranges
 class IDType(models.TextChoices):
     CEDULA_CIUDADANIA = 'CC', 'Citizenship card'
     TARJETA_IDENTIDAD = 'IC', 'Identity Card'
-    CEDULA_EXTRANJERIA = 'ARC', 'Alien Registration Card'
+    CEDULA_EXTRANJERIA = 'AR', 'Alien Registration Card'
     PASAPORTE = 'PA', 'Passport'
     OTRO = 'OT', 'Otro'
 
@@ -28,7 +28,7 @@ class MedicalConditions(models.TextChoices):
     ENFERMEDADES_CARDIACAS = 'CD', 'Cardiac Diseases'
     HIPERTENSION_ARTERIAL = 'AH', 'Arterial Hypertension'
     DIABETES = 'D', 'Diabetes'
-    ASMA_O_PROBLEMAS_RESPIRATORIOS = 'ARP', 'Asthma and respiratory problems'
+    ASMA_O_PROBLEMAS_RESPIRATORIOS = 'AR', 'Asthma and respiratory problems'
     EPILEPSIA_O_CONVULSIONES = 'ES', 'Epilepsy or Seizures'
     PROBLEMAS_MUSCULOESQUELETICOS = 'MP', 'Musculoskeletal Problems (e.g. Sprains, Fractures)'
     OTROS = 'OT', 'Others'
@@ -83,12 +83,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=30, null=False, blank=False)
     last_name = models.CharField(max_length=30, null=False, blank=False)
     id_type = models.CharField(
-        max_length=2,
         choices=IDType.choices,
         default=IDType.CEDULA_CIUDADANIA
     )
     category = models.CharField(
-        max_length=1,
         choices=Category.choices,
         default=Category.ESTUDIANTE
     )
