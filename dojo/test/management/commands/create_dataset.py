@@ -1,6 +1,8 @@
 import csv
 from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
+from django.db import connection
+
 from user_management.models import User, Category
 from dashboard.models import Dojo, Training, Technique
 from django.utils import timezone
@@ -14,6 +16,14 @@ class Command(BaseCommand):
         Dojo.objects.all().delete()
         Technique.objects.all().delete()
         User.objects.all().delete()
+
+        # Reset primary key sequences
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_training', 'id'), 1, false);")
+            cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_dojo', 'id'), 1, false);")
+            cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_technique', 'id'), 1, false);")
+            cursor.execute("SELECT setval(pg_get_serial_sequence('user_management_user', 'id'), 1, false);")
+
         self.load_users()
         self.load_techniques()
         self.load_dojos()
@@ -39,7 +49,10 @@ class Command(BaseCommand):
             reader = csv.DictReader(csvfile)
             i = 0
             for row in reader:
-                row['sensei'] = User.objects.filter(category=Category.SENSEI)[i]
+                try:
+                    row['sensei'] = User.objects.filter(category=Category.SENSEI)[i]
+                except:
+                    breakpoint()
                 Dojo.objects.create(**row)
                 i += 1
                 if i == 3:
