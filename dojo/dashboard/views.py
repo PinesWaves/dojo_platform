@@ -190,7 +190,7 @@ class StudentDashboard(LoginRequiredMixin, TemplateView):
     template_name = "pages/student/dashboard.html"
 
     def get(self, request, *args, **kwargs):
-        trainings = Training.objects.all().order_by('-date')
+        trainings = Training.objects.all().order_by('-date')[:6]
         ctx = {
             "trainings": trainings,
         }
