@@ -10,9 +10,9 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView
 import logging
 
-from dashboard.models import Training, Dojo, Technique, TechniqueCategory
+from dashboard.models import Training, Dojo, Technique, TechniqueCategory, TrainingStatus
 from dojo.mixins.view_mixins import UserCategoryRequiredMixin
-from user_management.models import User, Token
+from user_management.models import User, Token, Category
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class ManageTrainings(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateVie
         now = datetime.now(timezone.utc)
         for t in trainings:
             if now > t.date + timedelta(hours=2) and t.status:
-                t.status = False
+                t.status = TrainingStatus.FINALIZADO
                 if t.qr_image:
                     t.qr_image.delete(save=False)
                     t.qr_image = None
@@ -62,10 +62,9 @@ class ManageTrainings(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateVie
                 raise ValidationError("Invalid date format. Use MM/DD/YYYY HH:MM AM/PM.")
 
             # Validate `training_status`
-            training_status = request.POST.get('training_status', 'on')  # Default to 'off' if missing
-            if training_status not in ['on', 'off']:
+            training_status = request.POST.get('training_status')
+            if training_status not in [TrainingStatus.AGENDADO, TrainingStatus.FINALIZADO, TrainingStatus.CANCELADO]:
                 raise ValidationError("Invalid training status value.")
-            training_status = True if training_status == 'on' else False
 
             training_techniques = request.POST.getlist('training_techniques')
 
@@ -140,7 +139,7 @@ class ManageStudents(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView
         sensei = request.user
         #TODO: how to deal with a sensei with more than one dojo?
         dojo = Dojo.objects.filter(sensei=sensei).first()
-        self.ctx['students'] = User.objects.filter(category='E') # dojo.students.all() if dojo else []
+        self.ctx['students'] = User.objects.filter(category=Category.ESTUDIANTE) # dojo.students.all() if dojo else []
         self.ctx['time_url'] = [
             (t.expires_at, reverse('signup', kwargs={'token': t.token}))
             for t in Token.objects.all()
