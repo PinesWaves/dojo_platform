@@ -30,7 +30,7 @@
     <div class="row">
       <!-- Left col -->
       <section class="col-lg-3 connectedSortable">
-        <div class="card card-success">
+        <div class="card card-danger">
           <div class="card-header">
             <h3 class="card-title">Create training - {% now 'Y b j' %}</h3>
           </div>
@@ -62,21 +62,21 @@
             </div>
             <!-- /.card-body -->
             <div class="card-footer">
-              <button type="submit" class="btn btn-success">Submit</button>
+              <button type="submit" class="btn btn-danger">Submit</button>
             </div>
           </form>
         </div>
       </section>
 
       <section class="col-lg-9 connectedSortable">
-        <div class="card card-success">
+        <div class="card card-danger">
           <div class="card-header">
-            <h3 class="card-title">Trainings history</h3>
+            <h3 class="card-title">Training history</h3>
           </div>
           <div class="card-body">
             <div class="row">
             {% for t in trainings %}
-              {% if t.status %}
+              {% if t.status == 'A' %}
               <div class="col-sm-4 col-md-2">
                 <h4>{{ t.date }}</h4>
                 <img class="img-fluid pad" src="{{ t.qr_image.url }}" alt="training" width="200">
@@ -112,11 +112,34 @@
                     {% endif %} 
                   </td>
                   <td>
-                    {% for tc in t.techniques.all %}
-                      {{ tc.name }}<br> 
-                    {% empty %}
-                      No lessons assigned
-                    {% endfor %}
+                    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-default">
+                      List
+                    </button>
+                    <div class="modal fade" id="modal-default">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h4 class="modal-title">Technique list</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                          {% for tc in t.techniques.all %}
+                            {{ tc.name }}<br>
+                          {% empty %}
+                            No lessons assigned
+                          {% endfor %}
+                          </div>
+                          <div class="modal-footer justify-content-between">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          </div>
+                        </div>
+                        <!-- /.modal-content -->
+                      </div>
+                      <!-- /.modal-dialog -->
+                    </div>
+                    <!-- /.modal -->
                   </td>
                 </tr>
               {% endfor %}
@@ -124,9 +147,9 @@
               <tfoot>
               <tr>
                 <th>Date</th>
-                  <th>Status</th>
-                  <th>QR image</th>
-                  <th>Techniques</th>
+                <th>Status</th>
+                <th>QR image</th>
+                <th>Techniques</th>
               </tr>
               </tfoot>
             </table>
@@ -136,6 +159,7 @@
     </div>
     <!-- /.row (main row) -->
   </div><!-- /.container-fluid -->
+
 </section>
 <!-- /.content -->
 {% endblock %}
