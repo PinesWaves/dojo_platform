@@ -5,11 +5,11 @@
       <h4>Trainings</h4>
       <div id="accordion">
         {% for t in trainings %}
-        <div class="card card- {% if t.status == 'A' %}card-danger{% elif t.status == 'F' %}card-gray{% elif t.status == 'C' %}card-dark{% endif %}">
+        <div class="card {% if t.status == 'A' %}card-danger{% elif t.status == 'F' %}card-gray{% elif t.status == 'C' %}card-dark{% endif %}">
           <div class="card-header">
             <h4 class="card-title w-100">
               <a class="d-block w-100" data-toggle="collapse" href="#collapse{{ forloop.counter }}">
-                {{ t.location }} - {{ t.date }} + {{ t.status }}
+                {{ t.location }} - {{ t.date }}
               </a>
             </h4>
           </div>
