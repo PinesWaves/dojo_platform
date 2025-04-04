@@ -21,12 +21,17 @@ docker-compose -f .\docker-compose-local.yml up -d
 
 Once docker containers are running, we can launch ngrok
 ```sh
-ngrok http 443
+ngrok http 8000
 ```
 
 Create superuser
 ```sh
 python manage.py createsuperuser
+```
+
+Load initial data
+```sh
+python manage.py create_dataset --testing
 ```
 
 ### Test local ssl
