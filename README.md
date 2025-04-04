@@ -29,6 +29,11 @@ Create superuser
 python manage.py createsuperuser
 ```
 
+Load initial data
+```sh
+python manage.py create_dataset --testing
+```
+
 ### Test local ssl
 ```sh
 pip install django-sslserver
