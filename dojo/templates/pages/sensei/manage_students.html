@@ -6,38 +6,7 @@
 <link rel="stylesheet" href="{% static 'plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">
 <link rel="stylesheet" href="{% static 'plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}">
 <link rel="stylesheet" href="{% static 'plugins/toastr/toastr.min.css' %}">
-<style>
-/* Estilos para los círculos de colores */
-.level-circle {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    margin-right: 5px;
-}
-
-/* Colores para cada nivel */
-.level-10k { background-color: white; border: 1px solid black; }
-.level-9k { background-color: #ffff00; }
-.level-8k { background-color: yellow; }
-.level-7k { background-color: orange; }
-.level-6k { background-color: green; }
-.level-5k { background-color: #7700FF; }
-.level-4k { background-color: #7700FF; }
-.level-3k { background-color: #773333; }
-.level-2k { background-color: #773333; }
-.level-1k { background-color: #773333; }
-.level-1d { background-color: black; }
-.level-2d { background-color: black; }
-.level-3d { background-color: black; }
-.level-4d { background-color: black; }
-.level-5d { background-color: black; }
-.level-6d { background-color: black; }
-.level-7d { background-color: black; }
-.level-8d { background-color: black; }
-.level-9d { background-color: black; }
-.level-10d { background-color: black; }
-</style>
+<link rel="stylesheet" href="{% static 'dist/css/karate_levels.css' %}">
 {% endblock %}
 {% block students-link-status %}active{% endblock %}
 {% block dashboard_content %}
@@ -93,7 +62,13 @@
                       </a>
                     </td>
                     <td>{{ s.email }}</td>
-                    <td>{{ s.is_active }}</td>
+                    <td>
+                      {% if s.is_active %}
+                        <span class="badge badge-success">Active</span>
+                      {% else %}
+                        <span class="badge badge-danger">Inactive</span>
+                      {% endif %}
+                    </td>
                     <td>
                       <span class="level-circle level-{{ s.level|lower }}"></span>
                       {{ s.get_level_display  }}
@@ -169,7 +144,7 @@
                             </td>
                             <td>
                               <a id="clipboard" class="col-lg-8" href="{{ url }}">
-                                {{ time }}
+                                {{ time|date:"F j, g:i a" }}
                                 <i class="fas fa-clipboard"></i>
                               </a><br>
                             </td>
