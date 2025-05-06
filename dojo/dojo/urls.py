@@ -14,7 +14,7 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
     path('signup/<str:token>/', RegisterView.as_view(), name='signup'),
     path('dashboard/', include('dashboard.urls')),
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls, name='admin'),
 ]
 
 if settings.DEBUG:
