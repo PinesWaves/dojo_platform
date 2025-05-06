@@ -156,9 +156,60 @@ class UserRegisterForm(forms.ModelForm):
 
 
 class UserUpdateForm(forms.ModelForm):
+    birth_date = forms.DateField(
+        widget=CustomDatePickerWidget(),
+        required=False
+    )
+    country = forms.CharField(
+        widget=forms.Select(
+            attrs={
+                'class': 'selectpicker countrypicker',
+                'data-default': '',
+            }),
+    )
+
     class Meta:
         model = User
         fields = [
-            'first_name', 'last_name', 'id_type', 'id_number', 'birth_date', 'birth_place', 'profession', 'eps',
-            'phone_number', 'address', 'email', 'parent', 'parent_phone_number', 'category',
+            'first_name', 'last_name', 'category', 'id_type', 'id_number', 'birth_date', 'birth_place', 'profession',
+            'eps', 'phone_number', 'address', 'city', 'country', 'email', 'level', 'parent', 'parent_phone_number',
+            'medical_cond', 'drug_cons', 'allergies', 'other_activities', 'cardio_prob', 'injuries', 'physical_limit',
+            'lost_cons'
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance and self.instance.pk:
+            country_code = self.instance.country
+            self.fields['country'].initial = country_code
+            self.fields['country'].widget.attrs['data-default'] = country_code
+
+        for field_name, field in self.fields.items():
+            class_attr = field.widget.attrs.get('class', 'form-control')
+            field.widget.attrs['class'] = class_attr
+            if 'form-control' not in class_attr:
+                field.widget.attrs['class'] += ' form-control'
+
+            if field_name in self.errors:
+                field.widget.attrs['class'] += ' is-invalid'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        instance = self.instance
+
+        for field_name in self.fields:
+            value = cleaned_data.get(field_name)
+            if value in [None, '', []]:  # Si el valor es vacío
+                previous_value = getattr(instance, field_name, None)
+                cleaned_data[field_name] = previous_value  # Lo reemplaza por el valor anterior
+                self.data = self.data.copy()  # Necesario para modificar self.data si se usa luego
+                self.data[field_name] = previous_value  # Asegura que save() lo vea correctamente
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if commit:
+            user.save()
+        return user
