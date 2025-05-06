@@ -115,40 +115,10 @@ class RegisterView(FormView):
 
         form = self.get_form()
         if form.is_valid():
-            return self.form_valid(form, request)
+            return self.form_valid(form)
         else:
             return self.form_invalid(form)
 
-
-
-# Vista de Actualización de Usuario
-class UpdateUserView(LoginRequiredMixin, UpdateView):
-    model = User
-    form_class = UserUpdateForm
-    template_name = 'user_management/update_user.html'
-    success_url = reverse_lazy('attendance')
-
-    def get_object(self, queryset=None):
-        # Sensei puede editar cualquier usuario, otros solo su propio perfil
-        user = get_object_or_404(User, pk=self.kwargs['pk'])
-        if self.request.user.categoria == Category.SENSEI or self.request.user == user:
-            return user
-        return self.request.user
-
-# Vista de Desactivación de Usuario (solo Sensei)
-class DeleteUserView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-    model = User
-    template_name = 'user_management/delete_user.html'
-    success_url = reverse_lazy('login')
-
-    def test_func(self):
-        return self.request.user.categoria == Category.SENSEI
-
-    def form_valid(self, form):
-        user = self.get_object()
-        user.is_active = False  # Desactivar usuario en vez de eliminar
-        user.save()
-        return super().form_valid(form)
 
 # Vista de Recuperación de Contraseña
 class RecoverPass(TemplateView):
