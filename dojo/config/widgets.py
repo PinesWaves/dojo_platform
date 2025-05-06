@@ -28,8 +28,8 @@ class CustomSwitchWidget(forms.CheckboxInput):
 
 
 class CustomDatePickerWidget(forms.DateInput):
-    def __init__(self, label_text, *args, **kwargs):
-        self.label_text = label_text
+    def __init__(self, label_text=None, date=None, *args, **kwargs):
+        self.label_text = label_text if label_text else ""
         super().__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None, renderer=None):
@@ -40,8 +40,9 @@ class CustomDatePickerWidget(forms.DateInput):
 
         checkbox_html = super().render(name, value, attrs)
 
+        label_html = f"<label>{self.label_text}</label>" if self.label_text else ""
         custom_datepicker_html = f'''
-        <label>{self.label_text}</label>
+        {label_html}
         <div class="input-group date" id="{datepicker_id}" data-target-input="nearest">
             {checkbox_html}
             <div class="input-group-append" data-target="#{datepicker_id}" data-toggle="datetimepicker">
