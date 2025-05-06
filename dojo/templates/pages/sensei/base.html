@@ -200,7 +200,7 @@
                  alt="User Image">
         </div>
         <div class="info">
-          <a href="{% url 'manage_profile' %}?id={{ user.id }}" class="d-block">{{ user.first_name }} {{ user.last_name }}</a>
+          <a href="{% url 'manage_profile' user.id %}" class="d-block">{{ user.first_name }} {{ user.last_name }}</a>
         </div>
       </div>
 

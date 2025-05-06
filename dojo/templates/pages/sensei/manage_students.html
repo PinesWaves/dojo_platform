@@ -57,7 +57,7 @@
                 {% for s in students %}
                   <tr>
                     <td>
-                      <a href="{% url 'manage_profile' %}?id={{ s.id }}">
+                      <a href="{% url 'manage_profile' s.id %}">
                         {{ s.first_name }} {{ s.last_name }}
                       </a>
                     </td>
