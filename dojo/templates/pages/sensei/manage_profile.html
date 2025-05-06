@@ -1,38 +1,9 @@
 {% extends 'pages/sensei/base.html' %}
 {% load static %}
 {% block csslibs %}
-<style>
-/* Estilos para los círculos de colores */
-.level-circle {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    margin-right: 5px;
-}
-
-/* Colores para cada nivel */
-.level-10k { background-color: white; border: 1px solid black; }
-.level-9k { background-color: #ffff00; }
-.level-8k { background-color: yellow; }
-.level-7k { background-color: orange; }
-.level-6k { background-color: green; }
-.level-5k { background-color: #7700FF; }
-.level-4k { background-color: #7700FF; }
-.level-3k { background-color: #773333; }
-.level-2k { background-color: #773333; }
-.level-1k { background-color: #773333; }
-.level-1d { background-color: black; }
-.level-2d { background-color: black; }
-.level-3d { background-color: black; }
-.level-4d { background-color: black; }
-.level-5d { background-color: black; }
-.level-6d { background-color: black; }
-.level-7d { background-color: black; }
-.level-8d { background-color: black; }
-.level-9d { background-color: black; }
-.level-10d { background-color: black; }
-</style>
+<link rel="stylesheet" href="{% static 'dist/css/karate_levels.css' %}">
+<!-- Country picker flags -->
+<link rel="stylesheet" href="{% static 'plugins/bootstrap-select-country-4.2.0/css/bootstrap-select-country.min.css' %}">
 {% endblock %}
 {% block students-link-status %}active{% endblock %}
 {% block dashboard_content %}
@@ -60,15 +31,19 @@
         <div class="col-md-3">
 
           <!-- Profile Image -->
-          <div class="card card-primary card-outline">
+          <div class="card card-danger card-outline">
             <div class="card-body box-profile">
               <div class="text-center">
                 <img class="profile-user-img img-fluid img-circle"
-                     {% if student.picture %}
-                      src="{{ student.picture.url }}"
-                     {% else %}
-                      src="{% static 'dist/img/avatar.png' %}"
-                     {% endif %}
+                    {% if student.picture %}
+                     src="{{ student.picture.url }}"
+                    {% elif student.gender == 'M' %}
+                     src="{% static 'dist/img/avatar.png' %}"
+                    {% elif student.gender == 'F' %}
+                     src="{% static 'dist/img/avatar2.png' %}"
+                    {% else %}
+                     src="{% static 'dist/img/default_user.png' %}"
+                    {% endif %}
                      alt="User profile picture">
               </div>
 
@@ -81,58 +56,46 @@
 
               <ul class="list-group list-group-unbordered mb-3">
                 <li class="list-group-item">
-                  <b>Followers</b> <a class="float-right">1,322</a>
+                  <b>Gender</b> <a class="float-right">{{ student.get_gender_display }}</a>
                 </li>
                 <li class="list-group-item">
-                  <b>Following</b> <a class="float-right">543</a>
-                </li>
-                <li class="list-group-item">
-                  <b>Friends</b> <a class="float-right">13,287</a>
+                  <b>Birth Date</b> <a class="float-right">{{ student.birth_date }}</a>
                 </li>
               </ul>
 
-              <a href="#" class="btn btn-primary btn-block"><b>Follow</b></a>
+{#              <a href="#" class="btn btn-primary btn-block"><b>Follow</b></a>#}
             </div>
             <!-- /.card-body -->
           </div>
           <!-- /.card -->
 
           <!-- About Me Box -->
-          <div class="card card-primary">
+          <div class="card card-danger">
             <div class="card-header">
-              <h3 class="card-title">About Me</h3>
+              <h3 class="card-title">About {{ student.first_name }} {{ student.last_name }}</h3>
             </div>
             <!-- /.card-header -->
             <div class="card-body">
-              <strong><i class="fas fa-book mr-1"></i> Education</strong>
 
+              <strong><i class="fas fa-phone-alt mr-1"></i> Contact</strong>
               <p class="text-muted">
-                B.S. in Computer Science from the University of Tennessee at Knoxville
+                <span class="tag tag-danger"><b>Phone:</b> {{ student.phone_number }}</span><br>
+                <span class="tag tag-danger"><b>Email:</b> {{ student.email }}</span><br>
+                <span class="tag tag-danger"><b>Address:</b> {{ student.address }}</span><br>
+                <span class="tag tag-danger"><b>EPS:</b> {{ student.eps }}</span><br>
+                {% if student.parent %}
+                  <span class="tag tag-danger">{{ student.parent }}</span><br>
+                  <span class="tag tag-danger">{{ student.parent_phone_number }}</span><br>
+                {% endif %}
               </p>
-
               <hr>
 
               <strong><i class="fas fa-map-marker-alt mr-1"></i> Location</strong>
-
-              <p class="text-muted">Malibu, California</p>
-
+              <p class="text-muted">{{ student.city }}, {{ student.country }}</p>
               <hr>
 
-              <strong><i class="fas fa-pencil-alt mr-1"></i> Skills</strong>
-
-              <p class="text-muted">
-                <span class="tag tag-danger">UI Design</span>
-                <span class="tag tag-success">Coding</span>
-                <span class="tag tag-info">Javascript</span>
-                <span class="tag tag-warning">PHP</span>
-                <span class="tag tag-primary">Node.js</span>
-              </p>
-
-              <hr>
-
-              <strong><i class="far fa-file-alt mr-1"></i> Notes</strong>
-
-              <p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam fermentum enim neque.</p>
+              <strong><i class="fas fa-book mr-1"></i> Education</strong>
+              <p class="text-muted">{{ student.profession }}</p>
             </div>
             <!-- /.card-body -->
           </div>
@@ -361,49 +324,27 @@
                 <!-- /.tab-pane -->
 
                 <div class="tab-pane" id="settings">
-                  <form class="form-horizontal">
-                    <div class="form-group row">
-                      <label for="inputName" class="col-sm-2 col-form-label">Name</label>
-                      <div class="col-sm-10">
-                        <input type="email" class="form-control" id="inputName" placeholder="Name">
-                      </div>
-                    </div>
-                    <div class="form-group row">
-                      <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
-                      <div class="col-sm-10">
-                        <input type="email" class="form-control" id="inputEmail" placeholder="Email">
-                      </div>
-                    </div>
-                    <div class="form-group row">
-                      <label for="inputName2" class="col-sm-2 col-form-label">Name</label>
-                      <div class="col-sm-10">
-                        <input type="text" class="form-control" id="inputName2" placeholder="Name">
-                      </div>
-                    </div>
-                    <div class="form-group row">
-                      <label for="inputExperience" class="col-sm-2 col-form-label">Experience</label>
-                      <div class="col-sm-10">
-                        <textarea class="form-control" id="inputExperience" placeholder="Experience"></textarea>
-                      </div>
-                    </div>
-                    <div class="form-group row">
-                      <label for="inputSkills" class="col-sm-2 col-form-label">Skills</label>
-                      <div class="col-sm-10">
-                        <input type="text" class="form-control" id="inputSkills" placeholder="Skills">
-                      </div>
-                    </div>
-                    <div class="form-group row">
-                      <div class="offset-sm-2 col-sm-10">
-                        <div class="checkbox">
-                          <label>
-                            <input type="checkbox"> I agree to the <a href="#">terms and conditions</a>
-                          </label>
+                  <form method="post" class="form-horizontal" action="{% url 'manage_profile' student.id %}">
+                    {% csrf_token %}
+                    {% for field in form %}
+                      <div class="form-group row">
+                        <label for="{{ field.id_for_label }}" class="col-sm-2 col-form-label">{{ field.label }}</label>
+                        <div class="col-sm-10">
+                          {{ field }}
+                          {% if field.errors %}
+                            <span class="text-danger">{{ field.errors }}</span>
+                          {% endif %}
                         </div>
                       </div>
-                    </div>
+                    {% endfor %}
                     <div class="form-group row">
                       <div class="offset-sm-2 col-sm-10">
-                        <button type="submit" class="btn btn-danger">Submit</button>
+                        <button type="submit" class="btn btn-danger">Update</button>
+                        {% if student.is_active %}
+                          <button type="submit" class="btn btn-dark float-right">Deactivate</button>
+                        {% else %}
+                          <button type="submit" class="btn btn-dark float-right">Activate</button>
+                        {% endif %}
                       </div>
                     </div>
                   </form>
@@ -423,6 +364,19 @@
   <!-- /.content -->
 {% endblock %}
 {% block script %}
-<!-- jQuery -->
-<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+  <!-- jQuery -->
+  <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+  <!-- For datepicker -->
+<script src="{% static 'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+  <!-- Country picker flags -->
+<script src="{% static 'plugins/bootstrap-select-country-4.2.0/js/bootstrap-select-country.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $('#id_birth_date').datetimepicker({
+            format: 'L'
+        });
+
+        $('.countrypicker').countrypicker();
+    });
+</script>
 {% endblock %}
