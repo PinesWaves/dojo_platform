@@ -12,6 +12,12 @@
   <link href="{% static 'plugins/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
   <!-- Theme style -->
   <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+  <link rel="icon" href="{% static 'img/icon.png' %}">
+  <style>
+    .nav-link.active {
+        background-color: #dc3545 !important;
+    }
+  </style>
 </head>
 <body class="hold-transition layout-top-nav">
 <div class="wrapper">
@@ -212,17 +218,7 @@
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <div class="content-header">
-      {% block content-header %}{% endblock %}
-    </div>
-    <!-- /.content-header -->
-
-    <!-- Main content -->
-    <div class="content">
-      {% block content %}{% endblock %}
-    </div>
-    <!-- /.content -->
+    {% block dashboard_content %}{% endblock %}
   </div>
   <!-- /.content-wrapper -->
 
