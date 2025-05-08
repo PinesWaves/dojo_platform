@@ -19,6 +19,12 @@ docker-compose -f .\docker-compose-local.yml build web
 docker-compose -f .\docker-compose-local.yml up -d
 ```
 
+Push docker hub image
+```sh
+docker tag karate_site-web elph4nt0m/karate_site-web:v1.0
+docker push elph4nt0m/karate_site-web:v1.0
+```
+
 Once docker containers are running, we can launch ngrok
 ```sh
 ngrok http 8000
@@ -29,7 +35,7 @@ Create superuser
 python manage.py createsuperuser
 ```
 
-Load initial data
+Load initial test data
 ```sh
 python manage.py create_dataset --testing
 ```

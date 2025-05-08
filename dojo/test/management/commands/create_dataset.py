@@ -47,23 +47,24 @@ class Command(BaseCommand):
         # Create 90 students with random data
         users = []
         for _ in range(90):
+            gender = self.fake.random_element(elements=('M', 'F'))
             users.append({
                 'id_number': self.fake.unique.random_number(digits=10),
-                'first_name': self.fake.first_name(),
+                'first_name': self.fake.first_name_male() if gender == 'M' else self.fake.first_name_female(),
                 'last_name': self.fake.last_name(),
                 'id_type': 'CC',
                 'category': 'ST',
                 'birth_date': self.fake.date_of_birth(minimum_age=18, maximum_age=25),
                 'birth_place': self.fake.city(),
-                'gender': self.fake.random_element(elements=('M', 'F')),
+                'gender': gender,
                 'profession': self.fake.job()[:30],
                 'eps': self.fake.company(),
                 'phone_number': self.fake.numerify('###-###-####'),
                 'address': self.fake.address(),
                 'city': self.fake.city()[:30],
-                'country': self.fake.country()[:30],
+                'country': self.fake.country_code(),
                 'email': self.fake.email(),
-                'level': 'K10',
+                'level': self.fake.random_element(elements=('10k', '9k', '8k', '7k', '6k', '5k', '4k', '3k', '2k', '1k')),
                 'accept_inf_cons': True,
                 'medical_cond': 'NA',
                 'drug_cons': '',
@@ -85,23 +86,24 @@ class Command(BaseCommand):
             })
         # Create 3 senseis with random data
         for _ in range(3):
+            gender = self.fake.random_element(elements=('M', 'F'))
             users.append({
                 'id_number': self.fake.unique.random_number(digits=10),
-                'first_name': self.fake.first_name(),
+                'first_name': self.fake.first_name_male() if gender == 'M' else self.fake.first_name_female(),
                 'last_name': self.fake.last_name(),
                 'id_type': 'CC',
                 'category': 'SE',
                 'birth_date': self.fake.date_of_birth(minimum_age=30, maximum_age=50),
                 'birth_place': self.fake.city(),
-                'gender': self.fake.random_element(elements=('M', 'F')),
+                'gender': gender,
                 'profession': self.fake.job()[:30],
                 'eps': self.fake.company(),
                 'phone_number': self.fake.numerify('###-###-####'),
                 'address': self.fake.address(),
                 'city': self.fake.city()[:30],
-                'country': self.fake.country()[:30],
+                'country': self.fake.country_code(),
                 'email': self.fake.email(),
-                'level': 'K10',
+                'level': self.fake.random_element(elements=('1d', '2d', '3d', '4d', '5d', '6d', '7d', '8d', '9d', '10d')),
                 'accept_inf_cons': True,
                 'medical_cond': 'NA',
                 'drug_cons': '',

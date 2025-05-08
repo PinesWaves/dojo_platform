@@ -1,5 +1,8 @@
 from django import forms
 from django.utils.safestring import mark_safe
+from django.utils.html import format_html
+from django.utils.dateformat import format as django_date_format
+from datetime import date, datetime
 
 
 class CustomSwitchWidget(forms.CheckboxInput):
@@ -28,25 +31,35 @@ class CustomSwitchWidget(forms.CheckboxInput):
 
 
 class CustomDatePickerWidget(forms.DateInput):
-    def __init__(self, label_text, *args, **kwargs):
-        self.label_text = label_text
-        super().__init__(*args, **kwargs)
+    def __init__(self, label_text=None, attrs=None, format='%m/%d/%Y'):
+        self.label_text = label_text or ""
+        final_attrs = attrs or {}
+        super().__init__(attrs=final_attrs, format=format)
 
     def render(self, name, value, attrs=None, renderer=None):
         attrs = attrs or {}
         datepicker_id = attrs.get("id", name)  # Get ID or use name
-        attrs["class"] = "form-control datetimepicker-input"
+
+        if isinstance(value, (datetime, date)):
+            value = value.strftime(self.format)
+
+        existing_class = attrs.get("class", "")
+        attrs["class"] = f"{existing_class} form-control datetimepicker-input".strip()
+        # attrs["class"] = "form-control datetimepicker-input"
         attrs["data-target"] = f"#{datepicker_id}"
+        attrs["data-toggle"] = "datetimepicker"
 
-        checkbox_html = super().render(name, value, attrs)
+        input_html = super().render(name, value, attrs, renderer)
+        # checkbox_html = super().render(name, value, attrs)
 
-        custom_datepicker_html = f'''
-        <label>{self.label_text}</label>
-        <div class="input-group date" id="{datepicker_id}" data-target-input="nearest">
-            {checkbox_html}
-            <div class="input-group-append" data-target="#{datepicker_id}" data-toggle="datetimepicker">
-                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+        label_html = f"<label>{self.label_text}</label>" if self.label_text else ""
+        html = f"""
+            {label_html}
+            <div class="input-group date" id="{datepicker_id}" data-target-input="nearest">
+                {input_html}
+                <div class="input-group-append" data-target="#{datepicker_id}" data-toggle="datetimepicker">
+                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                </div>
             </div>
-        </div>
-        '''
-        return mark_safe(custom_datepicker_html)
+        """
+        return mark_safe(html)

@@ -19,5 +19,5 @@ from django.contrib.auth.views import LoginView
 from .views import RegisterView, UpdateUserView
 
 urlpatterns = [
-    path('update/<int:pk>/', UpdateUserView.as_view(), name='update_user'),
+    # path('update/<int:pk>/', UpdateUserView.as_view(), name='update_user'),
 ]

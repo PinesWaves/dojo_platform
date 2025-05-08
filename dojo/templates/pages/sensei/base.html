@@ -27,7 +27,11 @@
   <!-- summernote -->
   <link rel="stylesheet" href="{% static 'plugins/summernote/summernote-bs4.min.css' %}">
   <link rel="icon" href="{% static 'img/icon.png' %}">
-
+  <style>
+    .nav-link.active {
+        background-color: #dc3545 !important;
+    }
+  </style>
   {% block csslibs %}{% endblock %}
 
 </head>
@@ -196,7 +200,7 @@
                  alt="User Image">
         </div>
         <div class="info">
-          <a href="{% url 'manage_profile' %}?id={{ user.id }}" class="d-block">{{ user.first_name }} {{ user.last_name }}</a>
+          <a href="{% url 'manage_profile' user.id %}" class="d-block">{{ user.first_name }} {{ user.last_name }}</a>
         </div>
       </div>
 
@@ -217,37 +221,37 @@
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
           <li class="nav-item">
-            <a href="{% url 'manage_trainings' %}" class="nav-link">
+            <a href="{% url 'manage_trainings' %}" class="nav-link {% block training-link-status %}{% endblock %}">
               <i class="nav-icon fas fa-running"></i>
-              <p>Manage trainings</p>
+              <p>Trainings</p>
             </a>
           </li>
           <li class="nav-item">
-            <a href="{% url 'manage_students' %}" class="nav-link">
+            <a href="{% url 'manage_students' %}" class="nav-link {% block students-link-status %}{% endblock %}">
               <i class="nav-icon fas fa-users"></i>
-              <p>Manage students</p>
+              <p>Students</p>
             </a>
           </li>
           <li class="nav-item">
-            <a href="{% url 'manage_techniques' %}" class="nav-link">
+            <a href="{% url 'manage_techniques' %}" class="nav-link {% block techniques-link-status %}{% endblock %}">
               <i class="nav-icon fas fa-user-ninja"></i>
-              <p>Manage techniques</p>
+              <p>Techniques</p>
             </a>
           </li>
           <li class="nav-item">
-            <a href="{% url 'manage_techniques' %}" class="nav-link">
-              <i class="nav-icon fas fa-user-ninja"></i>
-              <p>Manage assesments</p>
+            <a href="{% url 'manage_techniques' %}" class="nav-link {% block assesments-link-status %}{% endblock %}">
+              <i class="nav-icon fas fa-tasks"></i>
+              <p>Assesments</p>
             </a>
           </li>
           <li class="nav-item">
-            <a href="{% url 'manage_techniques' %}" class="nav-link">
-              <i class="nav-icon fas fa-user-ninja"></i>
-              <p>Manage tournaments</p>
+            <a href="{% url 'manage_techniques' %}" class="nav-link {% block tournaments-link-status %}{% endblock %}">
+              <i class="nav-icon fas fa-trophy"></i>
+              <p>Tournaments</p>
             </a>
           </li>
           <li class="nav-item">
-            <a href="{% url 'student_dashboard' %}" class="nav-link">
+            <a href="{% url 'student_dashboard' %}" class="nav-link {% block stdashboard-link-status %}{% endblock %}">
               <i class="nav-icon fas fa-book-reader"></i>
               <p>Student dashboard</p>
             </a>
@@ -257,7 +261,7 @@
               {% csrf_token %}
               <button type="submit" class="nav-link">
                 <i class="nav-icon fas fa-sign-out-alt"></i>
-                Logout
+                <p>Logout</p>
               </button>
             </form>
           </li>

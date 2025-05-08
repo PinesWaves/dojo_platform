@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView
 import logging
@@ -13,6 +13,7 @@ import logging
 from dashboard.models import Training, Dojo, Technique, TechniqueCategory, TrainingStatus
 from dojo.mixins.view_mixins import UserCategoryRequiredMixin
 from user_management.models import User, Token, Category
+from user_management.forms import UserUpdateForm
 
 logger = logging.getLogger(__name__)
 
@@ -177,12 +178,40 @@ class ManageProfile(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView)
     template_name = "pages/sensei/manage_profile.html"
 
     def get(self, request, *args, **kwargs):
-        id = request.GET.get('id')
-        if id:
-            student = User.objects.filter(pk=id).first()
-            if student:
-                return render(request, self.template_name, context={'student': student})
-        return redirect(reverse_lazy('manage_students'))
+        pk = kwargs.get('pk')
+        student = get_object_or_404(User, pk=pk)
+        form = UserUpdateForm(instance=student)
+        ctx = {
+            'form': form,
+            'student': student,
+        }
+        return render(request, self.template_name, context=ctx)
+
+    def post(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        student = get_object_or_404(User, pk=pk)
+        form = UserUpdateForm(request.POST, instance=student)
+        breakpoint()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            ctx = {
+                'form': form,
+                'student': student,
+            }
+            return render(request, self.template_name, context=ctx)
+
+    def form_valid(self, form):
+        # Process the form
+        updated_user = form.save()
+        self.request.session['error'] = None
+        self.request.session['msg'] = "Update successful!"
+        return redirect('manage_profile', pk=updated_user.pk)
+
+    def form_invalid(self, form):
+        print(form.errors)
+        self.object = None
+        return self.render_to_response(self.get_context_data(form=form))
 
 
 class StudentDashboard(LoginRequiredMixin, TemplateView):
@@ -200,4 +229,11 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
     template_name = "pages/student/profile.html"
 
     def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
+        pk = kwargs.get('pk')
+        student = get_object_or_404(User, pk=pk)
+        form = UserUpdateForm(instance=student)
+        ctx = {
+            'form': form,
+            'student': student,
+        }
+        return render(request, self.template_name, context=ctx)
