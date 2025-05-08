@@ -158,6 +158,7 @@ class UserRegisterForm(forms.ModelForm):
 class UserUpdateForm(forms.ModelForm):
     birth_date = forms.DateField(
         widget=CustomDatePickerWidget(),
+        input_formats=['%m/%d/%Y'],
         required=False
     )
     country = forms.CharField(
