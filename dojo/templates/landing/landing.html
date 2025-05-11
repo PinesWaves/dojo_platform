@@ -1,0 +1,96 @@
+{% extends 'landing/base.html' %}
+{% load static %}
+{% block extra_css %}
+<style>
+.hero {
+  min-height: 100vh; /* 80% del alto de la ventana */
+  padding: 100px 0;
+  background-repeat: no-repeat;
+}
+</style>
+{% endblock %}
+{% block content %}
+<!-- Hero Section -->
+<section class="hero d-flex align-items-center" style="background-image: url('{% static 'img/h1_hero.png' %}'); background-size: cover; background-position: center;">
+  <div class="container text-center text-white">
+    <h1 class="display-4">Bienvenido al Seishin JKA Dojo</h1>
+    <p class="lead">Karate tradicional Shotokan para todas las edades</p>
+    <a href="#contacto" class="btn btn-danger btn-lg mt-3">Contáctanos</a>
+  </div>
+</section>
+
+{#<!-- Historia Section -->#}
+{#<section id="historia" class="py-5">#}
+{#  <div class="container">#}
+{#    <h2 class="text-center mb-4">Nuestra Historia</h2>#}
+{#    <p class="lead text-center">El Seishin JKA Dojo Bogotá nace con el propósito de transmitir los valores y técnicas tradicionales del Karate Do Shotokan JKA...</p>#}
+{#  </div>#}
+{#</section>#}
+
+<!-- Instructor Section -->
+<section id="sensei" class="bg-light py-5">
+  <div class="container ">
+    <h1 class="mb-4 text-bold text-center">Conócenos</h1>
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <img src="{% static 'img/about.png' %}" alt="Sensei" class="img-fluid d-flex justify-content-center mx-auto">
+{#        <h4>Sensei CESAR A. PEÑA CH.</h4>#}
+{#        <p>3er Dan JKA, más de 15 años de experiencia enseñando Karate Do tradicional en Colombia.</p>#}
+      </div>
+      <div class="col-md-6">
+        <h3>SENSEI CESAR A. PEÑA CH.</h3>
+        <p >Inició la práctica del Karate-Do en 1989 a la edad de 4 años con el Maestro Jairo A. Rozo B. y el maestro Jaime Fernández Garzón.</p>
+        <p >Practicó en ligas deportivas de Karate a nivel nacional. Sub-Oficial del Ejército Nacional de Colombia con el rango de Cabo 3<sup>o</sup> (R).</p>
+        <p >Actualmente 3<sup>er</sup> Dan de karate JKA otorgado por el sensei Mitsuo Inoue, 8<sup>o</sup> Dan JKA/HQ, presidente de la JKA Sudamericana.</p>
+        <p >Dojo afiliado a la JKA/WF Colombia a cargo del sensei Armando Vargas R. 6<sup>o</sup> Dan JKA, Chief Instructor JKA/ WF Colombia.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Horarios Section -->
+<section id="horarios" class="py-5">
+  <div class="container">
+    <h2 class="text-center mb-4">Horarios de Entrenamiento</h2>
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <ul class="list-group">
+          <li class="list-group-item">Lunes y Miércoles: 6:00 PM - 7:00 PM (Principiantes)</li>
+          <li class="list-group-item">Martes y Jueves: 7:00 PM - 8:30 PM (Avanzados)</li>
+          <li class="list-group-item">Sábados: 10:00 AM - 12:00 PM (Mixto)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contacto Section -->
+<section id="contacto" class="bg-dark text-white py-5">
+  <div class="container">
+    <h2 class="text-center mb-4">Contáctanos</h2>
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <form method="post" action="/contact/">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" required>
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Correo electrónico</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="mensaje" class="form-label">Mensaje</label>
+            <textarea class="form-control" id="mensaje" name="mensaje" rows="4" required></textarea>
+          </div>
+          <div class="text-center">
+            <button type="submit" class="btn btn-primary">Enviar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

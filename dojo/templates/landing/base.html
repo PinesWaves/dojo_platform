@@ -1,0 +1,65 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seishin JKA Dojo</title>
+  <link rel="stylesheet" href="{% static 'plugins/bootstrap/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'dist/css/custom_style.css' %}">
+  <link rel="icon" href="{% static 'img/icon.png' %}">
+  <style>
+    .navbar {
+      background-color: #000 !important; /* Ensures a solid black background */
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+<header>
+  <!-- Aquí puedes incluir el logo, menú de navegación, etc. -->
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <div class="container collapse navbar-collapse">
+      <a class="navbar-brand" href="/">
+        <img src="{% static 'img/logo-1.png' %}" alt="Seishin JKA Dojo Logo" height="40">
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="true" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Inicio</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/#conocenos">Conócenos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/#horarios">Horarios</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/#contacto">Contacto</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<footer>
+  <!-- Información de pie de página -->
+  <div class="container text-center">
+    <p>&copy; 2025 Seishin JKA Dojo. Todos los derechos reservados.</p>
+  </div>
+</footer>
+
+<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
