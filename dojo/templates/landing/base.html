@@ -6,11 +6,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Seishin JKA Dojo</title>
+  <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
   <link rel="stylesheet" href="{% static 'plugins/bootstrap/css/bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'dist/css/custom_style.css' %}">
   <link rel="icon" href="{% static 'img/icon.png' %}">
   <style>
     .navbar {
+      background-color: #000 !important; /* Ensures a solid black background */
+    }
+    .contacto {
       background-color: #000 !important; /* Ensures a solid black background */
     }
   </style>
@@ -28,9 +32,9 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarCollapse">
-        <ul class="navbar-nav mr-auto">
+        <ul class="navbar-nav ml-auto">
           <li class="nav-item">
-            <a class="nav-link" href="/">Inicio</a>
+            <a class="nav-link" href="/#inicio">Inicio</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="/#conocenos">Conócenos</a>
@@ -40,6 +44,9 @@
           </li>
           <li class="nav-item">
             <a class="nav-link" href="/#contacto">Contacto</a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'login' %}" class="btn btn-danger">Login</a>
           </li>
         </ul>
       </div>
@@ -51,7 +58,7 @@
   {% block content %}{% endblock %}
 </main>
 
-<footer>
+<footer >
   <!-- Información de pie de página -->
   <div class="container text-center">
     <p>&copy; 2025 Seishin JKA Dojo. Todos los derechos reservados.</p>

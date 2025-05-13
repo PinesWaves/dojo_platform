@@ -7,87 +7,220 @@
   padding: 100px 0;
   background-repeat: no-repeat;
 }
+
+.dojo-kun-marquee {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, transparent, white 20%, white 80%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, white 20%, white 80%, transparent);
+}
+
+.dojo-kun-inner {
+  display: flex;
+  flex-direction: column;
+  animation: scroll-up 20s linear infinite;
+}
+
+.dojo-kun-marquee:hover .dojo-kun-inner {
+  animation-play-state: paused;
+}
+
+.scroll-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.scroll-group h4 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 1.25rem;
+  color: white;
+}
+
+@keyframes scroll-up {
+  0% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+.border-bottom {
+  border-color: #ddd !important;
+}
 </style>
 {% endblock %}
 {% block content %}
 <!-- Hero Section -->
-<section class="hero d-flex align-items-center" style="background-image: url('{% static 'img/h1_hero.png' %}'); background-size: cover; background-position: center;">
+<section id="inicio" class="hero d-flex align-items-center" style="background-image: url('{% static 'img/h1_hero.png' %}'); background-size: cover; background-position: center;">
   <div class="container text-center text-white">
-    <h1 class="display-4">Bienvenido al Seishin JKA Dojo</h1>
-    <p class="lead">Karate tradicional Shotokan para todas las edades</p>
-    <a href="#contacto" class="btn btn-danger btn-lg mt-3">Contáctanos</a>
+    <h1 class="display-3 text-bold">Bienvenido al Seishin JKA Dojo</h1>
+    <h4>Karate tradicional Shotokan para todas las edades</h4>
+    <div class="dojo-kun-marquee my-4">
+      <div class="dojo-kun-inner">
+        <div class="scroll-group">
+          <h4><br></h4>
+          <h4><br></h4>
+          <h4>Karate Do: Camino de la mano vacía</h4>
+          <h4><br></h4>
+          <h4>DOJO KUN</h4>
+          <h4>1.	Buscar la perfección del carácter <br>HITOTSU! JIN KAKU KANSEI NI TSUTOMURU KOTO <br>一丶人格完成に努めること。 <br></h4>
+          <h4>2.	Ser correcto, leal y puntual <br>HITOTSU! MAKOTO NO MICHI O MAMORU KOTO <br>一丶誠の道を守ること。 <br></h4>
+          <h4>3.	Siempre superarse <br>HITOTSU! DORYOKU NO SEISHIN O YASHINAU KOTO <br>一丶努力の精神を養うこと。 <br></h4>
+          <h4>4.	Respeto y cortesía hacia los demás <br>HITOTSU! REIGI O OMONZORU KOTO <br>一丶礼儀を重んずること。 <br></h4>
+          <h4>5.	Abstenerse de comportamientos violentos <br>HITOTSU! KEKKI NO YU O IMASHIMURU KOTO <br>一丶血気の勇を戒むること。 <br></h4>
+        </div>
+
+{#        duplicated#}
+        <div class="scroll-group">
+          <h4><br></h4>
+          <h4><br></h4>
+          <h4>Karate Do: Camino de la mano vacía</h4>
+          <h4><br></h4>
+          <h4>DOJO KUN</h4>
+          <h4>1.	Buscar la perfección del carácter <br>HITOTSU! JIN KAKU KANSEI NI TSUTOMURU KOTO <br>一丶人格完成に努めること。 <br></h4>
+          <h4>2.	Ser correcto, leal y puntual <br>HITOTSU! MAKOTO NO MICHI O MAMORU KOTO <br>一丶誠の道を守ること。 <br></h4>
+          <h4>3.	Siempre superarse <br>HITOTSU! DORYOKU NO SEISHIN O YASHINAU KOTO <br>一丶努力の精神を養うこと。 <br></h4>
+          <h4>4.	Respeto y cortesía hacia los demás <br>HITOTSU! REIGI O OMONZORU KOTO <br>一丶礼儀を重んずること。 <br></h4>
+          <h4>5.	Abstenerse de comportamientos violentos <br>HITOTSU! KEKKI NO YU O IMASHIMURU KOTO <br>一丶血気の勇を戒むること。 <br></h4>
+        </div>
+      </div>
+    </div>
+    <a href="https://wa.me/573193769897" class="btn btn-danger btn-lg mt-3">Contáctanos</a>
   </div>
 </section>
 
-{#<!-- Historia Section -->#}
-{#<section id="historia" class="py-5">#}
-{#  <div class="container">#}
-{#    <h2 class="text-center mb-4">Nuestra Historia</h2>#}
-{#    <p class="lead text-center">El Seishin JKA Dojo Bogotá nace con el propósito de transmitir los valores y técnicas tradicionales del Karate Do Shotokan JKA...</p>#}
-{#  </div>#}
-{#</section>#}
-
 <!-- Instructor Section -->
-<section id="sensei" class="bg-light py-5">
-  <div class="container ">
+<section id="conocenos" class="bg-light py-3">
+  <div class="container">
     <h1 class="mb-4 text-bold text-center">Conócenos</h1>
     <div class="row justify-content-center">
       <div class="col-md-6">
-        <img src="{% static 'img/about.png' %}" alt="Sensei" class="img-fluid d-flex justify-content-center mx-auto">
-{#        <h4>Sensei CESAR A. PEÑA CH.</h4>#}
-{#        <p>3er Dan JKA, más de 15 años de experiencia enseñando Karate Do tradicional en Colombia.</p>#}
+        <img src="{% static 'img/about.png' %}" alt="Sensei" class="img-fluid d-flex justify-content-center mx-auto mb-3">
       </div>
+      <br>
       <div class="col-md-6">
         <h3>SENSEI CESAR A. PEÑA CH.</h3>
-        <p >Inició la práctica del Karate-Do en 1989 a la edad de 4 años con el Maestro Jairo A. Rozo B. y el maestro Jaime Fernández Garzón.</p>
-        <p >Practicó en ligas deportivas de Karate a nivel nacional. Sub-Oficial del Ejército Nacional de Colombia con el rango de Cabo 3<sup>o</sup> (R).</p>
-        <p >Actualmente 3<sup>er</sup> Dan de karate JKA otorgado por el sensei Mitsuo Inoue, 8<sup>o</sup> Dan JKA/HQ, presidente de la JKA Sudamericana.</p>
-        <p >Dojo afiliado a la JKA/WF Colombia a cargo del sensei Armando Vargas R. 6<sup>o</sup> Dan JKA, Chief Instructor JKA/ WF Colombia.</p>
+        <p>Inició la práctica del Karate-Do en 1989 a la edad de 4 años con el Maestro Jairo A. Rozo B. y el maestro Jaime Fernández Garzón.</p>
+        <p>Practicó en ligas deportivas de Karate a nivel nacional. Sub-Oficial del Ejército Nacional de Colombia con el rango de Cabo 3<sup>o</sup> (R).</p>
+        <p>Actualmente, 3<sup>er</sup> Dan de karate JKA otorgado por el sensei Mitsuo Inoue, 8<sup>o</sup> Dan JKA/HQ, presidente de la JKA Sudamericana.</p>
+        <p>Dojo afiliado a la JKA/WF Colombia a cargo del sensei Armando Vargas R. 6<sup>o</sup> Dan JKA, Chief Instructor JKA/ WF Colombia.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Nuesrto trabajo -->
+<section id="trabajo" class="py-3">
+  <div class="container">
+{#    <h2 class="text-center mb-4">Nuestro trabajo</h2>#}
+    <div class="row justify-content-center">
+      <div class="row col-md-9">
+        <div class="text-center text-bold col-md-4">
+          <img src="{% static 'img/belt-480x480.png' %}" alt="cinturon" class="img-fluid d-flex justify-content-center mx-auto mb-3" width="70%">
+          <p class="h3">Principiantes</p>
+          <p class="h6">Cinturones:<br>Blancos, Amarillos, Naranjas.</p>
+        </div>
+        <div class="text-center text-bold col-md-4">
+          <img src="{% static 'img/karategui-480x480.png' %}" alt="karatedogi" class="img-fluid d-flex justify-content-center mx-auto mb-3" width="70%">
+          <p class="h3">Intermedios</p>
+          <p class="h6">Cinturones:<br>Verdes, Violetas.</p>
+        </div>
+        <div class="text-center text-bold col-md-4">
+          <img src="{% static 'img/karate-480x480.png' %}" alt="karate" class="img-fluid d-flex justify-content-center mx-auto mb-3" width="70%">
+          <p class="h3">Avanzados</p>
+          <p class="h6">Cinturones:<br>Marrones y Negros</p>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- Horarios Section -->
-<section id="horarios" class="py-5">
-  <div class="container">
-    <h2 class="text-center mb-4">Horarios de Entrenamiento</h2>
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <ul class="list-group">
-          <li class="list-group-item">Lunes y Miércoles: 6:00 PM - 7:00 PM (Principiantes)</li>
-          <li class="list-group-item">Martes y Jueves: 7:00 PM - 8:30 PM (Avanzados)</li>
-          <li class="list-group-item">Sábados: 10:00 AM - 12:00 PM (Mixto)</li>
-        </ul>
-      </div>
+<section id="horarios" class="container my-5">
+  <div class="row">
+    <!-- Niños -->
+    <div class="col-md-4 mb-4 mb-md-0">
+      <h4>Niños (todos los niveles)</h4>
+      <ul class="list-unstyled">
+        <li class="d-flex justify-content-between border-bottom py-2">
+          <strong>Lunes</strong>
+          <span class="ms-auto text-end">5:30PM - 6:30PM</span>
+        </li>
+        <li class="d-flex justify-content-between border-bottom py-2">
+          <strong>Miércoles</strong>
+          <span class="ms-auto text-end">5:30PM - 6:30PM</span>
+        </li>
+        <li class="d-flex justify-content-between border-bottom py-2">
+          <strong>Viernes</strong>
+          <span class="ms-auto text-end">5:30PM - 6:30PM</span>
+        </li>
+        <li class="d-flex justify-content-between border-bottom py-2">
+          <strong>Sábado</strong>
+          <span class="ms-auto text-end">8:30AM - 10:00AM</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Adultos -->
+    <div class="col-md-4">
+      <h4>Adultos princ. e inter.</h4>
+      <ul class="list-unstyled">
+        <li class="d-flex justify-content-between border-bottom py-2">
+          <strong>Lunes</strong>
+          <span class="ms-auto text-end">7:00PM - 8:30PM</span>
+        </li>
+        <li class="d-flex justify-content-between border-bottom py-2">
+          <strong>Miércoles</strong>
+          <span class="ms-auto text-end">7:00PM - 8:30PM</span>
+        </li>
+        <li class="d-flex justify-content-between border-bottom py-2">
+          <strong>Viernes</strong>
+          <span class="ms-auto text-end">7:00PM - 8:30PM</span>
+        </li>
+        <li class="d-flex justify-content-between border-bottom py-2">
+          <strong>Sábado</strong>
+          <span class="ms-auto text-end">10:00AM - 11:30AM</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Adultos -->
+    <div class="col-md-4">
+      <h4>Adultos avanzados</h4>
+      <ul class="list-unstyled">
+        <li class="d-flex justify-content-between border-bottom py-2">
+          <strong>Martes</strong>
+          <span class="ms-auto text-end">7:00PM - 8:30PM</span>
+        </li>
+        <li class="d-flex justify-content-between border-bottom py-2">
+          <strong>Jueves</strong>
+          <span class="ms-auto text-end">7:00PM - 8:30PM</span>
+        </li>
+      </ul>
     </div>
   </div>
 </section>
 
 <!-- Contacto Section -->
-<section id="contacto" class="bg-dark text-white py-5">
+<section id="contacto" class="contacto bg-dark text-white py-5">
   <div class="container">
     <h2 class="text-center mb-4">Contáctanos</h2>
     <div class="row justify-content-center">
       <div class="col-md-8">
-        <form method="post" action="/contact/">
-          {% csrf_token %}
-          <div class="mb-3">
-            <label for="nombre" class="form-label">Nombre</label>
-            <input type="text" class="form-control" id="nombre" name="nombre" required>
-          </div>
-          <div class="mb-3">
-            <label for="email" class="form-label">Correo electrónico</label>
-            <input type="email" class="form-control" id="email" name="email" required>
-          </div>
-          <div class="mb-3">
-            <label for="mensaje" class="form-label">Mensaje</label>
-            <textarea class="form-control" id="mensaje" name="mensaje" rows="4" required></textarea>
-          </div>
-          <div class="text-center">
-            <button type="submit" class="btn btn-primary">Enviar</button>
-          </div>
-        </form>
+        <div class="d-flex justify-content-center">
+          <a href="https://www.instagram.com/dseishin/" target="_blank" class="btn btn-outline-light mx-2">
+            <i class="fab fa-instagram"></i> Instagram
+          </a>
+          <a href="https://www.facebook.com/seishin.dojo.10/" target="_blank" class="btn btn-outline-light mx-2">
+            <i class="fab fa-facebook"></i> Facebook
+          </a>
+          <a href="https://wa.me/573193769897" target="_blank" class="btn btn-outline-light mx-2">
+            <i class="fab fa-whatsapp"></i> WhatsApp
+          </a>
+        </div>
       </div>
     </div>
   </div>
