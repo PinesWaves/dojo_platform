@@ -2,7 +2,7 @@
 {% load static %}
 {% block extra_css %}
 <!-- AdminLTE CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+<link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
 
 <style>
 .hero {
@@ -74,8 +74,23 @@ section {
   object-fit: contain;
 }
 
-.carousel-item > .d-flex {
+/*.carousel-item > .d-flex {
   height: 100%;
+}*/
+
+@media (orientation: landscape) {
+  .carousel-img {
+    width: 100%;
+    height: auto;
+  }
+}
+
+/* En orientación portrait: alto completo */
+@media (orientation: portrait) {
+  .carousel-img {
+    height: 100%;
+    width: auto;
+  }
 }
 </style>
 {% endblock %}
@@ -172,8 +187,8 @@ section {
       <!-- Imágenes del carousel -->
       <div class="carousel-inner">
         {% for g in galery %}
-        <div class="carousel-item {% if forloop.first %}active{% endif %}">
-          <img src="{{ g }}" class="d-block w-100 carousel-img" alt="Karate {{ forloop.counter }}">
+        <div class="carousel-item {% if forloop.first %}active{% endif %} justify-content-center align-items-center">
+          <img src="{{ g }}" class="w-100 carousel-img img-responsive" alt="Karate {{ forloop.counter }}">
         </div>
         {% endfor %}
       </div>
@@ -284,5 +299,5 @@ section {
 </section>
 {% endblock %}
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script
+<script src="{% static 'plugins/popper/popper.min.js' %}"></script>
 {% endblock %}
