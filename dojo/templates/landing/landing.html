@@ -1,0 +1,303 @@
+{% extends 'landing/base.html' %}
+{% load static %}
+{% block extra_css %}
+<!-- AdminLTE CSS -->
+<link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+
+<style>
+.hero {
+  min-height: 100vh; /* 80% del alto de la ventana */
+  padding: 100px 0;
+  background-repeat: no-repeat;
+}
+
+.dojo-kun-marquee {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, transparent, white 20%, white 80%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, white 20%, white 80%, transparent);
+}
+
+.dojo-kun-inner {
+  display: flex;
+  flex-direction: column;
+  animation: scroll-up 20s linear infinite;
+}
+
+.dojo-kun-marquee:hover .dojo-kun-inner {
+  animation-play-state: paused;
+}
+
+.scroll-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.scroll-group h4 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 1.25rem;
+  color: white;
+}
+
+@keyframes scroll-up {
+  0% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+.border-bottom {
+  border-color: #ddd !important;
+}
+
+section {
+  scroll-margin-top: 60px; /* Ajusta según la altura de tu navbar */
+}
+
+#carouselExampleIndicators {
+  height: 75vh;
+  overflow: hidden;
+}
+
+.carousel-inner,
+.carousel-item {
+  height: 100%;
+}
+
+.carousel-img {
+  max-height: 100%;
+  width: auto;
+  object-fit: contain;
+}
+
+/*.carousel-item > .d-flex {
+  height: 100%;
+}*/
+
+@media (orientation: landscape) {
+  .carousel-img {
+    width: 100%;
+    height: auto;
+  }
+}
+
+/* En orientación portrait: alto completo */
+@media (orientation: portrait) {
+  .carousel-img {
+    height: 100%;
+    width: auto;
+  }
+}
+</style>
+{% endblock %}
+{% block content %}
+<!-- Hero Section -->
+<section id="inicio" class="hero d-flex align-items-center" style="background-image: url('{% static 'img/h1_hero.png' %}'); background-size: cover; background-position: center;">
+  <div class="container text-center text-white">
+    <h1 class="display-3 text-bold">Seishin JKA Dojo</h1>
+    <h4>Karate tradicional Shotokan para todas las edades</h4>
+    <div class="dojo-kun-marquee my-4">
+      <div class="dojo-kun-inner">
+        <div class="scroll-group">
+          <h4><br></h4>
+          <h4><br></h4>
+          <h4>Karate Do: Camino de la mano vacía</h4>
+          <h4><br></h4>
+          <h4>DOJO KUN</h4>
+          <h4>1.	Buscar la perfección del carácter <br>HITOTSU! JIN KAKU KANSEI NI TSUTOMURU KOTO <br>一丶人格完成に努めること。 <br></h4>
+          <h4>2.	Ser correcto, leal y puntual <br>HITOTSU! MAKOTO NO MICHI O MAMORU KOTO <br>一丶誠の道を守ること。 <br></h4>
+          <h4>3.	Siempre superarse <br>HITOTSU! DORYOKU NO SEISHIN O YASHINAU KOTO <br>一丶努力の精神を養うこと。 <br></h4>
+          <h4>4.	Respeto y cortesía hacia los demás <br>HITOTSU! REIGI O OMONZORU KOTO <br>一丶礼儀を重んずること。 <br></h4>
+          <h4>5.	Abstenerse de comportamientos violentos <br>HITOTSU! KEKKI NO YU O IMASHIMURU KOTO <br>一丶血気の勇を戒むること。 <br></h4>
+        </div>
+{#        duplicated#}
+        <div class="scroll-group">
+          <h4><br></h4>
+          <h4><br></h4>
+          <h4>Karate Do: Camino de la mano vacía</h4>
+          <h4><br></h4>
+          <h4>DOJO KUN</h4>
+          <h4>1.	Buscar la perfección del carácter <br>HITOTSU! JIN KAKU KANSEI NI TSUTOMURU KOTO <br>一丶人格完成に努めること。 <br></h4>
+          <h4>2.	Ser correcto, leal y puntual <br>HITOTSU! MAKOTO NO MICHI O MAMORU KOTO <br>一丶誠の道を守ること。 <br></h4>
+          <h4>3.	Siempre superarse <br>HITOTSU! DORYOKU NO SEISHIN O YASHINAU KOTO <br>一丶努力の精神を養うこと。 <br></h4>
+          <h4>4.	Respeto y cortesía hacia los demás <br>HITOTSU! REIGI O OMONZORU KOTO <br>一丶礼儀を重んずること。 <br></h4>
+          <h4>5.	Abstenerse de comportamientos violentos <br>HITOTSU! KEKKI NO YU O IMASHIMURU KOTO <br>一丶血気の勇を戒むること。 <br></h4>
+        </div>
+      </div>
+    </div>
+    <a href="https://wa.me/573193769897" class="btn btn-danger btn-lg mt-3">Contáctanos</a>
+  </div>
+</section>
+
+<!-- Instructor Section -->
+<section id="conocenos" class="bg-light py-3">
+  <div class="container">
+    <h1 class="mb-4 text-bold text-center">Conócenos</h1>
+    <div class="row align-items-center min-vh-80">
+      <div class="col-md-6">
+        <img src="{% static 'img/about.png' %}" alt="Sensei" class="img-fluid d-flex justify-content-center mx-auto mb-3">
+      </div>
+      <div class="col-md-6">
+        <h3>SENSEI CESAR A. PEÑA CH.</h3><br>
+        <p>Inició la práctica del Karate-Do en 1989 a la edad de 4 años con el Maestro Jairo A. Rozo B. y el maestro Jaime Fernández Garzón.<br><br>
+        Practicó en ligas deportivas de Karate a nivel nacional. Sub-Oficial del Ejército Nacional de Colombia con el rango de Cabo 3<sup>o</sup> (R).<br><br>
+        Actualmente, 3<sup>er</sup> Dan de karate JKA otorgado por el sensei Mitsuo Inoue, 8<sup>o</sup> Dan JKA/HQ, presidente de la JKA Sudamericana.<br><br>
+        Dojo afiliado a la JKA/WF Colombia a cargo del sensei Armando Vargas R. 6<sup>o</sup> Dan JKA, Chief Instructor JKA/ WF Colombia.</p>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="row col-md-9 w-50">
+        <div class="text-center text-bold col-md-4">
+          <img src="{% static 'img/belt-480x480.png' %}" alt="cinturon" class="img-fluid mx-auto d-block mb-3 w-50">
+          <p class="h3">Principiantes</p>
+          <p class="h6">Cinturones:<br>Blancos, Amarillos, Naranjas.</p>
+        </div>
+        <div class="text-center text-bold col-md-4">
+          <img src="{% static 'img/karategui-480x480.png' %}" alt="karatedogi" class="img-fluid mx-auto d-block mb-3 w-50">
+          <p class="h3">Intermedios</p>
+          <p class="h6">Cinturones:<br>Verdes, Violetas.</p>
+        </div>
+        <div class="text-center text-bold col-md-4">
+          <img src="{% static 'img/karate-480x480.png' %}" alt="karate" class="img-fluid mx-auto d-block mb-3 w-50">
+          <p class="h3">Avanzados</p>
+          <p class="h6">Cinturones:<br>Marrones y Negros</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Galeria -->
+<section id="galeria" class="py-3">
+  <div class="container-fluid p-0">
+    <h1 class="mb-4 text-bold text-center">Galería</h1>
+
+    <div id="carouselExampleIndicators" class="carousel slide bg-dark" data-ride="carousel">
+      <!-- Indicadores -->
+      <ol class="carousel-indicators">
+        {% for image in galery %}
+          <li data-target="#carouselExampleIndicators" data-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}"></li>
+        {% endfor %}
+      </ol>
+
+      <!-- Imágenes del carousel -->
+      <div class="carousel-inner">
+        {% for g in galery %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %} justify-content-center align-items-center">
+          <img src="{{ g }}" class="w-100 carousel-img img-responsive" alt="Karate {{ forloop.counter }}">
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Controles -->
+      <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Anterior</span>
+      </a>
+      <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Siguiente</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Horarios Section -->
+<section id="horarios" class="bg-light py-3">
+  <div class="container">
+    <h1 class="mb-4 text-bold text-center">Horarios</h1>
+
+    <div class="row">
+      <!-- Niños -->
+      <div class="col-md-4 mb-4 mb-md-0">
+        <h4>Niños (todos los niveles)</h4>
+        <ul class="list-unstyled">
+          <li class="d-flex justify-content-between border-bottom py-2">
+            <strong>Lunes</strong>
+            <span class="ms-auto text-end">5:30PM - 6:30PM</span>
+          </li>
+          <li class="d-flex justify-content-between border-bottom py-2">
+            <strong>Miércoles</strong>
+            <span class="ms-auto text-end">5:30PM - 6:30PM</span>
+          </li>
+          <li class="d-flex justify-content-between border-bottom py-2">
+            <strong>Viernes</strong>
+            <span class="ms-auto text-end">5:30PM - 6:30PM</span>
+          </li>
+          <li class="d-flex justify-content-between border-bottom py-2">
+            <strong>Sábado</strong>
+            <span class="ms-auto text-end">8:30AM - 10:00AM</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Adultos 1 -->
+      <div class="col-md-4 mb-4 mb-md-0">
+        <h4>Adultos princ. e inter.</h4>
+        <ul class="list-unstyled">
+          <li class="d-flex justify-content-between border-bottom py-2">
+            <strong>Lunes</strong>
+            <span class="ms-auto text-end">7:00PM - 8:30PM</span>
+          </li>
+          <li class="d-flex justify-content-between border-bottom py-2">
+            <strong>Miércoles</strong>
+            <span class="ms-auto text-end">7:00PM - 8:30PM</span>
+          </li>
+          <li class="d-flex justify-content-between border-bottom py-2">
+            <strong>Viernes</strong>
+            <span class="ms-auto text-end">7:00PM - 8:30PM</span>
+          </li>
+          <li class="d-flex justify-content-between border-bottom py-2">
+            <strong>Sábado</strong>
+            <span class="ms-auto text-end">10:00AM - 11:30AM</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Adultos 2 -->
+      <div class="col-md-4 mb-4 mb-md-0">
+        <h4>Adultos avanzados</h4>
+        <ul class="list-unstyled">
+          <li class="d-flex justify-content-between border-bottom py-2">
+            <strong>Martes</strong>
+            <span class="ms-auto text-end">7:00PM - 8:30PM</span>
+          </li>
+          <li class="d-flex justify-content-between border-bottom py-2">
+            <strong>Jueves</strong>
+            <span class="ms-auto text-end">7:00PM - 8:30PM</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contacto Section -->
+<section id="contacto" class="contacto text-white py-5">
+  <div class="container">
+    <h2 class="text-center mb-4">Contáctanos</h2>
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="d-flex justify-content-center">
+          <a href="https://www.instagram.com/dseishin/" target="_blank" class="btn btn-outline-light mx-2">
+            <i class="fab fa-instagram"></i> Instagram
+          </a>
+          <a href="https://www.facebook.com/seishin.dojo.10/" target="_blank" class="btn btn-outline-light mx-2">
+            <i class="fab fa-facebook"></i> Facebook
+          </a>
+          <a href="https://wa.me/573193769897" target="_blank" class="btn btn-outline-light mx-2">
+            <i class="fab fa-whatsapp"></i> WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'plugins/popper/popper.min.js' %}"></script>
+{% endblock %}
