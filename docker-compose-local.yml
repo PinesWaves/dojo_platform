@@ -1,5 +1,5 @@
 services:
-  db:
+  db_local:
     restart: always
     image: postgres:16
     environment:
@@ -7,14 +7,14 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
     volumes:
-      - pgdata:/var/lib/postgres/data
+      - pgdata_local:/var/lib/postgres/data
     ports:
-      - "5432:5432"
-  web:
+      - "5431:5431"
+  web_local:
     restart: always
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.local
     working_dir: /app/dojo
     tty: true
     stdin_open: true
@@ -25,8 +25,8 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - .env_local
     depends_on:
-      - db
+      - db_local
 volumes:
-  pgdata:
+  pgdata_local:
