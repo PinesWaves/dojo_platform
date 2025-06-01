@@ -55,7 +55,7 @@ WORKDIR /app/dojo
 # Copy Django project (assuming you have a local project to copy)
 COPY dojo /app/dojo
 
-COPY entrypoint.sh /entrypoint.sh
+COPY dojo/entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
 

@@ -17,7 +17,7 @@ services:
       dockerfile: Dockerfile
     working_dir: /app/dojo
     tty: true
-    entrypoint: ["./entrypoint_prod.sh"]
+    entrypoint: ["./entrypoint.sh"]
     volumes:
       - .:/app
       - ./dojo/static/:/app/static/
