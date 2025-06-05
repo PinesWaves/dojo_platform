@@ -9,7 +9,7 @@ chmod 755 dojo/entrypoint.sh
 docker-compose -f docker-compose-local.yml up -d
 ```
 
-if there is an updated, run:
+if there is an update, run:
 ```sh
 docker-compose -f .\docker-compose-local.yml down
 docker rm nginx
