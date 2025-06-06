@@ -11,12 +11,12 @@ docker-compose -f docker-compose-local.yml up -d
 
 if there is an update, run:
 ```sh
-docker-compose -f .\docker-compose-local.yml down
+docker compose -f docker-compose-local.yml down -v
 docker rm nginx
 docker rm web
-docker-compose -f .\docker-compose-local.yml build nginx
-docker-compose -f .\docker-compose-local.yml build web
-docker-compose -f .\docker-compose-local.yml up -d
+docker compose -f .\docker-compose-local.yml build nginx
+docker compose -f .\docker-compose-local.yml build web
+docker compose -f .\docker-compose-local.yml up -d
 ```
 
 Push docker hub image
