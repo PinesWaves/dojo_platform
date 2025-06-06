@@ -1,26 +1,35 @@
 services:
   db:
-    restart: always
     image: postgres:16
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=postgres
-    volumes:
-      - pgdata:/var/lib/postgres/data
-    ports:
-      - "5432:5432"
-  web:
     restart: always
+    environment:
+      POSTGRES_DB: ${DOJO_DB_NAME}
+      POSTGRES_USER: ${DOJO_DB_USER}
+      POSTGRES_PASSWORD: ${DOJO_DB_PASS}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DOJO_DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  web:
     build:
       context: .
       dockerfile: Dockerfile
+    restart: always
     working_dir: /app/dojo
     tty: true
-    entrypoint: ["./entrypoint.sh"]
+    entrypoint: ["/entrypoint.sh"]
     volumes:
       - .:/app
       - ./dojo/static/:/app/static/
+      - ./dojo/media/:/app/media/
       - ./dojo/logs:/app/dojo/logs
     expose:
       - "8000"
@@ -28,17 +37,28 @@ services:
       - .env
     depends_on:
       - db
+    networks:
+      - internal
+
   nginx:
-    image: nginx:latest
+    image: nginx:1.25
+    restart: always
     ports:
       - "80:80"
-      - "443:443"  # Expone el puerto 443 para HTTPS
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/ssl:/etc/nginx/ssl
       - ./dojo/static/:/app/static/
+      - ./dojo/media/:/app/media/
+      - ./certs:/etc/ssl/certs
     depends_on:
       - web
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+
 volumes:
   pgdata:

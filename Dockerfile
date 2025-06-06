@@ -1,71 +1,40 @@
-# Use the official Arch Linux base image
+# Usa imagen oficial de Arch Linux
 FROM archlinux:latest
 
-# Update the package database and upgrade the system
-RUN pacman -Syu --noconfirm
+# Actualiza sistema e instala dependencias necesarias
+RUN pacman -Syu --noconfirm && \
+    pacman -S --noconfirm \
+    base-devel openssl zlib xz sqlite bzip2 gdbm libnsl libffi \
+    bluez-libs readline libtirpc openbsd-netcat gdal wget \
+    nginx git
 
-# Install dependencies for building Python
-RUN pacman -S --noconfirm \
-    base-devel \
-    openssl \
-    zlib \
-    xz \
-    sqlite \
-    bzip2 \
-#    tk \
-    gdbm \
-    libnsl \
-    libffi \
-    bluez-libs \
-    readline \
-    libtirpc \
-#    python-psycopg2 \
-    openbsd-netcat \
-    gdal \
-    wget
+# Variables de entorno
+ENV PYTHON_VERSION=3.12.7 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
-# Set environment variables for Python installation
-ENV PYTHON_VERSION=3.12.7
-ENV PYTHONUNBUFFERED 1
-ENV PYTHONDONTWRITEBYTECODE 1
-
-# Download and compile Python
+# Descarga y compila Python
 RUN wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz && \
     tar -xvf Python-${PYTHON_VERSION}.tgz && \
     cd Python-${PYTHON_VERSION} && \
     ./configure --enable-optimizations && \
     make -j$(nproc) && \
-    make altinstall
+    make altinstall && \
+    ln -sf /usr/local/bin/python3.12 /usr/bin/python
 
-# Set Python 3.12.7 as the default Python version
-RUN ln -sf /usr/local/bin/python3.12 /usr/bin/python
+RUN python --version && python -m pip install --upgrade pip
 
-# Verify the default Python version
-RUN python --version
-
-# Update pip to the latest version
-RUN python -m pip install --upgrade pip
-
-# Create a directory for the Django project
+# Crear directorio del proyecto
 RUN mkdir -p /app/dojo
-
-# Set the working directory
 WORKDIR /app/dojo
 
-# Copy Django project (assuming you have a local project to copy)
+# Copiar archivos
 COPY dojo /app/dojo
-
 COPY dojo/entrypoint.sh /entrypoint.sh
+COPY dojo/requirements.txt /app/dojo/requirements.txt
 
 RUN chmod +x /entrypoint.sh
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Django 4.2
-RUN pip install -r requirements.txt
-
-# Expose port 8000 for Django development server
 EXPOSE 8000
-
-# Default command to run a bash shell
-# CMD ["bash"]
-
 ENTRYPOINT ["/entrypoint.sh"]
