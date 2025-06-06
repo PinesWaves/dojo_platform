@@ -3,15 +3,13 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
-if [ "$DATABASE" = "postgres" ]; then
-    echo "Waiting for postgres..."
+echo "Waiting for PostgreSQL at $DOJO_DB_HOST:$DOJO_DB_PORT..."
 
-    while ! nc -z "${DOJO_DB_HOST}" "${DOJO_DB_PORT}"; do
-      sleep 0.1
-    done
+while ! nc -z "$DOJO_DB_HOST" "$DOJO_DB_PORT"; do
+  sleep 0.1
+done
 
-    echo "PostgreSQL started"
-fi
+echo "PostgreSQL is available"
 
 mkdir -p /app/dojo/logs
 chmod -R 777 /app/dojo/logs
