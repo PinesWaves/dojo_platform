@@ -13,3 +13,9 @@ def landing_page(request):
             # 'https://dummyimage.com/600x400/666/fff',
     }
     return render(request, 'landing/landing.html', ctx)
+
+def custom_404(request, exception):
+    return render(request, "errors/404.html", status=404)
+
+def custom_500(request):
+    return render(request, "errors/500.html", status=500)
