@@ -26,14 +26,14 @@ class CustomLoginView(View):
 
     def get(self, request):
         user = request.user
-        error = request.session.pop('error', None)
+        error = request.session.pop('errors', None)
         msg = request.session.pop('msg', None)
         if user.is_authenticated:  # Redirige si ya está autenticado
             if user.is_superuser or user.category == Category.SENSEI:
                 return redirect(reverse_lazy('sensei_dashboard'))  # Redirigir al dashboard del sensei
             elif user.category == Category.ESTUDIANTE:
                 return redirect(reverse_lazy('student_dashboard'))  # Redirigir al dashboard del estudiante
-        return render(request, self.template_name, {'error': error, 'msg': msg})
+        return render(request, self.template_name, {'errors': error, 'msg': msg})
 
     def post(self, request):
         id_number = request.POST.get('id_number')
@@ -51,7 +51,7 @@ class CustomLoginView(View):
                 return redirect(reverse_lazy('login'))  # Página por defecto
 
         return render(request, self.template_name, {
-            'error': 'Invalid credentials',
+            'errors': 'Invalid credentials',
         })
 
 # Vista de Registro
@@ -68,10 +68,10 @@ class RegisterView(FormView):
         try:
             registration_token = Token.objects.get(token=token)
             if not registration_token.is_valid():
-                request.session['error'] = 'Invalid or expired token'
+                request.session['errors'] = 'Invalid or expired token'
                 return redirect(reverse_lazy('login'))  # "Invalid or expired token
         except Token.DoesNotExist:
-            request.session['error'] = 'Invalid or expired token'
+            request.session['errors'] = 'Invalid or expired token'
             return redirect(reverse_lazy('login'))  # "Invalid or expired token
 
         return super().get(request, *args, **kwargs)
@@ -79,7 +79,7 @@ class RegisterView(FormView):
     def form_valid(self, form):
         # Process the form
         form.save()
-        self.request.session['error'] = None
+        self.request.session['errors'] = None
         self.request.session['msg'] = "Registration successful!"
         return super().form_valid(form)
 
@@ -103,14 +103,14 @@ class RegisterView(FormView):
             'sectioned_fields': sectioned_fields,  # List of (section_number, fields)
             'total_sections': total_sections,  # Number of sections
             'token': self.kwargs.get('token'),  # Token passed in the URL
-            # 'error': form.errors.get('__all__'),  # Form errors
+            # 'errors': form.errors.get('__all__'),  # Form errors
         })
         return context
 
     def post(self, request, *args, **kwargs):
         token = kwargs.get('token')
         if not token:
-            request.session['error'] = 'Invalid or expired token'
+            request.session['errors'] = 'Invalid or expired token'
             return redirect(reverse_lazy('login'))
 
         form = self.get_form()
