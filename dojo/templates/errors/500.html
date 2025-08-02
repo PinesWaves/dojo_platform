@@ -1,0 +1,15 @@
+{% extends 'errors/base_error.html' %}
+{% block error_code %}500{% endblock %}
+{% block error_content %}
+<div class="error-content">
+  <h3>
+    <i class="fas fa-exclamation-triangle text-danger"></i>
+    Oops! Something went wrong.
+  </h3>
+  <p>
+    We will work on fixing that right away.
+    Meanwhile, you may <a href="{% url 'landing' %}">return to home page</a>.
+  </p>
+</div>
+<!-- /.error-content -->
+{% endblock %}

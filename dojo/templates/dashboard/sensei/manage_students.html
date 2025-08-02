@@ -1,0 +1,209 @@
+{% extends 'pages/sensei/base.html' %}
+{% load static %}
+{% block extra_css %}
+	<!-- DataTables -->
+<link rel="stylesheet" href="{% static 'plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/toastr/toastr.min.css' %}">
+<link rel="stylesheet" href="{% static 'dist/css/custom_style.css' %}">
+{% endblock %}
+{% block students-link-status %}active{% endblock %}
+{% block dashboard_content %}
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Manage students</h1>
+        </div><!-- /.col -->
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="{% url 'sensei_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Students</li>
+          </ol>
+        </div><!-- /.col -->
+      </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+  </div>
+  <!-- /.content-header -->
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Small boxes (Stat box) -->
+      <div class="row">
+        <div class=" col-md-9">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="nav-icon fas fa-users"></i>
+                List of students
+              </h3>
+            </div>
+            <div class="card-body">
+              <table id="example1" class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>Full name</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Level</th>
+                    <th>Contact</th>
+                    <th>Date joined</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {% for s in students %}
+                  <tr>
+                    <td>
+                      <a href="{% url 'manage_profile' s.id %}">
+                        {{ s.first_name }} {{ s.last_name }}
+                      </a>
+                    </td>
+                    <td>{{ s.email }}</td>
+                    <td>
+                      {% if s.is_active %}
+                        <span class="badge badge-success">Active</span>
+                      {% else %}
+                        <span class="badge badge-danger">Inactive</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <span class="level-circle level-{{ s.level|lower }}"></span>
+                      {{ s.get_level_display  }}
+                    </td>
+                    <td>{{ s.phone_number }}</td>
+                    <td>{{ s.date_joined|timesince }}</td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                <tr>
+                  <th>Full name</th>
+                  <th>Email</th>
+                  <th>Status</th>
+                  <th>Level</th>
+                  <th>Contact</th>
+                  <th>Training time</th>
+                </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="fas fa-edit"></i>
+                Activate registration form
+              </h3>
+            </div>
+            <div class="card-body">
+              <form action="{% url 'manage_students' %}" method="post">{% csrf_token %}
+                <div class="form-group">
+                  <label for="reg_time">Activate registration form until:</label>
+                  <div class="input-group date" id="timepicker" data-target-input="nearest">
+                    <div class="input-group-prepend" data-target="#timepicker" data-toggle="datetimepicker">
+                        <div class="input-group-text"><i class="far fa-clock"></i></div>
+                    </div>
+                    <input type="text" class="form-control datetimepicker-input" data-target="#timepicker" name="expiration_datetime"/>
+                    <div class="input-group-append">
+                      <button type="submit" class="btn btn-primary btn-block">Activate</button>
+                    </div>
+                  </div>
+                  <!-- /.input group -->
+                </div>
+                <!-- /.form group -->
+              </form>
+  
+              <label for="url">
+                Active registration url(s):<br>
+              </label>
+              {% if time_url is not none %}
+                <table id="example2" class="table table-bordered table-striped">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Info</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for time, url in time_url %}
+                    <tr>
+                      <form action="{% url 'manage_students' %}" method="post">{% csrf_token %}
+                        <div class="form-group">
+                          <input type="hidden" name="_method" value="delete">
+                          <input type="hidden" value="{{ url }}" name="url{{ forloop.counter }}">
+                          <div class="d-flex col-sm-6">
+                            <td>
+                              <button type="submit" class="btn btn-danger btn-block btn-xs col-sm-8">
+                                <i class="fas fa-trash"></i>
+                              </button>
+                            </td>
+                            <td>
+                              <a id="clipboard" class="col-lg-8" href="{{ url }}">
+                                {{ time|date:"F j, g:i a" }}
+                                <i class="fas fa-clipboard"></i>
+                              </a><br>
+                            </td>
+                          </div>
+                        </div>
+                      </form>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /.container-fluid -->
+  </section>
+  <!-- /.content -->
+{% endblock %}
+{% block script %}
+  <!-- DataTables  & Plugins -->
+  <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'plugins/jszip/jszip.min.js' %}"></script>
+  <script src="{% static 'plugins/pdfmake/pdfmake.min.js' %}"></script>
+  <script src="{% static 'plugins/pdfmake/vfs_fonts.js' %}"></script>
+  <script src="{% static 'plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+  <script src="{% static 'plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+  <script src="{% static 'plugins/toastr/toastr.min.js' %}"></script>
+  <script>
+    $(function () {
+      $("#example1").DataTable({
+        "responsive": true, "lengthChange": false, "autoWidth": false,
+        "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+      }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+
+      //Date and time picker
+      $('#timepicker').datetimepicker({ icons: { time: 'far fa-clock' } });
+      
+      $("#clipboard").click(async function (event) {
+        event.preventDefault();
+        // Get the relative href
+        var relativeHref = $(this).closest("a").attr("href");
+        
+        // Convert it to an absolute URL
+        var absoluteUrl = new URL(relativeHref, window.location.origin).href;
+
+        try {
+            await navigator.clipboard.writeText(absoluteUrl);
+            toastr.info("Copied: " + absoluteUrl)
+        } catch (err) {
+            console.error("Failed to copy: ", err);
+        }
+      });
+    });
+  </script>
+{% endblock %}

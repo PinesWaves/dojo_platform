@@ -85,7 +85,7 @@ class UserRegisterForm(forms.ModelForm):
     class Meta:
         model = User
         fields = [
-            'first_name', 'last_name', 'id_type', 'id_number', 'birth_date', 'birth_place', 'profession',
+            'first_name', 'last_name', 'id_type', 'id_number', 'gender', 'birth_date', 'birth_place', 'profession',
             'email', 'phone_number', 'country', 'city', 'address', 'parent', 'parent_phone_number', 'password1',
             'password2', 'eps', 'physical_cond', 'medical_cond', 'drug_cons', 'allergies', 'other_activities',
             'cardio_prob', 'injuries', 'physical_limit', 'lost_cons', 'sec_recom', 'agreement',

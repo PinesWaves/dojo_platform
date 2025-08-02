@@ -1,0 +1,45 @@
+<div class="col-lg-5">
+  <div class="card card-danger card-outline">
+    <div class="card-body">
+      {% if trainings %}
+      <h4>Trainings</h4>
+      <div id="accordion">
+        {% for t in trainings %}
+        <div class="card {% if t.status == 'A' %}card-danger{% elif t.status == 'F' %}card-gray{% elif t.status == 'C' %}card-dark{% endif %}">
+          <div class="card-header">
+            <h4 class="card-title w-100">
+              <a class="d-block w-100" data-toggle="collapse" href="#collapse{{ forloop.counter }}">
+                {{ t.location }} - {{ t.date }}
+              </a>
+            </h4>
+          </div>
+          <div id="collapse{{ forloop.counter }}" class="collapse" data-parent="#accordion">
+            <div class="card-body">
+              <p>Training on {{ t.date }}</p>
+              {% if t.status == 'A' %}
+              <img class="img-fluid pad" src="{{ t.qr_image.url }}" alt="training" width="400">
+              <p class="card-text">
+                Scan QR and confirm attendance
+              </p>
+              {% elif t.status == 'F' %}
+              <p>Training has ended</p>
+              {% elif t.status == 'C' %}
+              <p>Training canceled</p>
+              {% endif %}
+              <p>Techniques</p>
+              <ul>
+                {% for tech in t.techniques.all %}
+                <li>{{ tech.name }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p>No trainings yet</p>
+    {% endif %}
+    </div>
+  </div><!-- /.card -->
+</div><!-- /.col-md-6 -->
