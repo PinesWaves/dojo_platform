@@ -3,10 +3,15 @@ from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
 from django.db import connection
 from faker import Faker
+import logging
 
 from user_management.models import User, Category
 from dashboard.models import Dojo, Training, Technique, TrainingStatus
 from django.utils import timezone
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -25,6 +30,7 @@ class Command(BaseCommand):
             self.load_testing_data()        
 
     def load_testing_data(self):
+        logger.info('Reset DB from testing data')
         Training.objects.all().delete()
         Dojo.objects.all().delete()
         Technique.objects.all().delete()
@@ -37,6 +43,7 @@ class Command(BaseCommand):
             cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_technique', 'id'), 1, false);")
             cursor.execute("SELECT setval(pg_get_serial_sequence('user_management_user', 'id'), 1, false);")
 
+        logger.info('Loading testing data')
         self.load_users()
         self.load_techniques()
         self.load_dojos()
@@ -45,6 +52,7 @@ class Command(BaseCommand):
     
     def load_users(self):
         # Create 90 students with random data
+        logger.info('Loading users')
         users = []
         for _ in range(90):
             gender = self.fake.random_element(elements=('M', 'F'))
@@ -84,7 +92,9 @@ class Command(BaseCommand):
                 'is_staff': False,
                 'is_superuser': False
             })
+
         # Create 3 senseis with random data
+        logger.info('Loading senseis')
         for _ in range(3):
             gender = self.fake.random_element(elements=('M', 'F'))
             users.append({
@@ -131,6 +141,7 @@ class Command(BaseCommand):
 
     def load_techniques(self):
         # Create Techniques
+        logger.info('Loading techniques')
         techniques = []
         tcs_list = [
             "Nukiite (ataque con la punta de los dedos)",
@@ -156,6 +167,7 @@ class Command(BaseCommand):
 
     def load_dojos(self):
         # Create 3 Dojos
+        logger.info('Loading dojos')
         dojos = []
         for _ in range(3):
             dojos.append({
@@ -179,6 +191,8 @@ class Command(BaseCommand):
                 i = 0
 
     def load_trainings(self):
+        logger.info('Loading trainings')
+        # Create 10 Training sessions with different statuses
         today = datetime.now().date()
         for i in range(1, 11):
             for j in range(2):
