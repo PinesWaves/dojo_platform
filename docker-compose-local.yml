@@ -3,13 +3,16 @@ services:
     restart: always
     image: postgres:16
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=postgres
+      POSTGRES_DB: ${DOJO_DB_NAME}
+      POSTGRES_USER: ${DOJO_DB_USER}
+      POSTGRES_PASSWORD: ${DOJO_DB_PASS}
     volumes:
       - pgdata_local:/var/lib/postgres/data
     ports:
-      - "5431:5431"
+      - "5432:5432"
+    env_file:
+      - .env_local
+
   web_local:
     restart: always
     build:
@@ -21,6 +24,7 @@ services:
     volumes:
       - .:/app
       - ./dojo/static/:/app/static/
+      - ./dojo/media/:/app/media/
       - ./dojo/logs:/app/dojo/logs
     ports:
       - "8000:8000"
