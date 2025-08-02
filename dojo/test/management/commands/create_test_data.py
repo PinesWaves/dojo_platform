@@ -1,4 +1,3 @@
-import csv
 from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
 from django.db import connection
@@ -15,19 +14,19 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = 'Load dataset from CSV files into the database'
+    help = 'Create and load test data into the database'
     
-    def add_arguments(self, parser):
-        parser.add_argument(
-            '--testing',
-            action='store_true',
-            help='Reset the database before loading the dataset'
-        )
+    # def add_arguments(self, parser):
+    #     parser.add_argument(
+    #         '--testing',
+    #         action='store_true',
+    #         help='Reset the database before loading the dataset'
+    #     )
 
     def handle(self, *args, **kwargs):
-        if kwargs['testing']:
-            self.fake = Faker()
-            self.load_testing_data()        
+        # if kwargs['testing']:
+        self.fake = Faker()
+        self.load_testing_data()
 
     def load_testing_data(self):
         logger.info('Reset DB from testing data')
