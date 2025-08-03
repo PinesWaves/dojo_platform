@@ -5,7 +5,7 @@ from django.http import HttpResponseForbidden
 
 from user_management.models import Category
 
-class UserCategoryRequiredMixin(View):
+class AdminRequiredMixin(View):
     allowed_categories = [Category.SENSEI]
 
     def dispatch(self, request, *args, **kwargs):
