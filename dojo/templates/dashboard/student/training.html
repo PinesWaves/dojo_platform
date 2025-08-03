@@ -1,6 +1,6 @@
 {% extends 'base-top-nav.html' %}
-{% block title %} AdminLTE 2 | Dashboard {% endblock %}
-{% block dashboard_content %}
+{% block title %} Dashboard {% endblock %}
+{% block content-header %}
 <div class="content-header">
   <div class="container">
     <div class="row mb-2">
@@ -20,9 +20,9 @@
 <div class="content">
   <div class="container">
     <div class="row">
-  {#    #TODO Add FullCalendar js lib#}
-      {% include 'dashboard/common/technique_list.html' %}
-    </div><!-- /.row -->
+      {% include 'dashboard/common/training_list.html' %}
+    </div>
+    <!-- /.row -->
   </div><!-- /.container-fluid -->
 </div>
 {% endblock %}

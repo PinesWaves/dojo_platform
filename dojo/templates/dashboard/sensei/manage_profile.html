@@ -1,4 +1,4 @@
-{% extends 'pages/sensei/base.html' %}
+{% extends 'dashboard/sensei/base.html' %}
 {% block students-link-status %}active{% endblock %}
 {% load static %}
 {% block title %} Profile {% endblock %}
@@ -25,7 +25,7 @@
     </div><!-- /.container-fluid -->
   </section>
 
-  {% include 'pages/common/profile.html' %}
+  {% include 'dashboard/common/profile.html' %}
 {% endblock %}
 {% block script %}
   <!-- jQuery -->

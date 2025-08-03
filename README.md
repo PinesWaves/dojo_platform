@@ -1,22 +1,22 @@
 #### Build project containers
 - Powershell
 ```sh
-docker-compose -f .\docker-compose-local.yml up -d
+docker-compose --env-file .env_local -f docker-compose-local.yml up -d
 ```
 - Linux terminal
 ```sh
-chmod 755 dojo/entrypoint.sh
-docker-compose -f docker-compose-local.yml up -d
+chmod 755 dojo/entrypoint_local.sh
+docker-compose --env-file .env_local -f docker-compose-local.yml up -d
 ```
 
 if there is an update, run:
 ```sh
-docker compose -f docker-compose-local.yml down -v
+docker compose --env-file .env_local -f docker-compose-local.yml down -v
 docker rm nginx
 docker rm web
-docker compose -f .\docker-compose-local.yml build nginx
-docker compose -f .\docker-compose-local.yml build web
-docker compose -f .\docker-compose-local.yml up -d
+docker compose --env-file .env_local -f .\docker-compose-local.yml build nginx
+docker compose --env-file .env_local -f .\docker-compose-local.yml build web_local
+docker-compose --env-file .env_local -f docker-compose-local.yml up -d
 ```
 
 Push docker hub image
@@ -37,7 +37,7 @@ python manage.py createsuperuser
 
 Load initial test data
 ```sh
-python manage.py create_dataset --testing
+python manage.py create_test_dataset
 ```
 
 ### Test local ssl
