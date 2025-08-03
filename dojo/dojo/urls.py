@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.contrib.auth.views import LogoutView
 from django.urls import path, include
 
-from .views import *
+from .views import landing_page, custom_404, custom_500
 from user_management.views import RegisterView, CustomLoginView
 
 
@@ -20,11 +20,24 @@ urlpatterns = [
 # Solo habilita el admin si DEBUG=True o ALLOW_ADMIN=True
 if settings.DEBUG or getattr(settings, 'ALLOW_ADMIN', False):
     from django.contrib import admin
+
     urlpatterns += [
         path('admin/', admin.site.urls),
     ]
 
 if settings.DEBUG:
+    from django.shortcuts import render
+
+    def test_404(request):
+        return render(request, 'errors/404.html', status=404)
+
+    def test_500(request):
+        return render(request, 'errors/500.html', status=500)
+
+    urlpatterns += [
+        path('test-404/', test_404),
+        path('test-500/', test_500),
+    ]
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 handler404 = 'dojo.views.custom_404'

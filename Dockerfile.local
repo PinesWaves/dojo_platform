@@ -59,7 +59,7 @@ COPY dojo/entrypoint_local.sh /entrypoint_local.sh
 
 RUN chmod +x /entrypoint_local.sh
 
-# Install Django 4.2
+# Install Django 5.0 and other Python dependencies
 RUN pip install -r requirements.txt
 
 # Expose port 8000 for Django development server
