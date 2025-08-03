@@ -53,7 +53,7 @@ class Command(BaseCommand):
         # Create 90 students with random data
         logger.info('Loading users')
         users = []
-        for _ in range(90):
+        for i in range(90):
             gender = self.fake.random_element(elements=('M', 'F'))
             users.append({
                 'id_number': self.fake.unique.random_number(digits=10),
@@ -87,14 +87,14 @@ class Command(BaseCommand):
                 'date_joined': datetime.now(),
                 'payment': self.fake.random_int(min=0, max=1000),
                 'payment_status': self.fake.boolean(),
-                'is_active': True,
+                'is_active': True if i < 80 else False,  # Last 10 users are inactive
                 'is_staff': False,
                 'is_superuser': False
             })
 
         # Create 3 senseis with random data
         logger.info('Loading senseis')
-        for _ in range(3):
+        for i in range(3):
             gender = self.fake.random_element(elements=('M', 'F'))
             users.append({
                 'id_number': self.fake.unique.random_number(digits=10),
@@ -128,7 +128,7 @@ class Command(BaseCommand):
                 'date_joined': datetime.now(),
                 'payment': self.fake.random_int(min=0, max=1000),
                 'payment_status': self.fake.boolean(),
-                'is_active': True,
+                'is_active': True if i < 2 else False,  # Last sensei is inactive
                 'is_staff': True,
                 'is_superuser': False
             })
@@ -136,7 +136,32 @@ class Command(BaseCommand):
         for row in users:
             User.objects.create_user(**row)
 
+        # Following users are created for testing purposes
+        logger.info('Creating specific users for testing')
+        # Create a superuser
         User.objects.create_superuser(first_name='jesus', last_name='rod', password='rosales3', id_number=1)
+        # Create student with specific data
+        student = User.objects.create_user(
+            first_name='jesus',
+            last_name='rod',
+            id_number=2,
+            id_type='CC',
+            category=Category.ESTUDIANTE,
+            birth_date=datetime(2000, 1, 1),
+            birth_place='Bogotá',
+            password = 'rosales3'
+        )
+        # Create sensei with specific data
+        sensei = User.objects.create_user(
+            first_name='jesus',
+            last_name='rod',
+            id_number=3,
+            id_type='CC',
+            category=Category.SENSEI,
+            birth_date=datetime(1980, 1, 1),
+            birth_place='Bogotá',
+            password = 'rosales3'
+        )
 
     def load_techniques(self):
         # Create Techniques
