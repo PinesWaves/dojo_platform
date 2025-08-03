@@ -22,6 +22,9 @@ class SenseiDashboard(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateVie
     template_name = "dashboard/sensei/dashboard.html"
 
     def get(self, request, *args, **kwargs):
+        user_cat = request.user.category
+        if user_cat != Category.SENSEI:
+            return redirect('student_dashboard')
         trainings = Training.objects.all().order_by('-date')[:6]
         ctx = {
             "trainings": trainings,
@@ -230,6 +233,9 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
+        user_id = request.user.id
+        if user_id != pk:
+            return redirect('student_dashboard')
         student = get_object_or_404(User, pk=pk)
         form = UserUpdateForm(instance=student)
         ctx = {
