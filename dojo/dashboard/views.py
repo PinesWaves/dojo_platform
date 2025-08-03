@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class SenseiDashboard(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
-    template_name = "pages/sensei/dashboard.html"
+    template_name = "dashboard/sensei/dashboard.html"
 
     def get(self, request, *args, **kwargs):
         trainings = Training.objects.all().order_by('-date')[:6]
@@ -30,7 +30,7 @@ class SenseiDashboard(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateVie
 
 
 class ManageTrainings(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
-    template_name = "pages/sensei/manage_trainings.html"
+    template_name = "dashboard/sensei/manage_trainings.html"
 
     def get(self, request, *args, **kwargs):
         trainings = Training.objects.all()
@@ -79,11 +79,11 @@ class ManageTrainings(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateVie
                 train.techniques.add(technique)
             train.save()
         except ValidationError as e:
-            return JsonResponse({'error': str(e)}, status=400)
+            return JsonResponse({'errors': str(e)}, status=400)
         except Technique.DoesNotExist:
-            return JsonResponse({'error': 'One or more selected techniques do not exist.'}, status=400)
+            return JsonResponse({'errors': 'One or more selected techniques do not exist.'}, status=400)
         except Exception as e:
-            return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
+            return JsonResponse({'errors': 'An unexpected errors occurred.'}, status=500)
 
         trainings = Training.objects.filter(status=True)
         techniques = Technique.objects.all()
@@ -95,7 +95,7 @@ class ManageTrainings(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateVie
 
 
 class ManageTechniques(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
-    template_name = "pages/sensei/manage_techniques.html"
+    template_name = "dashboard/sensei/manage_techniques.html"
 
     def get(self, request, *args, **kwargs):
         techniques = Technique.objects.all()
@@ -112,7 +112,7 @@ class ManageTechniques(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateVi
         category = request.POST.get('technique_category')
         if not name or category not in dict(TechniqueCategory.choices):
             return render(request, self.template_name, {
-                'error': 'Invalid data submitted.',
+                'errors': 'Invalid data submitted.',
                 'technique_categories': TechniqueCategory.choices
             })
 
@@ -132,7 +132,7 @@ class ManageTechniques(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateVi
 
 
 class ManageStudents(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
-    template_name = "pages/sensei/manage_students.html"
+    template_name = "dashboard/sensei/manage_students.html"
     ctx = dict()
 
     def get(self, request, *args, **kwargs):
@@ -175,7 +175,7 @@ class ManageStudents(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView
 
 
 class ManageProfile(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
-    template_name = "pages/sensei/manage_profile.html"
+    template_name = "dashboard/sensei/manage_profile.html"
 
     def get(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
@@ -204,7 +204,7 @@ class ManageProfile(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView)
     def form_valid(self, form):
         # Process the form
         updated_user = form.save()
-        self.request.session['error'] = None
+        self.request.session['errors'] = None
         self.request.session['msg'] = "Update successful!"
         return redirect('manage_profile', pk=updated_user.pk)
 
@@ -215,7 +215,7 @@ class ManageProfile(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView)
 
 
 class StudentDashboard(LoginRequiredMixin, TemplateView):
-    template_name = "pages/student/dashboard.html"
+    template_name = "dashboard/student/dashboard.html"
 
     def get(self, request, *args, **kwargs):
         trainings = Training.objects.all().order_by('-date')[:6]
@@ -226,7 +226,7 @@ class StudentDashboard(LoginRequiredMixin, TemplateView):
 
 
 class StudentProfile(LoginRequiredMixin, TemplateView):
-    template_name = "pages/student/profile.html"
+    template_name = "dashboard/student/profile.html"
 
     def get(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
