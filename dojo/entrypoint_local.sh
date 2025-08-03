@@ -23,11 +23,11 @@ python manage.py migrate --noinput
 # Collect static files (optional)
 python manage.py collectstatic --noinput
 
+# Load dummy data
+python manage.py create_test_data
+
 # Start the Django server
 python manage.py runserver 0.0.0.0:8000
-
-# Load dummy data
-python manage.py create_dataset
 
 # Execute the command specified as arguments to this script
 exec "$@"
