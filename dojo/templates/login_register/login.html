@@ -3,11 +3,11 @@
 {% block login_box_msg %}Sign in to start your session{% endblock %}
 {% block login-box-content %}
 <!-- Error Message -->
-{% if error %}
+{% if errors %}
   <div class="alert alert-danger alert-dismissible">
     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
     <h5><i class="icon fas fa-exclamation-triangle"></i> Error!</h5>
-    {{ error }}
+    {{ errors }}
   </div>
 {% endif %}
 {% if msg %}
