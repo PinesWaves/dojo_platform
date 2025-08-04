@@ -23,8 +23,8 @@ services:
     stdin_open: true
     volumes:
       - .:/app
-      - ./dojo/static/:/app/static/
-      - ./dojo/media/:/app/media/
+      - ./dojo/static/:/app/dojo/static/
+      - ./dojo/media/:/app/dojo/media/
       - ./dojo/logs:/app/dojo/logs
     ports:
       - "8000:8000"
