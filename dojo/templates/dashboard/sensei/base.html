@@ -193,12 +193,16 @@
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
             <img class="img-circle elevation-2"
-                 {% if user.picture %}
-                  src="{{ user.picture.url }}"
-                 {% else %}
-                  src="{% static 'dist/img/avatar.png' %}"
-                 {% endif %}
-                 alt="User Image">
+                {% if student.picture %}
+                 src="{{ student.picture.url }}"
+                {% elif student.gender == 'M' %}
+                 src="{% static 'dist/img/avatar.png' %}"
+                {% elif student.gender == 'F' %}
+                 src="{% static 'dist/img/avatar2.png' %}"
+                {% else %}
+                 src="{% static 'dist/img/default_user.png' %}"
+                {% endif %}
+                alt="User Image">
         </div>
         <div class="info">
           <a href="{% url 'manage_profile' user.id %}" class="d-block">{{ user.first_name }} {{ user.last_name }}</a>
@@ -316,7 +320,7 @@
 <!-- daterangepicker -->
 <script src="{% static 'plugins/moment/moment.min.js' %}"></script>
 <script src="{% static 'plugins/daterangepicker/daterangepicker.js' %}"></script>
-<!-- Tempusdominus Bootstrap 4 -->
+<!-- Tempusdominus Bootstrap 4 (Datepicker) -->
 <script src="{% static 'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
 <!-- Summernote -->
 <script src="{% static 'plugins/summernote/summernote-bs4.min.js' %}"></script>
