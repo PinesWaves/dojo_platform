@@ -1,7 +1,7 @@
 asgiref==3.8.1
 bcrypt==4.2.1
 Django==5.2.4
-Faker==37.0.0
+Faker==37.5.3
 gunicorn==23.0.0
 packaging==24.2
 pillow==11.0.0
