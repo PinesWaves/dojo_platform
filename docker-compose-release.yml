@@ -41,7 +41,7 @@ services:
       - internal
 
   nginx:
-    image: nginx:1.25
+    image: nginx:1.29
     restart: always
     ports:
       - "80:80"
