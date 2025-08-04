@@ -3,9 +3,11 @@
 {% load static %}
 {% block title %} Profile {% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'dist/css/custom_style.css' %}">
-<!-- Country picker flags -->
-<link rel="stylesheet" href="{% static 'plugins/bootstrap-select-country-4.2.0/css/bootstrap-select-country.min.css' %}">
+  <link rel="stylesheet" href="{% static 'dist/css/custom_style.css' %}">
+  <!-- Country picker flags -->
+  <link rel="stylesheet" href="{% static 'plugins/bootstrap-select-country-4.2.0/css/bootstrap-select-country.min.css' %}">
+  <!-- Cropper.js -->
+  <link href="{% static 'plugins/cropperjs-v1.6.2/css/cropper.min.css' %}" rel="stylesheet">
 {% endblock %}
 {% block dashboard_content %}
   <!-- Content Header (Page header) -->
@@ -28,24 +30,20 @@
   {% include 'dashboard/common/profile.html' %}
 {% endblock %}
 {% block script %}
-  <!-- jQuery -->
-  <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
-  <!-- For datepicker -->
-<script src="{% static 'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
   <!-- Country picker flags -->
-<script src="{% static 'plugins/bootstrap-select-country-4.2.0/js/bootstrap-select-country.min.js' %}"></script>
-<script>
-    $(document).ready(function () {
-        $('#id_birth_date').datetimepicker({
-            format: 'L',
-            locale: 'es'
-        });
-        var val = birthPicker.find('input').val();
-        if (val) {
-            birthPicker.datetimepicker('date', moment(val, 'MM/DD/YYYY'));
-        }
+  <script src="{% static 'plugins/bootstrap-select-country-4.2.0/js/bootstrap-select-country.min.js' %}"></script>
+  <!-- Cropper.js -->
+  <script src="{% static 'plugins/cropperjs-v1.6.2/js/cropper.min.js' %}" rel="stylesheet"></script>
+  <!-- Custom JS for modal and crop -->
+  <script src="{% static 'dist/js/custom.js' %}" rel="stylesheet"></script>
+  <script>
+      $(document).ready(function () {
+          $('#id_birth_date').datetimepicker({
+              format: 'L',
+              //locale: 'es'
+          });
 
-        $('.countrypicker').countrypicker();
-    });
-</script>
+          $('.countrypicker').countrypicker();
+      });
+  </script>
 {% endblock %}

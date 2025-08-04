@@ -29,7 +29,7 @@ from dashboard.views import (
 urlpatterns = [
     path('', SenseiDashboard.as_view(), name='sensei_dashboard'),
     path('student/', StudentDashboard.as_view(), name='student_dashboard'),
-    path('student/profile/<int:pk>/', StudentProfile.as_view(), name='profile'),
+    path('student/profile/', StudentProfile.as_view(), name='profile'),
     path('manage_trainings/', ManageTrainings.as_view(), name='manage_trainings'),
     path('manage_techniques/', ManageTechniques.as_view(), name='manage_techniques'),
     path('manage_students/', ManageStudents.as_view(), name='manage_students'),
