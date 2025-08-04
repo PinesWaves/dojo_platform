@@ -3,7 +3,12 @@
 <div class="modal fade" id="modal-profile-pic" tabindex="-1" aria-labelledby="modalProfilePicLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
-      <form id="form-profile-pic" method="POST" enctype="multipart/form-data" action="{% url 'profile' %}">
+      <form id="form-profile-pic" method="POST" enctype="multipart/form-data"
+          {% if 'student/profile' in request.path %}
+            action="{% url 'profile' %}">
+          {% elif 'manage_profile/' in request.path %}
+            action="{% url 'manage_profile' student.id %}">
+          {% endif %}
         {% csrf_token %}
         <div class="modal-header">
           <h5 class="modal-title" id="modalProfilePicLabel">Update Profile Picture</h5>

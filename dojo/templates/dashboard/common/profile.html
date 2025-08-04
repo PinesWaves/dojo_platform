@@ -314,7 +314,12 @@
               <!-- /.tab-pane -->
 
               <div class="tab-pane" id="settings">
-                <form method="post" class="form-horizontal" action="{% url 'manage_profile' student.id %}">
+                <form method="post" class="form-horizontal"
+                    {% if 'student/profile' in request.path %}
+                      action="{% url 'profile' %}">
+                    {% elif 'manage_profile/' in request.path %}
+                      action="{% url 'manage_profile' student.id %}">
+                    {% endif %}
                   {% csrf_token %}
                   {% for field in form %}
                     <div class="form-group row">
@@ -330,6 +335,7 @@
                   <div class="form-group row">
                     <div class="offset-sm-2 col-sm-10">
                       <button type="submit" class="btn btn-danger">Update</button>
+                      <button type="submit" class="btn btn-dark float-right ml-1">Delete</button>
                       {% if student.is_active %}
                         <button type="submit" class="btn btn-dark float-right">Deactivate</button>
                       {% else %}
