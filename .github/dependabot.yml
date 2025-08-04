@@ -4,9 +4,30 @@
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
 version: 2
+
 updates:
-  - package-ecosystem: "" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  # 1. Python - pip dependencies
+  - package-ecosystem: "pip"
+    directory: "/dojo"  # ajusta si tu requirements.txt está en otra ruta
     schedule:
       interval: "weekly"
-  
+    allow:
+      - dependency-type: "direct"  # opcional: solo dependencias explícitas
+
+  # 2. Dockerfile
+  - package-ecosystem: "docker"
+    directory: "/"  # ajusta si tu Dockerfile está en otra carpeta
+    schedule:
+      interval: "weekly"
+
+  # 3. docker-compose
+  - package-ecosystem: "docker-compose"
+    directory: "/"  # ajusta si docker-compose.yml está en otro lado
+    schedule:
+      interval: "weekly"
+
+  # 4. GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"  # raíz del repo, donde está la carpeta `.github/workflows`
+    schedule:
+      interval: "weekly"
