@@ -193,11 +193,11 @@
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
             <img class="img-circle elevation-2"
-                {% if student.picture %}
-                 src="{{ student.picture.url }}"
-                {% elif student.gender == 'M' %}
+                {% if user.picture %}
+                 src="{{ user.picture.url }}"
+                {% elif user.gender == 'M' %}
                  src="{% static 'dist/img/avatar.png' %}"
-                {% elif student.gender == 'F' %}
+                {% elif user.gender == 'F' %}
                  src="{% static 'dist/img/avatar2.png' %}"
                 {% else %}
                  src="{% static 'dist/img/default_user.png' %}"
