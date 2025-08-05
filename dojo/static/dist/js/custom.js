@@ -2,7 +2,7 @@
 // This code handles the modal for uploading a new profile picture
 // Make sure to include Bootstrap's JS in your HTML file before this script
 // <script src="/static/plugins/bootstrap-5.3.1/js/bootstrap.bundle.min.js"></script>
-// Modal html location: templates/dashboard/common/profile_modal.html
+// Modal html location: templates/dashboard/common/modal_user_update_profile_pic.html
 $(document).ready(function () {
     $('#profile-pic-input').on('change', function () {
         const [file] = this.files;
