@@ -57,7 +57,6 @@
           <!-- /.card-body -->
         </div>
         <!-- /.card -->
-        {% include 'dashboard/common/profile_modal.html' %}
 
         <!-- About Me Box -->
         <div class="card card-danger">
@@ -335,11 +334,15 @@
                   <div class="form-group row">
                     <div class="offset-sm-2 col-sm-10">
                       <button type="submit" class="btn btn-danger">Update</button>
-                      <button type="submit" class="btn btn-dark float-right ml-1">Delete</button>
-                      {% if student.is_active %}
-                        <button type="submit" class="btn btn-dark float-right">Deactivate</button>
-                      {% else %}
-                        <button type="submit" class="btn btn-dark float-right">Activate</button>
+                      {% if 'manage_profile/' in request.path and user.pk != student.pk%}
+                        <div class="btn btn-dark float-right ml-1" data-toggle="modal" data-target="#modal-user-delete">Delete</div>
+                        <div class="btn btn-dark float-right" data-toggle="modal" data-target="#modal-user-switch-status">
+                        {% if student.is_active %}
+                          Deactivate
+                        {% else %}
+                          Activate
+                        {% endif %}
+                        </div>
                       {% endif %}
                     </div>
                   </div>
@@ -356,5 +359,10 @@
     </div>
     <!-- /.row -->
   </div><!-- /.container-fluid -->
+  {% include 'dashboard/common/modal_user_update_profile_pic.html' %}
+  {% if 'manage_profile/' in request.path and user.pk != student.pk %}
+    {% include 'dashboard/common/modal_user_delete.html' %}
+    {% include 'dashboard/common/modal_user_switch_status.html' %}
+  {% endif %}
 </section>
 <!-- /.content -->
