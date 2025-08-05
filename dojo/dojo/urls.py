@@ -13,8 +13,8 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
     path('signup/<str:token>/', RegisterView.as_view(), name='signup'),
     path('dashboard/', include('dashboard.urls')),
-    path('404/', custom_404),
-    path('500/', custom_500),
+    path('404/', custom_404, name='404'),
+    path('500/', custom_500, name='500'),
 ]
 
 # Solo habilita el admin si DEBUG=True o ALLOW_ADMIN=True
@@ -35,8 +35,8 @@ if settings.DEBUG:
         return render(request, 'errors/500.html', status=500)
 
     urlpatterns += [
-        path('test-404/', test_404),
-        path('test-500/', test_500),
+        path('test-404/', test_404, name='test_404'),
+        path('test-500/', test_500, name='test_500'),
     ]
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
