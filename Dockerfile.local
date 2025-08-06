@@ -55,17 +55,10 @@ WORKDIR /app/dojo
 # Copy Django project (assuming you have a local project to copy)
 COPY dojo /app/dojo
 
-COPY dojo/entrypoint_local.sh /entrypoint_local.sh
-
-RUN chmod +x /entrypoint_local.sh
-
 # Install Django 5.0 and other Python dependencies
 RUN pip install -r requirements.txt
 
 # Expose port 8000 for Django development server
 EXPOSE 8000
 
-# Default command to run a bash shell
-# CMD ["bash"]
-
-ENTRYPOINT ["/entrypoint_local.sh"]
+ENTRYPOINT ["sh", "/app/dojo/entrypoint_local.sh"]

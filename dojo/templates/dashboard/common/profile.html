@@ -8,18 +8,24 @@
         <!-- Profile Image -->
         <div class="card card-danger card-outline">
           <div class="card-body box-profile">
-            <div class="text-center">
-              <img class="profile-user-img img-fluid img-circle"
-                  {% if student.picture %}
-                   src="{{ student.picture.url }}"
-                  {% elif student.gender == 'M' %}
-                   src="{% static 'dist/img/avatar.png' %}"
-                  {% elif student.gender == 'F' %}
-                   src="{% static 'dist/img/avatar2.png' %}"
-                  {% else %}
-                   src="{% static 'dist/img/default_user.png' %}"
-                  {% endif %}
-                   alt="User profile picture">
+            <div class="position-relative w-100 mb-3" style="cursor: pointer;" data-toggle="modal" data-target="#modal-profile-pic">
+              <img class="profile-user-img img-fluid img-circle mx-auto d-block"
+                   {% if student.picture %}
+                     src="{{ student.picture.url }}"
+                   {% elif student.gender == 'M' %}
+                     src="{% static 'dist/img/avatar.png' %}"
+                   {% elif student.gender == 'F' %}
+                     src="{% static 'dist/img/avatar2.png' %}"
+                   {% else %}
+                     src="{% static 'dist/img/default_user.png' %}"
+                   {% endif %}
+                   alt="User profile picture"
+                   id="profile-image-display">
+
+              <!-- Ícono de lápiz -->
+              <span class="position-absolute" style="bottom: 2px; right: calc(50% - 45px);">
+                <i class="fas fa-pencil-alt bg-white text-primary rounded-circle p-1 border border-secondary shadow-sm"></i>
+              </span>
             </div>
 
             <h3 class="profile-username text-center">{{ student.first_name }} {{ student.last_name }}</h3>
@@ -36,8 +42,16 @@
               <li class="list-group-item">
                 <b>Birth Date</b> <a class="float-right">{{ student.birth_date }}</a>
               </li>
+              <li class="list-group-item">
+                <b>Status</b> <a class="float-right">
+                  {% if student.is_active %}
+                    <span class="badge badge-success">Active</span>
+                  {% else %}
+                    <span class="badge badge-danger">Inactive</span>
+                  {% endif %}
+                </a>
+              </li>
             </ul>
-
 {#              <a href="#" class="btn btn-primary btn-block"><b>Follow</b></a>#}
           </div>
           <!-- /.card-body -->
@@ -299,7 +313,12 @@
               <!-- /.tab-pane -->
 
               <div class="tab-pane" id="settings">
-                <form method="post" class="form-horizontal" action="{% url 'manage_profile' student.id %}">
+                <form method="post" class="form-horizontal"
+                    {% if 'student/profile' in request.path %}
+                      action="{% url 'profile' %}">
+                    {% elif 'manage_profile/' in request.path %}
+                      action="{% url 'manage_profile' student.id %}">
+                    {% endif %}
                   {% csrf_token %}
                   {% for field in form %}
                     <div class="form-group row">
@@ -315,10 +334,15 @@
                   <div class="form-group row">
                     <div class="offset-sm-2 col-sm-10">
                       <button type="submit" class="btn btn-danger">Update</button>
-                      {% if student.is_active %}
-                        <button type="submit" class="btn btn-dark float-right">Deactivate</button>
-                      {% else %}
-                        <button type="submit" class="btn btn-dark float-right">Activate</button>
+                      {% if 'manage_profile/' in request.path and user.pk != student.pk%}
+                        <div class="btn btn-dark float-right ml-1" data-toggle="modal" data-target="#modal-user-delete">Delete</div>
+                        <div class="btn btn-dark float-right" data-toggle="modal" data-target="#modal-user-switch-status">
+                        {% if student.is_active %}
+                          Deactivate
+                        {% else %}
+                          Activate
+                        {% endif %}
+                        </div>
                       {% endif %}
                     </div>
                   </div>
@@ -335,5 +359,10 @@
     </div>
     <!-- /.row -->
   </div><!-- /.container-fluid -->
+  {% include 'dashboard/common/modal_user_update_profile_pic.html' %}
+  {% if 'manage_profile/' in request.path and user.pk != student.pk %}
+    {% include 'dashboard/common/modal_user_delete.html' %}
+    {% include 'dashboard/common/modal_user_switch_status.html' %}
+  {% endif %}
 </section>
 <!-- /.content -->

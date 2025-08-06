@@ -11,14 +11,14 @@ from django.views.generic import TemplateView
 import logging
 
 from dashboard.models import Training, Dojo, Technique, TechniqueCategory, TrainingStatus
-from dojo.mixins.view_mixins import UserCategoryRequiredMixin
+from dojo.mixins.view_mixins import AdminRequiredMixin
 from user_management.models import User, Token, Category
 from user_management.forms import UserUpdateForm
 
 logger = logging.getLogger(__name__)
 
 
-class SenseiDashboard(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
+class SenseiDashboard(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
     template_name = "dashboard/sensei/dashboard.html"
 
     def get(self, request, *args, **kwargs):
@@ -32,7 +32,7 @@ class SenseiDashboard(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateVie
         return render(request, self.template_name, ctx)
 
 
-class ManageTrainings(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
+class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
     template_name = "dashboard/sensei/manage_trainings.html"
 
     def get(self, request, *args, **kwargs):
@@ -97,7 +97,7 @@ class ManageTrainings(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateVie
         return render(request, self.template_name, context=ctx)
 
 
-class ManageTechniques(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
+class ManageTechniques(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
     template_name = "dashboard/sensei/manage_techniques.html"
 
     def get(self, request, *args, **kwargs):
@@ -134,7 +134,7 @@ class ManageTechniques(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateVi
         return render(request, self.template_name, context=ctx)
 
 
-class ManageStudents(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
+class ManageStudents(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
     template_name = "dashboard/sensei/manage_students.html"
     ctx = dict()
 
@@ -177,7 +177,7 @@ class ManageStudents(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView
         return render(request, self.template_name, context=self.ctx)
 
 
-class ManageProfile(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView):
+class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
     template_name = "dashboard/sensei/manage_profile.html"
 
     def get(self, request, *args, **kwargs):
@@ -193,8 +193,19 @@ class ManageProfile(LoginRequiredMixin, UserCategoryRequiredMixin, TemplateView)
     def post(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
         student = get_object_or_404(User, pk=pk)
-        form = UserUpdateForm(request.POST, instance=student)
-        breakpoint()
+        form = UserUpdateForm(request.POST, request.FILES, instance=student)
+        if request.FILES.get('picture'):
+            if student.picture:
+                student.picture.delete(save=False)
+
+            uploaded_file = request.FILES['picture']
+            ext = uploaded_file.name.rsplit('.')[-1]
+            student.picture.save(f'{pk}.{ext}', request.FILES['picture'], save=True)
+            ctx = {
+                'form': form,
+                'student': student,
+            }
+            return render(request, self.template_name, context=ctx)
         if form.is_valid():
             return self.form_valid(form)
         else:
@@ -222,8 +233,12 @@ class StudentDashboard(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         trainings = Training.objects.all().order_by('-date')[:6]
+        pk = request.user.pk
+        student = get_object_or_404(User, pk=pk)
         ctx = {
             "trainings": trainings,
+            "student": student,
+            "techniques": Technique.objects.all(),
         }
         return render(request, self.template_name, ctx)
 
@@ -232,10 +247,7 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/student/profile.html"
 
     def get(self, request, *args, **kwargs):
-        pk = kwargs.get('pk')
-        user_id = request.user.id
-        if user_id != pk:
-            return redirect('student_dashboard')
+        pk = request.user.pk
         student = get_object_or_404(User, pk=pk)
         form = UserUpdateForm(instance=student)
         ctx = {
@@ -243,3 +255,42 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
             'student': student,
         }
         return render(request, self.template_name, context=ctx)
+
+    def post(self, request, *args, **kwargs):
+        pk = request.user.pk
+        student = get_object_or_404(User, pk=pk)
+        form = UserUpdateForm(request.POST, request.FILES, instance=student)
+        if request.FILES.get('picture'):
+            if student.picture:
+                student.picture.delete(save=False)
+
+            uploaded_file = request.FILES['picture']
+            ext = uploaded_file.name.rsplit('.')[-1]
+            student.picture.save(f'{pk}.{ext}', request.FILES['picture'], save=True)
+            ctx = {
+                'form': form,
+                'student': student,
+            }
+            return render(request, self.template_name, context=ctx)
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            request.session['errors'] = form.errors
+            request.session['msg'] = "Update failed!"
+            ctx = {
+                'form': form,
+                'student': student,
+            }
+            return render(request, self.template_name, context=ctx)
+
+    def form_valid(self, form):
+        # Process the form
+        updated_user = form.save()
+        self.request.session['errors'] = None
+        self.request.session['msg'] = "Update successful!"
+        return redirect('profile', pk=updated_user.pk)
+
+    def form_invalid(self, form):
+        print(form.errors)
+        self.object = None
+        return self.render_to_response(self.get_context_data(form=form))

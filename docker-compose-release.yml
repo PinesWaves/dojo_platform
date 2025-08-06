@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16
+    image: postgres:17
     restart: always
     environment:
       POSTGRES_DB: ${DOJO_DB_NAME}
@@ -41,7 +41,7 @@ services:
       - internal
 
   nginx:
-    image: nginx:1.25
+    image: nginx:1.29
     restart: always
     ports:
       - "80:80"
