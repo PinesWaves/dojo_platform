@@ -1,7 +1,7 @@
 services:
   db_local:
     restart: always
-    image: postgres:16
+    image: postgres:17
     environment:
       POSTGRES_DB: ${DOJO_DB_NAME}
       POSTGRES_USER: ${DOJO_DB_USER}
