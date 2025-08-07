@@ -139,7 +139,13 @@ class Command(BaseCommand):
         # Following users are created for testing purposes
         logger.info('Creating specific users for testing')
         # Create a superuser
-        User.objects.create_superuser(first_name='jesus', last_name='rod', password='rosales3', id_number=1)
+        User.objects.create_superuser(
+            first_name='jesus',
+            last_name='rod',
+            password='rosales3',
+            id_number=1,
+            category=Category.SENSEI
+        )
         # Create student with specific data
         student = User.objects.create_user(
             first_name='jesus',
@@ -208,6 +214,7 @@ class Command(BaseCommand):
             try:
                 row['sensei'] = User.objects.filter(category=Category.SENSEI)[i]
             except:
+                # TODO pending complete dojo logic
                 breakpoint()
             Dojo.objects.create(**row)
             i += 1
