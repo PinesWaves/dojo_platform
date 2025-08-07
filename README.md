@@ -37,7 +37,7 @@ python manage.py createsuperuser
 
 Load initial test data
 ```sh
-python manage.py create_test_dataset
+python manage.py create_test_data
 ```
 
 ### Test local ssl
