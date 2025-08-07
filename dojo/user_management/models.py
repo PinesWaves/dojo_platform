@@ -2,6 +2,7 @@ import base64
 from datetime import datetime, timedelta
 from io import BytesIO
 from PIL import Image
+from django.utils import timezone
 from django.utils.timezone import now
 
 from django.db import models
@@ -120,7 +121,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     sec_recom = models.BooleanField(default=False)
     # I have read, understand the questions, completed and answered the questionnaire with my acceptance?
     agreement = models.BooleanField(default=False)
-    date_joined = models.DateTimeField(auto_now_add=True)
+    date_joined = models.DateTimeField(default=timezone.now, editable=True)
     date_deactivated = models.DateTimeField(null=True)
     date_reactivated = models.DateTimeField(null=True)
     payment = models.IntegerField(default=0)
