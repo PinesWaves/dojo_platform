@@ -18,12 +18,12 @@ class CustomSwitchWidget(forms.CheckboxInput):
 
         checkbox_html = super().render(name, value, attrs)
         a_text, a_url = self.a_tag
-
+        link = f'<a href="{a_url}" target="_blank">{a_text}</a>' if a_text else ''
         switch_html = f'''
         <div class="custom-control custom-switch custom-switch-on-danger">
             {checkbox_html}
             <label class="custom-control-label" for="{switch_id}">
-                {self.label_text} {"" if not a_text else f'<a href="{a_url}" target="_blank">{a_text}</a>'}
+                {self.label_text} {link}
             </label>
         </div>
         '''
@@ -33,7 +33,9 @@ class CustomSwitchWidget(forms.CheckboxInput):
 class CustomDatePickerWidget(forms.DateInput):
     def __init__(self, label_text=None, attrs=None, format='%m/%d/%Y'):
         self.label_text = label_text or ""
-        final_attrs = attrs or {}
+        final_attrs = {'required': 'required'}
+        if attrs:
+            final_attrs.update(attrs)
         super().__init__(attrs=final_attrs, format=format)
 
     def render(self, name, value, attrs=None, renderer=None):
@@ -52,9 +54,8 @@ class CustomDatePickerWidget(forms.DateInput):
         input_html = super().render(name, value, attrs, renderer)
         # checkbox_html = super().render(name, value, attrs)
 
-        label_html = f"<label>{self.label_text}</label>" if self.label_text else ""
+        # label_html = f"<label>{self.label_text}</label>" if self.label_text else ""
         html = f"""
-            {label_html}
             <div class="input-group date" id="{datepicker_id}" data-target-input="nearest">
                 {input_html}
                 <div class="input-group-append" data-target="#{datepicker_id}" data-toggle="datetimepicker">

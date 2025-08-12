@@ -12,7 +12,7 @@ import logging
 
 from dashboard.models import Training, Dojo, Technique, TechniqueCategory, TrainingStatus
 from dojo.mixins.view_mixins import AdminRequiredMixin
-from user_management.models import User, Token, Category
+from user_management.models import User, Token, Category, TokenType
 from user_management.forms import UserUpdateForm
 
 logger = logging.getLogger(__name__)
@@ -158,20 +158,27 @@ class ManageStudents(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
             register_code = token_urlsafe(30)
 
             # Save the token to the database
+            Token.objects.all().delete()  # Clear existing tokens
+            # Create a new token with the provided expiration date
             Token.objects.create(
                 token=register_code,
+                type=TokenType.SIGNUP,
+                created_at=datetime.now(timezone.utc),
                 expires_at=expiration_datetime
             )
 
-        if request.POST.get('_method') == 'delete':
+        elif request.POST.get('_method') == 'delete':
             url = request.POST['url']
-            token = url.split('/')[2]
+            token = url.split('/')[-2]
             Token.objects.filter(token=token).delete()
 
         self.ctx['time_url'] = [
             (t.expires_at, reverse('signup', kwargs={'token': t.token}))
             for t in Token.objects.all()
         ]
+
+        self.request.session['errors'] = None
+        self.request.session['msg'] = "Update successful!"
 
 
         return render(request, self.template_name, context=self.ctx)
@@ -193,27 +200,47 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
         student = get_object_or_404(User, pk=pk)
-        form = UserUpdateForm(request.POST, request.FILES, instance=student)
-        if request.FILES.get('picture'):
+        breakpoint()
+        if request.POST.get('action') == 'switch_status':
+            # Handle the switch action
+            if student.is_active:
+                student.is_active = False
+                student.date_deactivated = datetime.now()
+                student.date_reactivated = None
+                student.save()
+                self.request.session['msg'] = "User deactivated successfully!"
+            else:
+                student.is_active = True
+                student.date_reactivated = datetime.now()
+                student.date_deactivated = None
+                student.save()
+                self.request.session['msg'] = "User activated successfully!"
+            return redirect('manage_profile', pk=pk)
+        elif self.request.POST.get('action') == 'delete':
+            student.delete()
+            self.request.session['msg'] = "User deleted successfully!"
+            return redirect('manage_students')
+        elif self.request.FILES.get('picture'):
+            # Handle picture upload
             if student.picture:
                 student.picture.delete(save=False)
 
-            uploaded_file = request.FILES['picture']
+            uploaded_file = self.request.FILES['picture']
             ext = uploaded_file.name.rsplit('.')[-1]
-            student.picture.save(f'{pk}.{ext}', request.FILES['picture'], save=True)
+            student.picture.save(f'{pk}.{ext}', self.request.FILES['picture'], save=True)
+            form = UserUpdateForm(self.request.POST, self.request.FILES, instance=student)
             ctx = {
                 'form': form,
                 'student': student,
             }
             return render(request, self.template_name, context=ctx)
-        if form.is_valid():
-            return self.form_valid(form)
         else:
-            ctx = {
-                'form': form,
-                'student': student,
-            }
-            return render(request, self.template_name, context=ctx)
+            form = UserUpdateForm(request.POST, instance=student)
+
+            if form.is_valid():
+                return self.form_valid(form)
+            else:
+                return  self.form_invalid(form, student, request)
 
     def form_valid(self, form):
         # Process the form
@@ -222,9 +249,13 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         self.request.session['msg'] = "Update successful!"
         return redirect('manage_profile', pk=updated_user.pk)
 
-    def form_invalid(self, form):
-        print(form.errors)
-        self.object = None
+    def form_invalid(self, form, student, request):
+        request.session['errors'] = form.errors
+        request.session['msg'] = "Update failed!"
+        ctx = {
+            'form': form,
+            'student': student,
+        }
         return self.render_to_response(self.get_context_data(form=form))
 
 
@@ -273,24 +304,24 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
             }
             return render(request, self.template_name, context=ctx)
         if form.is_valid():
-            return self.form_valid(form)
+            return self.form_invalid(form, request)
+            # return self.form_valid(form)
         else:
-            request.session['errors'] = form.errors
-            request.session['msg'] = "Update failed!"
-            ctx = {
-                'form': form,
-                'student': student,
-            }
-            return render(request, self.template_name, context=ctx)
+            return self.form_invalid(form, request)
+            # return render(request, self.template_name, context=ctx)
 
     def form_valid(self, form):
         # Process the form
-        updated_user = form.save()
+        form.save()
         self.request.session['errors'] = None
         self.request.session['msg'] = "Update successful!"
-        return redirect('profile', pk=updated_user.pk)
+        return redirect('profile')
 
-    def form_invalid(self, form):
-        print(form.errors)
-        self.object = None
-        return self.render_to_response(self.get_context_data(form=form))
+    def form_invalid(self, form, request):
+        request.session['errors'] = form.errors
+        request.session['msg'] = "Update failed!"
+        # ctx = {
+        #     'form': form,
+        #     'student': student,
+        # }
+        return redirect('profile')

@@ -19,7 +19,9 @@ class UserRegisterForm(forms.ModelForm):
                 'class': 'selectpicker countrypicker',
                 # 'data-flag': 'true',
                 'data-default': 'CO',
-            }),
+            }
+        ),
+        required=True
     )
     password1 = forms.CharField(
         label="Password",
@@ -81,14 +83,21 @@ class UserRegisterForm(forms.ModelForm):
         ),
         required=True
     )
+    date_joined = forms.DateField(
+        widget=CustomDatePickerWidget(
+            label_text="Date joined",
+        ),
+        required=True
+    )
 
     class Meta:
         model = User
         fields = [
             'first_name', 'last_name', 'id_type', 'id_number', 'gender', 'birth_date', 'birth_place', 'profession',
             'email', 'phone_number', 'country', 'city', 'address', 'parent', 'parent_phone_number', 'password1',
-            'password2', 'eps', 'physical_cond', 'medical_cond', 'drug_cons', 'allergies', 'other_activities',
-            'cardio_prob', 'injuries', 'physical_limit', 'lost_cons', 'sec_recom', 'agreement',
+            'password2', 'eps', 'date_joined', 'physical_cond', 'medical_cond', 'drug_cons', 'allergies',
+            'other_activities', 'cardio_prob', 'injuries', 'physical_limit', 'lost_cons', 'sec_recom', 'agreement',
+            'accept_regulations', 'accept_inf_cons'
         ]
         labels = {
             'birth_date': '',
@@ -96,6 +105,7 @@ class UserRegisterForm(forms.ModelForm):
             'medical_cond': 'Medical Condition',
             'drug_cons': 'Drug Consumption',
             'eps': 'EPS',
+            'date_joined': '',
             'cardio_prob': '',
             'injuries': '',
             'physical_limit': '',
@@ -107,43 +117,64 @@ class UserRegisterForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        # Extraemos el usuario actual del contexto si es pasado
         self.request_user = kwargs.pop('request_user', None)
         super().__init__(*args, **kwargs)
-        for field_name, field in self.fields.items():
-            class_attr = field.widget.attrs.get('class', 'form-control')
-            field.widget.attrs['class'] = class_attr
-            if 'form-control' not in class_attr:
-                field.widget.attrs['class'] += ' form-control'
 
+        for field_name, field in self.fields.items():
+            # Asegurar clase form-control (menos checkboxes o switches)
+            class_attr = field.widget.attrs.get('class', '')
+            if not isinstance(field.widget, forms.CheckboxInput) and 'form-control' not in class_attr:
+                class_attr = (class_attr + ' form-control').strip()
+            field.widget.attrs['class'] = class_attr
+
+            # Obtener texto base para placeholder/label
+            label_text = self.Meta.labels.get(field_name) if hasattr(self.Meta, 'labels') else None
+            if not label_text:
+                label_text = field.label or field_name.replace('_', ' ').title()
+
+            # Si es un <select>, mantener label y no poner placeholder
+            if isinstance(field.widget, forms.Select):
+                field.label = label_text
+                field.widget.attrs.pop('placeholder', None)
+            else:
+                # No es select: usar placeholder y quitar label
+                field.widget.attrs['placeholder'] = label_text
+                field.label = ''
+
+            # Marcar campos con error
             if field_name in self.errors:
                 field.widget.attrs['class'] += ' is-invalid'
 
-    def clean_password2(self):
-        password1 = self.cleaned_data.get("password1")
-        password2 = self.cleaned_data.get("password2")
+    def clean(self):
+        cleaned_data = super().clean()
 
+        # Validación de campos obligatorios
+        required_fields = [
+            'first_name', 'last_name', 'id_type', 'id_number', 'gender',
+            'birth_date', 'birth_place', 'profession', 'email', 'phone_number',
+            'country', 'city', 'address', 'date_joined', 'eps',
+            'physical_cond', 'medical_cond',
+            'sec_recom', 'agreement', 'accept_inf_cons', 'accept_regulations',
+            'password1', 'password2',
+        ]
+
+        # for field in required_fields:
+        #     value = cleaned_data.get(field)
+        #     if value in [None, '', False]:
+        #         self.add_error(field, "This field is required.")
+
+        # Validación de contraseña
+        password1 = cleaned_data.get("password1")
+        password2 = cleaned_data.get("password2")
         if password1 and password2 and password1 != password2:
-            raise ValidationError("Passwords do not match.")
-        return password2
+            self.add_error("password2", "Passwords do not match.")
 
-    def clean_category(self):
-        category = self.cleaned_data['category']
-        if 'category' in self.changed_data and not self.request_user.is_sensei:
-            raise forms.ValidationError("Only users with category 'Sensei' can change the category.")
-        return category
+        # Validación del campo category si cambia
+        category = cleaned_data.get("category")
+        if category and 'category' in self.changed_data and self.request_user and not self.request_user.is_sensei:
+            self.add_error("category", "Only users with category 'Sensei' can change the category.")
 
-    def clean_accept_regulations(self):
-        accept = self.cleaned_data.get('accept_regulations')
-        if not accept:
-            raise forms.ValidationError("You must accept the Regulations to continue.")
-        return accept
-
-    def clean_accept_inf_cons(self):
-        accept = self.cleaned_data.get('accept_inf_cons')
-        if not accept:
-            raise forms.ValidationError("You must accept the Informed Consent to continue.")
-        return accept
+        return cleaned_data
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -167,13 +198,34 @@ class UserUpdateForm(forms.ModelForm):
                 'class': 'selectpicker countrypicker',
                 'data-default': '',
             }),
+        required=False
     )
+    birth_place = forms.CharField(required=False)
+    profession = forms.CharField(required=False)
+    city = forms.CharField(required=False)
+    parent = forms.CharField(required=False)
+    parent_phone_number = forms.CharField(required=False)
+    medical_cond = forms.CharField(required=False)
+    drug_cons = forms.CharField(required=False)
+    allergies = forms.CharField(required=False)
+    other_activities = forms.CharField(required=False)
+    cardio_prob = forms.BooleanField(required=False)
+    injuries = forms.BooleanField(required=False)
+    physical_limit = forms.BooleanField(required=False)
+    lost_cons = forms.BooleanField(required=False)
+    date_joined = forms.DateField(
+        widget=CustomDatePickerWidget(
+            label_text="Date joined",
+        ),
+        required=True
+    )
+
 
     class Meta:
         model = User
         fields = [
             'first_name', 'last_name', 'category', 'id_type', 'id_number', 'birth_date', 'birth_place', 'profession',
-            'eps', 'phone_number', 'address', 'city', 'country', 'email', 'level', 'parent', 'parent_phone_number',
+            'eps', 'date_joined', 'phone_number', 'address', 'city', 'country', 'email', 'level', 'parent', 'parent_phone_number',
             'medical_cond', 'drug_cons', 'allergies', 'other_activities', 'cardio_prob', 'injuries', 'physical_limit',
             'lost_cons'
         ]
@@ -214,3 +266,42 @@ class UserUpdateForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+
+class ForgotPassForm(forms.Form):
+    email = forms.EmailField(
+        label="",
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Email'
+        }),
+        required=True
+    )
+
+
+class RecoverPassForm(forms.Form):
+    password1 = forms.CharField(
+        label="",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'New Password'
+        }),
+        required=True
+    )
+    password2 = forms.CharField(
+        label="",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirm New Password'
+        }),
+        required=True
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get("password1")
+        password2 = cleaned_data.get("password2")
+
+        if password1 and password2 and password1 != password2:
+            raise ValidationError("Passwords do not match.")
+        return cleaned_data
