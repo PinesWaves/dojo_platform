@@ -3,7 +3,7 @@
 <div class="modal fade" id="modal-user-switch-status" tabindex="-1" aria-labelledby="modalUserSwitchStatusLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content bg-secondary">
-      <form id="form-switch_status" method="POST" enctype="multipart/form-data" action="{% url 'manage_profile' student.id %}">
+      <form id="form-switch_status" method="POST" action="{% url 'manage_profile' student.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="switch_status">
         <div class="modal-header">
