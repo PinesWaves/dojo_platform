@@ -1,4 +1,5 @@
 import base64
+import uuid
 from datetime import datetime, timedelta
 from io import BytesIO
 from PIL import Image
@@ -13,40 +14,40 @@ from config.config_vars import Ranges
 
 
 class IDType(models.TextChoices):
-    CEDULA_CIUDADANIA = 'CC', 'Citizenship card'
-    TARJETA_IDENTIDAD = 'IC', 'Identity Card'
-    CEDULA_EXTRANJERIA = 'AR', 'Alien Registration Card'
-    PASAPORTE = 'PA', 'Passport'
-    OTRO = 'OT', 'Otro'
+    CITIZENSHIP_CARD = 'CC', 'Citizenship card'
+    IDENTITY_CARD = 'IC', 'Identity Card'
+    ALIEN_CARD = 'AR', 'Alien Registration Card'
+    PASSPORT = 'PA', 'Passport'
+    OTHER = 'OT', 'Other'
 
 
 class Category(models.TextChoices):
     SENSEI = 'SE', 'Sensei'
+    SEMPAI = 'SP', 'Sempai'
     ESTUDIANTE = 'ST', 'Student'
 
 
 class MedicalConditions(models.TextChoices):
-    ENFERMEDADES_CARDIACAS = 'CD', 'Cardiac Diseases'
-    HIPERTENSION_ARTERIAL = 'AH', 'Arterial Hypertension'
+    CARDIAC_DISEASES = 'CD', 'Cardiac Diseases'
+    ARTERIAL_HYPERTENSION = 'AH', 'Arterial Hypertension'
     DIABETES = 'D', 'Diabetes'
-    ASMA_O_PROBLEMAS_RESPIRATORIOS = 'AR', 'Asthma and respiratory problems'
-    EPILEPSIA_O_CONVULSIONES = 'ES', 'Epilepsy or Seizures'
-    PROBLEMAS_MUSCULOESQUELETICOS = 'MP', 'Musculoskeletal Problems (e.g. Sprains, Fractures)'
-    OTROS = 'OT', 'Others'
+    ASTHMA_OR_RESPIRATORY_PROBLEMS = 'AR', 'Asthma or respiratory problems'
+    EPILEPSY_OR_SEIZURES = 'ES', 'Epilepsy or Seizures'
+    MUSCULOSKELETAL_PROBLEMS = 'MP', 'Musculoskeletal Problems (e.g. Sprains, Fractures)'
+    OTHERS = 'OT', 'Others'
     NA = 'NA', 'No aplicable'
 
 
 class PhysicalConditions(models.TextChoices):
-    EXCELENTE = 'E', 'Excellent'
-    BUENO = 'G', 'Good'
-    ACEPTABLE = 'A', 'Acceptable'
-    NECESITA_MEJORAR = 'I', 'Needs improvement'
+    EXCELLENT = 'E', 'Excellent'
+    GOOD = 'G', 'Good'
+    ACCEPTABLE = 'A', 'Acceptable'
+    NEEDS_IMPROVEMENT = 'I', 'Needs improvement'
 
 
 class Genders(models.TextChoices):
     MALE = 'M', 'Male'
     FEMALE = 'F', 'Female'
-    NA = 'NA', 'N/A'
 
 
 class UserManager(BaseUserManager):
@@ -85,7 +86,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=30, null=False, blank=False)
     id_type = models.CharField(
         choices=IDType.choices,
-        default=IDType.CEDULA_CIUDADANIA
+        default=IDType.CITIZENSHIP_CARD
     )
     category = models.CharField(
         choices=Category.choices,
@@ -94,7 +95,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     id_number = models.CharField(max_length=30, unique=True, null=False, blank=False)
     birth_date = models.DateField(default=datetime(2000, 1, 1), null=False, blank=False)
     birth_place = models.CharField(max_length=30, default='')
-    gender = models.CharField(choices=Genders.choices, default=Genders.NA, null=True, blank=True)
+    gender = models.CharField(choices=Genders.choices, default=Genders.MALE)
     profession = models.CharField(max_length=30, default='')
     eps = models.CharField(max_length=50, default='')
     phone_number = models.CharField(max_length=15, null=False, blank=False)
@@ -106,7 +107,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     level = models.CharField(choices=Ranges.choices, default=Ranges.K10)
     parent = models.CharField(max_length=60, null=True, blank=True, default='')
     parent_phone_number = models.CharField(max_length=15, null=True, blank=True, default='')
-    accept_inf_cons = models.BooleanField(default=False)
     medical_cond = models.CharField(choices=MedicalConditions.choices, default=MedicalConditions.NA)
     drug_cons = models.CharField(max_length=60, null=True, blank=True, default='')
     allergies = models.CharField(max_length=60, null=True, blank=True, default='')
@@ -116,7 +116,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     physical_limit = models.BooleanField(default=False)
     # Lost consciousness or lost balance after feeling dizzy
     lost_cons = models.BooleanField('lost consciousness', default=False)
-    physical_cond = models.CharField(choices=PhysicalConditions.choices, default=PhysicalConditions.ACEPTABLE)
+    physical_cond = models.CharField(choices=PhysicalConditions.choices, default=PhysicalConditions.ACCEPTABLE)
     # Follow the instructor's recommendations and safety rules during the classes.
     sec_recom = models.BooleanField(default=False)
     # I have read, understand the questions, completed and answered the questionnaire with my acceptance?
@@ -126,6 +126,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_reactivated = models.DateTimeField(null=True)
     payment = models.IntegerField(default=0)
     payment_status = models.BooleanField(default=True)
+    accept_regulations = models.BooleanField(default=False)
+    accept_inf_cons = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
@@ -138,42 +140,50 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
 
-    def save_picture(self, image_file):
-        """Convert the image to Base64 and save it."""
-        buffer = BytesIO()
-        image = Image.open(image_file)
-        image.save(buffer, format=image.format)  # Preserve original format
-        buffer.seek(0)
-        encoded_image = base64.b64encode(buffer.read()).decode('utf-8')
-        self.picture = encoded_image
-        self.save()
+    # def save_picture(self, image_file):
+    #     """Convert the image to Base64 and save it."""
+    #     buffer = BytesIO()
+    #     image = Image.open(image_file)
+    #     image.save(buffer, format=image.format)  # Preserve original format
+    #     buffer.seek(0)
+    #     encoded_image = base64.b64encode(buffer.read()).decode('utf-8')
+    #     self.picture = encoded_image
+    #     self.save()
+
+
+class TokenType(models.TextChoices):
+    SIGNUP = 'SU', 'Sign up'
+    PASSWORD_RESET  = 'PR', 'Password reset'
+    OTHER = 'O', 'Other'
 
 
 class Token(models.Model):
+    user = models.ForeignKey('User', null=True, blank=True, on_delete=models.CASCADE)
     token = models.CharField(max_length=100, unique=True)  # The generated token
     created_at = models.DateTimeField(auto_now_add=True)  # Timestamp for token creation
     expires_at = models.DateTimeField()  # Expiration timestamp
+    type = models.CharField(
+        max_length=2,
+        choices=TokenType.choices,
+        default=TokenType.OTHER
+    )  # Task associated with the token
+
+    @classmethod
+    def generate_token(cls, token_type=TokenType.OTHER, user=None, hours_valid=1):
+        """
+        Genera un token único con una fecha de expiración.
+        """
+        token_str = uuid.uuid4().hex
+        return cls.objects.create(
+            token=token_str,
+            user=user,
+            type=token_type,
+            expires_at=now() + timedelta(hours=hours_valid)
+        )
 
     def is_valid(self):
         """Check if the token is still valid."""
-        return now() + timedelta(minutes=1) <= self.expires_at
+        return now() <= self.expires_at
 
-    def dispatch(self, request, *args, **kwargs):
-        token = self.kwargs.get('token')
-
-        # Check if the token exists and is valid
-        try:
-            registration_token = Token.objects.get(token=token)
-            if not registration_token.is_valid():
-                return HttpResponseForbidden("Invalid or expired token.")
-        except Token.DoesNotExist:
-            return HttpResponseForbidden("Invalid or expired token.")
-
-        return super().dispatch(request, *args, **kwargs)
-
-    def form_valid(self, form):
-        # token = self.kwargs.get('token')
-        # Mark the token as used or delete it
-        # Token.objects.filter(token=token).delete()
-
-        return super().form_valid(form)
+    def __str__(self):
+        return f"{self.type} - {self.token}"
