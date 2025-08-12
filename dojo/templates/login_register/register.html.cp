@@ -187,6 +187,10 @@
             format: 'L'
         });
 
+        $('#id_date_joined').datetimepicker({
+            format: 'L'
+        });
+
         $('.countrypicker').countrypicker();
 
         //$.validator.setDefaults({
@@ -194,36 +198,65 @@
         //        alert("Form successful submitted!");
         //    }
         //});
+
         $('#registration_form').validate({
             rules: {
-                email: {
+                first_name: { required: true },
+                last_name: { required: true },
+                id_type: { required: true },
+                id_number: { required: true },
+                gender: { required: true },
+                birth_date: { required: true, date: true },
+                birth_place: { required: true },
+                profession: { required: true },
+                email: { required: true, email: true },
+                phone_number: { required: true, digits: true },
+                country: { required: true },
+                city: { required: true },
+                address: { required: true },
+                parent: { required: true },
+                parent_phone_number: { required: true, digits: true },
+                password1: { required: true, minlength: 8 },
+                password2: {
                     required: true,
-                    email: true,
+                    equalTo: "#id_password1"
                 },
-                password: {
-                    required: true,
-                    minlength: 5
-                },
-                terms: {
-                    required: true
-                },
+                eps: { required: true },
+                date_joined: { required: true, date: true },
+                physical_cond: { required: true },
+                medical_cond: { required: true },
+                drug_cons: { required: true },
+                allergies: { required: true },
+                other_activities: { required: true },
+                cardio_prob: { required: false },
+                injuries: { required: false },
+                physical_limit: { required: false },
+                lost_cons: { required: false },
+                sec_recom: { required: true },
+                agreement: { required: true }
             },
-            //messages: {
-            //    first_name: {
-            //        required: "Please enter your first name",
-            //    }
-            //},
-            errorElement: 'span',
+            messages: {
+                first_name: "Please enter your first name",
+                last_name: "Please enter your last name",
+                email: "Enter a valid email address",
+                password2: "Passwords must match",
+                phone_number: "Enter a valid phone number",
+                parent_phone_number: "Enter a valid phone number"
+                // Puedes personalizar más mensajes si lo deseas
+            },
+            errorClass: "is-invalid",
+            validClass: "",
+            errorElement: "div",
             errorPlacement: function (error, element) {
                 error.addClass('invalid-feedback');
                 element.closest('.form-group').append(error);
             },
-            highlight: function (element, errorClass, validClass) {
-                $(element).addClass('is-invalid');
+            /*highlight: function (element) {
+                $(element).addClass("is-invalid");
             },
-            unhighlight: function (element, errorClass, validClass) {
-                $(element).removeClass('is-invalid');
-            }
+            unhighlight: function (element) {
+                $(element).removeClass("is-invalid");
+            }*/
         });
     });
 </script>
