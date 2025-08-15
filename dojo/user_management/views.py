@@ -5,7 +5,7 @@ from pathlib import Path
 import math
 from django.contrib import messages
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.core.mail import send_mail, EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.templatetags.static import static
@@ -70,6 +70,19 @@ class CustomLoginView(View):
 
         messages.error(request, "Invalid credentials.")
         return redirect(reverse_lazy('login'))
+
+
+class CustomLogoutView(LogoutView):
+    def dispatch(self, request, *args, **kwargs):
+        # Elimina todos los mensajes antiguos
+        list(messages.get_messages(request))
+
+        response = super().dispatch(request, *args, **kwargs)
+
+        # Agrega un mensaje de cierre de sesión exitoso
+        messages.success(request, "You have been logged out successfully.")
+
+        return response
 
 # Vista de Registro
 class RegisterView(FormView):
