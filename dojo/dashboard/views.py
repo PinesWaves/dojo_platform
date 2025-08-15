@@ -1,6 +1,10 @@
+import base64
 from datetime import datetime, timezone, timedelta
+from io import BytesIO
 from secrets import token_urlsafe
 
+import qrcode
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
@@ -200,7 +204,7 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
         student = get_object_or_404(User, pk=pk)
-        breakpoint()
+
         if request.POST.get('action') == 'switch_status':
             # Handle the switch action
             if student.is_active:
@@ -281,9 +285,26 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
         pk = request.user.pk
         student = get_object_or_404(User, pk=pk)
         form = UserUpdateForm(instance=student)
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=2
+            ,
+        )
+        qr.add_data(str(student.id_number))
+        qr.make(fit=True)
+
+        img = qr.make_image(fill_color="black", back_color="white")
+
+        # Save the image to an in-memory buffer and encode to base64
+        buffer = BytesIO()
+        img.save(buffer, format="PNG")
+        qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
         ctx = {
             'form': form,
             'student': student,
+            'qr_code': f"data:image/png;base64,{qr_code_base64}",
         }
         return render(request, self.template_name, context=ctx)
 
