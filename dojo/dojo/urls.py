@@ -4,12 +4,12 @@ from django.contrib.auth.views import LogoutView
 from django.urls import path, include
 
 from .views import landing_page, custom_404, custom_500
-from user_management.views import RegisterView, CustomLoginView, RecoverPass, ForgotPass
+from user_management.views import RegisterView, CustomLoginView, RecoverPass, ForgotPass, CustomLogoutView
 
 urlpatterns = [
     path('', landing_page, name='landing'),
     path('login/', CustomLoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+    path('logout/', CustomLogoutView.as_view(next_page='login'), name='logout'),
     path('signup/<str:token>/', RegisterView.as_view(), name='signup'),
     path('forgot-password/', ForgotPass.as_view(), name='forgot-password'),
     path('recover-password/<str:token>/', RecoverPass.as_view(), name='recover-password'),
