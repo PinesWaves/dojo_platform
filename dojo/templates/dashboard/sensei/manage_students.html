@@ -47,10 +47,10 @@
                   <tr>
                     <th>Full name</th>
                     <th>Email</th>
-                    <th>Status</th>
                     <th>Level</th>
                     <th>Contact</th>
                     <th>Date joined</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -63,18 +63,18 @@
                     </td>
                     <td>{{ s.email }}</td>
                     <td>
+                      <span class="level-circle level-{{ s.level|lower }}"></span>
+                      {{ s.get_level_display  }}
+                    </td>
+                    <td>{{ s.phone_number }}</td>
+                    <td>{{ s.date_joined|timesince }}</td>
+                    <td>
                       {% if s.is_active %}
                         <span class="badge badge-success">Active</span>
                       {% else %}
                         <span class="badge badge-danger">Inactive</span>
                       {% endif %}
                     </td>
-                    <td>
-                      <span class="level-circle level-{{ s.level|lower }}"></span>
-                      {{ s.get_level_display  }}
-                    </td>
-                    <td>{{ s.phone_number }}</td>
-                    <td>{{ s.date_joined|timesince }}</td>
                   </tr>
                 {% endfor %}
                 </tbody>
@@ -118,43 +118,43 @@
                 <!-- /.form group -->
               </form>
   
+              {% if time_url %}
               <label for="url">
                 Active registration url(s):<br>
               </label>
-              {% if time_url is not none %}
-                <table id="example2" class="table table-bordered table-striped">
-                  <thead>
-                    <tr>
-                      <th></th>
-                      <th>Info</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for time, url in time_url %}
-                    <tr>
-                      <form action="{% url 'manage_students' %}" method="post">{% csrf_token %}
-                        <div class="form-group">
-                          <input type="hidden" name="_method" value="delete">
-                          <input type="hidden" value="{{ url }}" name="url{{ forloop.counter }}">
-                          <div class="d-flex col-sm-6">
-                            <td>
-                              <button type="submit" class="btn btn-danger btn-block btn-xs col-sm-8">
-                                <i class="fas fa-trash"></i>
-                              </button>
-                            </td>
-                            <td>
-                              <a id="clipboard" class="col-lg-8" href="{{ url }}">
-                                {{ time|date:"F j, g:i a" }}
-                                <i class="fas fa-clipboard"></i>
-                              </a><br>
-                            </td>
-                          </div>
+              <table id="example2" class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Info</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for time, url in time_url %}
+                  <tr>
+                    <form action="{% url 'manage_students' %}" method="post">{% csrf_token %}
+                      <div class="form-group">
+                        <input type="hidden" name="_method" value="delete">
+                        <input type="hidden" value="{{ url }}" name="url">
+                        <div class="d-flex col-sm-6">
+                          <td>
+                            <button type="submit" class="btn btn-danger btn-block btn-xs col-sm-8">
+                              <i class="fas fa-trash"></i>
+                            </button>
+                          </td>
+                          <td>
+                            <a id="clipboard" class="col-lg-8" href="{{ url }}">
+                              {{ time|date:"M d H:i" }}
+                              <i class="fas fa-clipboard"></i>
+                            </a><br>
+                          </td>
                         </div>
-                      </form>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
+                      </div>
+                    </form>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
               {% endif %}
             </div>
           </div>

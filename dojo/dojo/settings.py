@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(int(os.environ.get("DEBUG", default=0)))
+DEBUG = bool(int(os.environ.get("DEBUG", 0)))
 ALLOW_ADMIN = bool(int(os.environ.get("ALLOW_ADMIN", 0)))
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 if not DEBUG:
@@ -45,10 +45,16 @@ GDAL_LIBRARY_PATH = '/usr/lib/libgdal.so'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # Set session timeout to 30 minutes (1800 seconds)
 SESSION_COOKIE_AGE = 1800
+# CSRF_COOKIE_SAMESITE = 'Lax'  # Configuración recomendada para CSRF en producción
+# SESSION_COOKIE_SAMESITE = 'Lax'  # Configuración recomendada para sesiones
+# CSRF_COOKIE_HTTPONLY = True  # Evita el acceso a la cookie CSRF desde JavaScript
+# CSRF_COOKIE_SECURE = True  # Solo en producción con HTTPS
+# CSRF_COOKIE_NAME = 'csrftoken'  # Nombre de la cookie CSRF
+# CSRF_USE_SESSIONS = True  # Utiliza sesiones para almacenar el token CSRF
+# CSRF_COOKIE_PATH = '/'  # Ruta de la cookie CSRF
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -90,12 +96,12 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'dojo.wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
 DATABASES = {
     # 'default': {
     #     'ENGINE': 'django.db.backends.sqlite3',
@@ -142,6 +148,17 @@ TIME_ZONE = 'America/Bogota'
 USE_I18N = True
 
 USE_TZ = True
+
+
+# Email settings for Gmail
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.environ.get("DOJO_EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = os.environ.get("DOJO_EMAIL_PORT", 587)
+EMAIL_USE_TLS = bool(int(os.environ.get("DOJO_EMAIL_USE_TLS", 1)))
+EMAIL_HOST_USER = os.environ.get("DOJO_EMAIL_HOST_USER", "jarh1992@gmail.com")
+EMAIL_HOST_PASSWORD = os.environ.get("DOJO_EMAIL_HOST_PASSWORD", "")  # NOT your normal password
+# Optional, to identify sender
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 # Static files (CSS, JavaScript, Images)

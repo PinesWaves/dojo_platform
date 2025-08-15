@@ -5,6 +5,7 @@ from faker import Faker
 import logging
 
 from user_management.models import User, Category
+from config.config_vars import Ranges
 from dashboard.models import Dojo, Training, Technique, TrainingStatus
 from django.utils import timezone
 
@@ -30,6 +31,7 @@ class Command(BaseCommand):
 
     def load_testing_data(self):
         logger.info('Reset DB from testing data')
+        self.stdout.write('Reset DB from testing data')
         Training.objects.all().delete()
         Dojo.objects.all().delete()
         Technique.objects.all().delete()
@@ -47,11 +49,13 @@ class Command(BaseCommand):
         self.load_techniques()
         self.load_dojos()
         self.load_trainings()
+        logger.info(self.style.SUCCESS('Testing dataset loaded successfully'))
         self.stdout.write(self.style.SUCCESS('Testing dataset loaded successfully'))
-    
+
     def load_users(self):
         # Create 90 students with random data
         logger.info('Loading users')
+        self.stdout.write('Loading users')
         users = []
         for i in range(90):
             gender = self.fake.random_element(elements=('M', 'F'))
@@ -71,7 +75,7 @@ class Command(BaseCommand):
                 'city': self.fake.city()[:30],
                 'country': self.fake.country_code(),
                 'email': self.fake.email(),
-                'level': self.fake.random_element(elements=('10k', '9k', '8k', '7k', '6k', '5k', '4k', '3k', '2k', '1k')),
+                'level': self.fake.random_element(elements=[x[0] for x in Ranges.choices][:13]),
                 'accept_inf_cons': True,
                 'medical_cond': 'NA',
                 'drug_cons': '',
@@ -88,74 +92,65 @@ class Command(BaseCommand):
                 'payment': self.fake.random_int(min=0, max=1000),
                 'payment_status': self.fake.boolean(),
                 'is_active': True if i < 80 else False,  # Last 10 users are inactive
-                'is_staff': False,
+                'is_staff': False,  # Only the first student is staff (Sempai)
                 'is_superuser': False
             })
 
-        # Create 3 senseis with random data
-        logger.info('Loading senseis')
-        for i in range(3):
-            gender = self.fake.random_element(elements=('M', 'F'))
-            users.append({
-                'id_number': self.fake.unique.random_number(digits=10),
-                'first_name': self.fake.first_name_male() if gender == 'M' else self.fake.first_name_female(),
-                'last_name': self.fake.last_name(),
-                'id_type': 'CC',
-                'category': 'SE',
-                'birth_date': self.fake.date_of_birth(minimum_age=30, maximum_age=50),
-                'birth_place': self.fake.city(),
-                'gender': gender,
-                'profession': self.fake.job()[:30],
-                'eps': self.fake.company(),
-                'phone_number': self.fake.numerify('###-###-####'),
-                'address': self.fake.address(),
-                'city': self.fake.city()[:30],
-                'country': self.fake.country_code(),
-                'email': self.fake.email(),
-                'level': self.fake.random_element(elements=('1d', '2d', '3d', '4d', '5d', '6d', '7d', '8d', '9d', '10d')),
-                'accept_inf_cons': True,
-                'medical_cond': 'NA',
-                'drug_cons': '',
-                'allergies': '',
-                'other_activities': '',
-                'cardio_prob': self.fake.boolean(),
-                'injuries': self.fake.boolean(),
-                'physical_limit': self.fake.boolean(),
-                'lost_cons': self.fake.boolean(),
-                'physical_cond': 'A',
-                'sec_recom': True,
-                'agreement': True,
-                'date_joined': datetime.now(),
-                'payment': self.fake.random_int(min=0, max=1000),
-                'payment_status': self.fake.boolean(),
-                'is_active': True if i < 2 else False,  # Last sensei is inactive
-                'is_staff': True,
-                'is_superuser': False
-            })
-
-        for row in users:
-            User.objects.create_user(**row)
+        # Create users in the database
+        logger.info('Creating users in the database')
+        self.stdout.write('Creating users in the database')
+        User.objects.bulk_create([User(**row) for row in users])
 
         # Following users are created for testing purposes
         logger.info('Creating specific users for testing')
+        self.stdout.write('Creating specific users for testing')
         # Create a superuser
-        User.objects.create_superuser(first_name='jesus', last_name='rod', password='rosales3', id_number=1)
-        # Create student with specific data
-        student = User.objects.create_user(
+        User.objects.create_superuser(
             first_name='jesus',
             last_name='rod',
+            password='rosales3',
+            id_number=1,
+            category=Category.SENSEI
+        )
+        # Create Sempai with specific data
+        User.objects.create_user(
+            first_name='alberto',
+            last_name='henao',
             id_number=2,
             id_type='CC',
-            category=Category.ESTUDIANTE,
+            email='jarh1992@outlook.com',
+            category=Category.SEMPAI,
             birth_date=datetime(2000, 1, 1),
             birth_place='Bogotá',
             password = 'rosales3'
         )
-        # Create sensei with specific data
-        sensei = User.objects.create_user(
-            first_name='jesus',
-            last_name='rod',
+        # Create sensei (Dojo 1) with specific data
+        User.objects.create_user(
+            first_name='cesar',
+            last_name='peña',
             id_number=3,
+            id_type='CC',
+            category=Category.SENSEI,
+            birth_date=datetime(1980, 1, 1),
+            birth_place='Bogotá',
+            password = 'rosales3'
+        )
+        # Create sensei (Dojo 2) with specific data
+        User.objects.create_user(
+            first_name=self.fake.first_name(),
+            last_name=self.fake.last_name(),
+            id_number=4,
+            id_type='CC',
+            category=Category.SENSEI,
+            birth_date=datetime(1980, 1, 1),
+            birth_place='Bogotá',
+            password = 'rosales3'
+        )
+        # Create sensei (Dojo 3) with specific data
+        User.objects.create_user(
+            first_name=self.fake.first_name(),
+            last_name=self.fake.last_name(),
+            id_number=5,
             id_type='CC',
             category=Category.SENSEI,
             birth_date=datetime(1980, 1, 1),
@@ -166,6 +161,7 @@ class Command(BaseCommand):
     def load_techniques(self):
         # Create Techniques
         logger.info('Loading techniques')
+        self.stdout.write('Loading techniques')
         techniques = []
         tcs_list = [
             "Nukiite (ataque con la punta de los dedos)",
@@ -192,9 +188,11 @@ class Command(BaseCommand):
     def load_dojos(self):
         # Create 3 Dojos
         logger.info('Loading dojos')
+        self.stdout.write('Loading dojos')
         dojos = []
-        for _ in range(3):
+        for i in range(3):
             dojos.append({
+                'sensei': User.objects.get(id_number=i+3),  # Will be assigned later
                 'name': self.fake.company(),
                 'address': self.fake.address(),
                 'city': self.fake.city(),
@@ -202,20 +200,12 @@ class Command(BaseCommand):
                 'phone_number': self.fake.numerify('###-###-####'),
                 'email': self.fake.email()
             })
-        
-        i = 0
-        for row in dojos:
-            try:
-                row['sensei'] = User.objects.filter(category=Category.SENSEI)[i]
-            except:
-                breakpoint()
-            Dojo.objects.create(**row)
-            i += 1
-            if i == 3:
-                i = 0
+
+        Dojo.objects.bulk_create([Dojo(**row) for row in dojos])
 
     def load_trainings(self):
         logger.info('Loading trainings')
+        self.stdout.write('Loading trainings')
         # Create 10 Training sessions with different statuses
         today = datetime.now().date()
         for i in range(1, 11):
