@@ -195,9 +195,11 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         pk = kwargs.get('pk')
         student = get_object_or_404(User, pk=pk)
         form = UserUpdateForm(instance=student)
+        qr_code = generate_qr_code(student.id_number)
         ctx = {
             'form': form,
             'student': student,
+            'qr_code': f"data:image/png;base64,{qr_code}",
         }
         return render(request, self.template_name, context=ctx)
 
@@ -285,26 +287,11 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
         pk = request.user.pk
         student = get_object_or_404(User, pk=pk)
         form = UserUpdateForm(instance=student)
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=2
-            ,
-        )
-        qr.add_data(str(student.id_number))
-        qr.make(fit=True)
-
-        img = qr.make_image(fill_color="black", back_color="white")
-
-        # Save the image to an in-memory buffer and encode to base64
-        buffer = BytesIO()
-        img.save(buffer, format="PNG")
-        qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
+        qr_code = generate_qr_code(student.id_number)
         ctx = {
             'form': form,
             'student': student,
-            'qr_code': f"data:image/png;base64,{qr_code_base64}",
+            'qr_code': f"data:image/png;base64,{qr_code}",
         }
         return render(request, self.template_name, context=ctx)
 
@@ -346,3 +333,20 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
         #     'student': student,
         # }
         return redirect('profile')
+
+
+def generate_qr_code(data):
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=3,
+    )
+    qr.add_data(data)
+    qr.make(fit=True)
+
+    img = qr.make_image(fill_color="black", back_color="white")
+    buffered = BytesIO()
+    img.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+    return img_str
