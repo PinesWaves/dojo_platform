@@ -37,8 +37,6 @@ else:
         'https://*.ngrok-free.app',
     ]
 
-# SESSION_COOKIE_SECURE = True   # Solo en producción con HTTPS
-# CSRF_COOKIE_SECURE = True      # Solo en producción con HTTPS
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 GDAL_LIBRARY_PATH = '/usr/lib/libgdal.so'
 # Close session when the browser is closed
@@ -46,6 +44,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # Set session timeout to 30 minutes (1800 seconds)
 SESSION_COOKIE_AGE = 1800
 # CSRF_COOKIE_SAMESITE = 'Lax'  # Configuración recomendada para CSRF en producción
+# SESSION_COOKIE_SECURE = True  # Solo en producción con HTTPS
 # SESSION_COOKIE_SAMESITE = 'Lax'  # Configuración recomendada para sesiones
 # CSRF_COOKIE_HTTPONLY = True  # Evita el acceso a la cookie CSRF desde JavaScript
 # CSRF_COOKIE_SECURE = True  # Solo en producción con HTTPS
@@ -74,6 +73,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'dojo.middlewares.ClearMessagesIfLoggedOutMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
