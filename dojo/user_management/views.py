@@ -58,9 +58,19 @@ class CustomLoginView(View):
                 return redirect(reverse_lazy('login'))
 
             # Si las credenciales son válidas, iniciar sesión
+            login(request, user)
             messages.success(request, "Login successful!")
 
-            login(request, user)
+            # --- Check for the 'next' URL from the form submission ---
+            next_url = request.POST.get('next')
+
+            # Use Django's built-in is_safe_url for robust validation
+            from django.utils.http import url_has_allowed_host_and_scheme
+
+            # Redirect to the 'next' URL if it exists and is safe
+            if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+                return redirect(next_url)
+
             if user.is_superuser or user.category == Category.SENSEI:
                 return redirect(reverse_lazy('sensei_dashboard'))
             elif user.category == Category.ESTUDIANTE:

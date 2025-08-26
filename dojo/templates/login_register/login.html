@@ -11,6 +11,9 @@
   {% endfor %}
 {% endif %}
 <form action="{% url 'login' %}" method="post"> {% csrf_token %}
+  {% if request.GET.next %}
+    <input type="hidden" name="next" value="{{ request.GET.next }}">
+  {% endif %}
   <div class="input-group mb-3">
     <input type="number" class="form-control" placeholder="ID number" id="id_number" name="id_number" required>
     <div class="input-group-append">
