@@ -91,3 +91,88 @@ class Dojo(models.Model):
         """
         self.clean()
         super().save(*args, **kwargs)
+
+
+class Kata(models.Model):
+    LEVEL_CHOICES = [
+        ('beginner', 'Principiante'),
+        ('intermediate', 'Intermedio'),
+        ('advanced', 'Avanzado'),
+    ]
+
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    level = models.CharField(max_length=50, choices=LEVEL_CHOICES)
+    embusen_diagram = models.ImageField(upload_to='embusen/', blank=True, null=True)
+    video_reference = models.URLField(blank=True, null=True)
+    order = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class KataSerie(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to='series/', blank=True, null=True)
+    katas = models.ManyToManyField(Kata, related_name='series')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class KataLesson(models.Model):
+    kata = models.ForeignKey(Kata, on_delete=models.CASCADE, related_name='lessons')
+    title = models.CharField(max_length=100)
+    objectives = models.TextField()
+    content = models.TextField(blank=True)
+    order = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"{self.kata.name} - {self.title}"
+
+
+class KataLessonActivity(models.Model):
+    lesson = models.ForeignKey(KataLesson, on_delete=models.CASCADE, related_name='activities')
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    image = models.ImageField(upload_to='activities/images/', blank=True, null=True)
+    video = models.URLField(blank=True, null=True)
+    order = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.lesson.title} - {self.title}"
+
+
+class KataLessonActivityImage(models.Model):
+    activity = models.ForeignKey(KataLessonActivity, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='activities/images/')
+    caption = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return f"Imagen de {self.activity.title}"
+
+
+class KataLessonActivityVideo(models.Model):
+    activity = models.ForeignKey(KataLessonActivity, on_delete=models.CASCADE, related_name='videos')
+    url = models.URLField()
+    description = models.CharField(max_length=255, blank=True)
+
+    @property
+    def embed_url(self):
+        from urllib.parse import urlparse, parse_qs
+        parsed = urlparse(self.url)
+        video_id = parse_qs(parsed.query).get('v')
+        if video_id:
+            return f"https://www.youtube.com/embed/{video_id[0]}"
+        return None
+
+    def __str__(self):
+        return f"Video de {self.activity.title}"

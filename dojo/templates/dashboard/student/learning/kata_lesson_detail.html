@@ -1,0 +1,78 @@
+{% extends 'dashboard/student/base-st.html' %}
+{% block title %}Seishin Dojo JKA | {{ lesson.title }}{% endblock %}
+{% block dashboard_content %}
+
+<div class="content-header">
+  <div class="container">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="m-0">{{ lesson.title }}</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="{% url 'student_dashboard' %}">Dashboard</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'library' %}">Library</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'kata_detail' lesson.kata.id %}">{{ lesson.kata.name }}</a></li>
+          <li class="breadcrumb-item active">Lección {{ lesson.order }}</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+  <div class="container">
+    <div class="card card-outline card-info">
+      <div class="card-body">
+        <p><strong>Objetivos:</strong> {{ lesson.objectives }}</p>
+        <p>{{ lesson.content }}</p>
+      </div>
+    </div>
+
+    {% if lesson.activities.exists %}
+      <h5 class="mt-4">📝 Actividades</h5>
+      {% for activity in lesson.activities.all %}
+      <div class="card card-outline card-secondary mb-3">
+        <div class="card-header">
+          <strong>{{ activity.title }}</strong>
+        </div>
+        <div class="card-body">
+          <p>{{ activity.description }}</p>
+
+          {% if activity.images.exists %}
+          <div class="row">
+            {% for img in activity.images.all %}
+            <div class="col-md-6 mb-2 d-flex flex-column align-items-center">
+              <img src="{{ img.image.url }}" class="img-fluid mb-2" alt="{{ img.caption }}">
+              {% if img.caption %}
+                <small class="text-muted text-center">{{ img.caption }}</small>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          {% if activity.videos.exists %}
+          <div class="mt-2">
+            {% for vid in activity.videos.all %}
+              {% if vid.embed_url %}
+              <div class="embed-responsive embed-responsive-16by9 mb-2">
+                <iframe class="embed-responsive-item" src="{{ vid.embed_url }}" allowfullscreen></iframe>
+              </div>
+              {% endif %}
+              {% if vid.description %}
+              <small class="text-muted">{{ vid.description }}</small>
+              {% endif %}
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-muted">No hay actividades registradas para esta lección.</p>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

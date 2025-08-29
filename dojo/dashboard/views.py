@@ -14,7 +14,7 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView
 import logging
 
-from dashboard.models import Training, Dojo, Technique, TechniqueCategory, TrainingStatus
+from dashboard.models import Training, Dojo, Technique, TechniqueCategory, TrainingStatus, KataSerie, Kata, KataLesson
 from dojo.mixins.view_mixins import AdminRequiredMixin
 from user_management.models import User, Token, Category, TokenType
 from user_management.forms import UserUpdateForm
@@ -102,7 +102,7 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
 
 
 class ManageTechniques(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
-    template_name = "dashboard/sensei/manage_techniques.html"
+    template_name = "dashboard/sensei/../templates/dashboard/student/learning/manage_techniques.html"
 
     def get(self, request, *args, **kwargs):
         techniques = Technique.objects.all()
@@ -265,6 +265,9 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
+######################################### STUDENT VIEWS #########################################
+
+
 class StudentDashboard(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/student/dashboard.html"
 
@@ -350,3 +353,35 @@ def generate_qr_code(data):
     img.save(buffered, format="PNG")
     img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
     return img_str
+
+
+class Library(TemplateView):
+    template_name = "dashboard/student/learning/library.html"
+
+    def get(self, request, *args, **kwargs):
+        series = KataSerie.objects.all()
+        return render(request, self.template_name, context={'series': series})
+
+
+class KataDetail(TemplateView):
+    template_name = "dashboard/student/learning/kata_detail.html"
+
+    def get(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        kata = get_object_or_404(Kata, pk=pk)
+        ctx = {
+            'kata': kata,
+        }
+        return render(request, self.template_name, context=ctx)
+
+
+class KataLessonDetail(TemplateView):
+    template_name = "dashboard/student/learning/kata_lesson_detail.html"
+
+    def get(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        lesson = get_object_or_404(KataLesson, pk=pk)
+        ctx = {
+            'lesson': lesson,
+        }
+        return render(request, self.template_name, context=ctx)
