@@ -1,4 +1,5 @@
 {% extends 'dashboard/student/base-st.html' %}
+{% load static %}
 {% block title %}Seishin Dojo JKA | Library{% endblock %}
 {% block dashboard_content %}
 <div class="content-header">
@@ -18,55 +19,29 @@
 </div>
 <div class="content">
   <div class="container">
-    <div class="row">
-      {% for serie in series %}
-      <div class="col-md-6">
-        <div class="card card-outline card-danger">
-          <div class="card-header">
-            <h3 class="card-title">{{ serie.name }}</h3>
-          </div>
-          <div class="card-body">
-            {% if serie.image %}
-              <img src="{{ serie.image.url }}" class="img-fluid mb-3" alt="Imagen de la serie">
-            {% endif %}
-            <p>{{ serie.description }}</p>
-
-            <h5>📝 Cursos en esta serie:</h5>
-            {% for kata in serie.katas.all %}
-            <div id="accordion">
-              <div class="card card-danger">
-                <div class="card-header">
-                  <h4 class="card-title w-100">
-                    <a class="d-block w-100" data-toggle="collapse" href="#kata-{{ kata.id }}">
-                      {{ kata.name }}
-                    </a>
-                  </h4>
-                </div>
-                <div id="kata-{{ kata.id }}" class="collapse" data-parent="#accordion">
-                  <div class="card-body">
-                    <ol>
-                      <li>
-                        <a href="{% url 'kata_detail' kata.id %}">Información básica de la kata</a><br>
-                      </li>
-                      {% for lesson in kata.lessons.all %}
-                      <li>
-                        <a href="{% url 'kata_lesson_detail' lesson.id %}">{{ lesson.title }}</a><br>
-                      </li>
-                      {% empty %}
-                      <p>No hay lecciones registradas aún.</p>
-                      {% endfor %}
-                    </ol>
-                  </div>
-                </div>
+    <div class="card card-success">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-12 col-lg-6 col-xl-6">
+            <div class="card mb-2">
+              <img class="card-img-top" src="{% static 'img/techniques_banner.png' %}" alt="Techniques banner">
+              <div class="card-img-overlay d-flex flex-column">
+                <h3 class="text-light align-text-bottom"><b>Techniques</b></h3><br>
+                <a href="{% url 'techniques' %}" class="mt-auto text-black btn btn-light"><b>Go to techniques page</b></a>
               </div>
             </div>
-            {% empty %}
-            <li class="list-group-item">No hay cursos registrados aún.</li>
-            {% endfor %}
+          </div>
+          <div class="col-md-12 col-lg-6 col-xl-6">
+            <div class="card mb-2">
+              <img class="card-img-top" src="{% static 'img/series_banner.png' %}" alt="Series banner">
+              <div class="card-img-overlay d-flex flex-column">
+                <h3 class="text-light align-text-bottom"><b>Kata Series</b></h3><br>
+                <a href="{% url 'series' %}" class="mt-auto text-black btn btn-light"><b>Go to series page</b></a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      {% endfor %}
     </div>
   </div>
 </div>
