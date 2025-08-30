@@ -25,8 +25,10 @@ from dashboard.views import (
     ManageStudents,
     ManageProfile,
     Library,
+    Techniques,
+    KataSeries,
     KataDetail,
-    KataLessonDetail
+    KataLessonDetail,
 )
 
 urlpatterns = [
@@ -36,8 +38,10 @@ urlpatterns = [
     path('manage_students/', ManageStudents.as_view(), name='manage_students'),
     path('manage_profile/<int:pk>/', ManageProfile.as_view(), name='manage_profile'),
     path('student/', StudentDashboard.as_view(), name='student_dashboard'),
+    path('student/profile/', StudentProfile.as_view(), name='profile'),
     path('library/', Library.as_view(), name='library'),
+    path('library/series/', KataSeries.as_view(), name='series'),
+    path('library/techniques/', Techniques.as_view(), name='techniques'),
     path('library/kata/<int:pk>/', KataDetail.as_view(), name='kata_detail'),
     path('library/kata/lesson/<int:pk>/', KataLessonDetail.as_view(), name='kata_lesson_detail'),
-    path('student/profile/', StudentProfile.as_view(), name='profile'),
 ]

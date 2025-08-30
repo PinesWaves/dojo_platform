@@ -360,6 +360,27 @@ class Library(TemplateView):
 
     def get(self, request, *args, **kwargs):
         series = KataSerie.objects.all()
+        techniques = Technique.objects.all()
+        ctx = {
+            'series': series,
+            'techniques': techniques,
+        }
+        return render(request, self.template_name, context=ctx)
+
+
+class Techniques(TemplateView):
+    template_name = "dashboard/student/learning/techniques.html"
+
+    def get(self, request, *args, **kwargs):
+        techniques = Technique.objects.all()
+        return render(request, self.template_name, context={'techniques': techniques})
+
+
+class KataSeries(TemplateView):
+    template_name = "dashboard/student/learning/kata_series.html"
+
+    def get(self, request, *args, **kwargs):
+        series = KataSerie.objects.all()
         return render(request, self.template_name, context={'series': series})
 
 
