@@ -30,6 +30,7 @@
   <style>
     .nav-link.active {
         background-color: #dc3545 !important;
+        color: white !important;
     }
   </style>
   {% block extra_css %}{% endblock %}
@@ -226,6 +227,18 @@
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
           <li class="nav-item">
+            <a href="{% url 'sensei_dashboard' %}" class="nav-link {% block dashboard-link-status %}{% endblock %}">
+              <i class="nav-icon fas fa-school"></i>
+              <p>Sensei dashboard</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'student_dashboard' %}" class="nav-link {% block stdashboard-link-status %}{% endblock %}">
+              <i class="nav-icon fas fa-book-reader"></i>
+              <p>Student dashboard</p>
+            </a>
+          </li>
+          <li class="nav-item">
             <a href="{% url 'manage_trainings' %}" class="nav-link {% block training-link-status %}{% endblock %}">
               <i class="nav-icon fas fa-running"></i>
               <p>Trainings</p>
@@ -253,12 +266,6 @@
             <a href="{% url 'manage_techniques' %}" class="nav-link {% block tournaments-link-status %}{% endblock %}">
               <i class="nav-icon fas fa-trophy"></i>
               <p>Tournaments</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="{% url 'student_dashboard' %}" class="nav-link {% block stdashboard-link-status %}{% endblock %}">
-              <i class="nav-icon fas fa-book-reader"></i>
-              <p>Student dashboard</p>
             </a>
           </li>
           <li class="nav-item">
