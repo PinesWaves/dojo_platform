@@ -1,98 +1,115 @@
-{% extends 'landing/base.html' %}
+{% extends 'base-user.html' %}
 {% load static %}
-{% block extra_css %}
-<!-- AdminLTE CSS -->
-<link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
-
-<style>
-.hero {
-  min-height: 100vh; /* 80% del alto de la ventana */
-  padding: 100px 0;
-  background-repeat: no-repeat;
-}
-
-.dojo-kun-marquee {
-  position: relative;
-  height: 200px;
-  overflow: hidden;
-  mask-image: linear-gradient(to bottom, transparent, white 20%, white 80%, transparent);
-  -webkit-mask-image: linear-gradient(to bottom, transparent, white 20%, white 80%, transparent);
-}
-
-.dojo-kun-inner {
-  display: flex;
-  flex-direction: column;
-  animation: scroll-up 20s linear infinite;
-}
-
-.dojo-kun-marquee:hover .dojo-kun-inner {
-  animation-play-state: paused;
-}
-
-.scroll-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.scroll-group h4 {
-  margin-bottom: 1.5rem;
-  text-align: center;
-  font-size: 1.25rem;
-  color: white;
-}
-
-@keyframes scroll-up {
-  0% {
-    transform: translateY(0%);
+{% block css %}
+  <style>
+  .hero {
+    min-height: 100vh; /* 80% del alto de la ventana */
+    padding: 100px 0;
+    background-repeat: no-repeat;
   }
-  100% {
-    transform: translateY(-50%);
+
+  .dojo-kun-marquee {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, transparent, white 20%, white 80%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, white 20%, white 80%, transparent);
   }
-}
 
-.border-bottom {
-  border-color: #ddd !important;
-}
-
-section {
-  scroll-margin-top: 60px; /* Ajusta según la altura de tu navbar */
-}
-
-#carouselExampleIndicators {
-  height: 75vh;
-  overflow: hidden;
-}
-
-.carousel-inner,
-.carousel-item {
-  height: 100%;
-}
-
-.carousel-img {
-  max-height: 100%;
-  width: auto;
-  object-fit: contain;
-}
-
-/*.carousel-item > .d-flex {
-  height: 100%;
-}*/
-
-@media (orientation: landscape) {
-  .carousel-img {
-    width: 100%;
-    height: auto;
+  .dojo-kun-inner {
+    display: flex;
+    flex-direction: column;
+    animation: scroll-up 20s linear infinite;
   }
-}
 
-/* En orientación portrait: alto completo */
-@media (orientation: portrait) {
-  .carousel-img {
+  .dojo-kun-marquee:hover .dojo-kun-inner {
+    animation-play-state: paused;
+  }
+
+  .scroll-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .scroll-group h4 {
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-size: 1.25rem;
+    color: white;
+  }
+
+  @keyframes scroll-up {
+    0% {
+      transform: translateY(0%);
+    }
+    100% {
+      transform: translateY(-50%);
+    }
+  }
+
+  .border-bottom {
+    border-color: #ddd !important;
+  }
+
+  section {
+    scroll-margin-top: 60px; /* Ajusta según la altura de tu navbar */
+  }
+
+  #carouselExampleIndicators {
+    height: 75vh;
+    overflow: hidden;
+  }
+
+  .carousel-inner,
+  .carousel-item {
     height: 100%;
-    width: auto;
   }
-}
-</style>
+
+  .carousel-img {
+    max-height: 100%;
+    width: auto;
+    object-fit: contain;
+  }
+
+  /*.carousel-item > .d-flex {
+    height: 100%;
+  }*/
+
+  @media (orientation: landscape) {
+    .carousel-img {
+      width: 100%;
+      height: auto;
+    }
+  }
+
+  /* En orientación portrait: alto completo */
+  @media (orientation: portrait) {
+    .carousel-img {
+      height: 100%;
+      width: auto;
+    }
+  }
+  </style>
+{% endblock %}
+{% block main-menu %}
+<li class="nav-item">
+  <a class="nav-link" href="/#inicio">Inicio</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="/#conocenos">Conócenos</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="/#galeria">Galería</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="/#horarios">Horarios</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="/#contacto">Contacto</a>
+</li>
+<li class="nav-item">
+  <a href="{% url 'login' %}" class="btn btn-danger">Login</a>
+</li>
 {% endblock %}
 {% block content %}
 <!-- Hero Section -->
@@ -298,6 +315,6 @@ section {
   </div>
 </section>
 {% endblock %}
-{% block extra_js %}
+{% block js %}
 <script src="{% static 'plugins/popper/popper.min.js' %}"></script>
 {% endblock %}
