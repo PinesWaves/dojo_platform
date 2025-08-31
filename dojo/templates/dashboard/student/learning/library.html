@@ -1,16 +1,27 @@
-{% extends 'dashboard/student/base-st.html' %}
+{% extends 'dashboard/student/dashboard.html' %}
 {% load static %}
 {% block title %}Seishin Dojo JKA | Library{% endblock %}
-{% block dashboard_content %}
+{% block content %}
 <div class="content-header">
-  <div class="container">
+  <div class="container py-3">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1 class="m-0">Kata Series</h1>
+        <h1 class="mb-2 text-bold">Library</h1>
       </div><!-- /.col -->
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item"><a href="{% url 'student_dashboard' %}">Dashboard</a></li>
+          <li class="breadcrumb-item">
+            <a href="
+            {% if user.is_authenticated %}
+              {% if user.is_staff %}
+                {% url 'sensei_dashboard' %}
+              {% else %}
+                {% url 'student_dashboard' %}
+              {% endif %}
+            {% else %}
+              {% url 'landing' %}
+            {% endif %}">Home</a>
+          </li>
           <li class="breadcrumb-item active">Library</li>
         </ol>
       </div><!-- /.col -->
@@ -45,6 +56,5 @@
     </div>
   </div>
 </div>
-
 <!-- /.content -->
 {% endblock %}
