@@ -1,17 +1,28 @@
-{% extends 'dashboard/student/base-st.html' %}
+{% extends 'dashboard/student/dashboard.html' %}
 {% block title %}Seishin Dojo JKA | {{ kata.name }}{% endblock %}
-{% block dashboard_content %}
-
+{% block content %}
 <div class="content-header">
-  <div class="container">
+  <div class="container py-3">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1 class="m-0">{{ kata.name }}</h1>
+        <h1 class="mb-2 text-bold">{{ kata.name }}</h1>
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item"><a href="{% url 'student_dashboard' %}">Dashboard</a></li>
+          <li class="breadcrumb-item">
+            <a href="
+            {% if user.is_authenticated %}
+              {% if user.is_staff %}
+                {% url 'sensei_dashboard' %}
+              {% else %}
+                {% url 'student_dashboard' %}
+              {% endif %}
+            {% else %}
+              {% url 'landing' %}
+            {% endif %}">Home</a>
+          </li>
           <li class="breadcrumb-item"><a href="{% url 'library' %}">Library</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'series' %}">Series</a></li>
           <li class="breadcrumb-item active">{{ kata.name }}</li>
         </ol>
       </div>
@@ -21,7 +32,7 @@
 
 <div class="content">
   <div class="container">
-    <div class="card card-outline card-success">
+    <div class="card card-outline card-danger">
       <div class="card-body">
         <p><strong>Nivel:</strong> {{ kata.get_level_display }}</p>
         <p>{{ kata.description }}</p>
@@ -45,7 +56,7 @@
       {% for lesson in kata.lessons.all %}
       <li class="list-group-item d-flex justify-content-between align-items-center">
         {{ lesson.title }}
-        <a href="{% url 'kata_lesson_detail' lesson.id %}" class="btn btn-sm btn-primary">Ver lección</a>
+        <a href="{% url 'kata_lesson_detail' lesson.id %}" class="btn btn-sm btn-danger">Ver lección</a>
       </li>
       {% empty %}
       <li class="list-group-item text-muted">No hay lecciones registradas para esta kata.</li>
@@ -53,5 +64,4 @@
     </ul>
   </div>
 </div>
-
 {% endblock %}

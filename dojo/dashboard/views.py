@@ -365,6 +365,11 @@ class Library(TemplateView):
             'series': series,
             'techniques': techniques,
         }
+        if request.user.is_authenticated:
+            pk = request.user.pk
+            student = get_object_or_404(User, pk=pk)
+            ctx['student'] = student
+
         return render(request, self.template_name, context=ctx)
 
 
@@ -373,7 +378,15 @@ class Techniques(TemplateView):
 
     def get(self, request, *args, **kwargs):
         techniques = Technique.objects.all()
-        return render(request, self.template_name, context={'techniques': techniques})
+        ctx = {
+            'techniques': techniques,
+        }
+        if request.user.is_authenticated:
+            pk = request.user.pk
+            student = get_object_or_404(User, pk=pk)
+            ctx['student'] = student
+
+        return render(request, self.template_name, context=ctx)
 
 
 class KataSeries(TemplateView):
@@ -381,7 +394,15 @@ class KataSeries(TemplateView):
 
     def get(self, request, *args, **kwargs):
         series = KataSerie.objects.all()
-        return render(request, self.template_name, context={'series': series})
+        ctx = {
+            'series': series,
+        }
+        if request.user.is_authenticated:
+            pk = request.user.pk
+            student = get_object_or_404(User, pk=pk)
+            ctx['student'] = student
+
+        return render(request, self.template_name, context=ctx)
 
 
 class KataDetail(TemplateView):
@@ -393,6 +414,11 @@ class KataDetail(TemplateView):
         ctx = {
             'kata': kata,
         }
+        if request.user.is_authenticated:
+            pk = request.user.pk
+            student = get_object_or_404(User, pk=pk)
+            ctx['student'] = student
+
         return render(request, self.template_name, context=ctx)
 
 
@@ -405,4 +431,9 @@ class KataLessonDetail(TemplateView):
         ctx = {
             'lesson': lesson,
         }
+        if request.user.is_authenticated:
+            pk = request.user.pk
+            student = get_object_or_404(User, pk=pk)
+            ctx['student'] = student
+
         return render(request, self.template_name, context=ctx)

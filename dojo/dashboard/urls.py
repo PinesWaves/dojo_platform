@@ -40,8 +40,8 @@ urlpatterns = [
     path('student/', StudentDashboard.as_view(), name='student_dashboard'),
     path('student/profile/', StudentProfile.as_view(), name='profile'),
     path('library/', Library.as_view(), name='library'),
-    path('library/series/', KataSeries.as_view(), name='series'),
     path('library/techniques/', Techniques.as_view(), name='techniques'),
+    path('library/series/', KataSeries.as_view(), name='series'),
     path('library/kata/<int:pk>/', KataDetail.as_view(), name='kata_detail'),
     path('library/kata/lesson/<int:pk>/', KataLessonDetail.as_view(), name='kata_lesson_detail'),
 ]

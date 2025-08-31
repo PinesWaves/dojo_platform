@@ -1,20 +1,31 @@
-{% extends 'dashboard/student/base-st.html' %}
+{% extends 'dashboard/student/dashboard.html' %}
 {% load static %}
 {% block title %}Seishin Dojo JKA |  Profile{% endblock %}
 {% block css %}
   <!-- Cropper.js -->
   <link href="{% static 'plugins/cropperjs-v1.6.2/css/cropper.min.css' %}" rel="stylesheet">
 {% endblock %}
-{% block dashboard_content %}
+{% block content %}
   <div class="content-header">
-    <div class="container">
-      <div class="row mb-2">
-        <div class="col-sm-6">
-          <h1 class="m-0"> Profile</h1>
+    <div class="container py-3">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="mb-2 text-bold">Profile</h1>
         </div><!-- /.col -->
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="{% url 'student_dashboard' %}">Home</a></li>
+            <li class="breadcrumb-item">
+              <a href="
+              {% if user.is_authenticated %}
+                {% if user.is_staff %}
+                  {% url 'sensei_dashboard' %}
+                {% else %}
+                  {% url 'student_dashboard' %}
+                {% endif %}
+              {% else %}
+                {% url 'landing' %}
+              {% endif %}">Home</a>
+            </li>
             <li class="breadcrumb-item active">Profile</li>
           </ol>
         </div><!-- /.col -->
@@ -27,7 +38,7 @@
     </div>
   </div>
 {% endblock %}
-{% block script %}
+{% block js %}
   <!-- Cropper.js -->
   <script src="{% static 'plugins/cropperjs-v1.6.2/js/cropper.min.js' %}" rel="stylesheet"></script>
   <!-- Custom JS for modal and crop -->
