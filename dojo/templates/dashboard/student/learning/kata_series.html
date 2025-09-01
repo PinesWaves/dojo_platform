@@ -9,7 +9,16 @@
       </div><!-- /.col -->
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item"><a href="{% url 'landing' %}">Home</a></li>
+          <li class="breadcrumb-item"><a href="
+            {% if user.is_authenticated %}
+              {% if user.is_staff %}
+                {% url 'sensei_dashboard' %}
+              {% else %}
+                {% url 'student_dashboard' %}
+              {% endif %}
+            {% else %}
+              {% url 'landing' %}
+            {% endif %}">Home</a></li>
           <li class="breadcrumb-item"><a href="{% url 'library' %}">Library</a></li>
           <li class="breadcrumb-item active">Series</li>
         </ol>
