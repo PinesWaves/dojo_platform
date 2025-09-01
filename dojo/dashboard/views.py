@@ -1,17 +1,13 @@
-import base64
 from datetime import datetime, timezone, timedelta
-from io import BytesIO
 from secrets import token_urlsafe
 
-import qrcode
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.views.generic import TemplateView
 import logging
 
@@ -19,6 +15,7 @@ from dashboard.models import Training, Dojo, Technique, TechniqueCategory, Train
 from dojo.mixins.view_mixins import AdminRequiredMixin
 from user_management.models import User, Token, Category, TokenType
 from user_management.forms import UserUpdateForm
+from utils.utils import get_qr_base64
 
 logger = logging.getLogger(__name__)
 
@@ -207,11 +204,11 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         pk = kwargs.get('pk')
         student = get_object_or_404(User, pk=pk)
         form = UserUpdateForm(instance=student)
-        qr_code = generate_qr_code(student.id_number)
+        qr_code = get_qr_base64(student.id_number)
         ctx = {
             'form': form,
             'student': student,
-            'qr_code': f"data:image/png;base64,{qr_code}",
+            'qr_code': qr_code,
         }
         return render(request, self.template_name, context=ctx)
 
@@ -299,80 +296,50 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/student/profile.html"
 
     def get(self, request, *args, **kwargs):
-        pk = request.user.pk
-        student = get_object_or_404(User, pk=pk)
+        student = request.user
         form = UserUpdateForm(instance=student)
-        qr_code = generate_qr_code(student.id_number)
+        qr_code = get_qr_base64(student.id_number)
         ctx = {
             'form': form,
             'student': student,
-            'qr_code': f"data:image/png;base64,{qr_code}",
+            'qr_code': qr_code,
         }
         return render(request, self.template_name, context=ctx)
 
     def post(self, request, *args, **kwargs):
-        pk = request.user.pk
-        student = get_object_or_404(User, pk=pk)
-        form = UserUpdateForm(request.POST, request.FILES, instance=student)
-        if request.FILES.get('picture'):
+        student = request.user
+        if 'picture' in request.FILES:
+            uploaded_file = request.FILES['picture']
+            ext = uploaded_file.name.rsplit('.')[-1]
+
             if student.picture:
                 student.picture.delete(save=False)
 
-            uploaded_file = request.FILES['picture']
-            ext = uploaded_file.name.rsplit('.')[-1]
-            student.picture.save(f'{pk}.{ext}', request.FILES['picture'], save=True)
-            ctx = {
-                'form': form,
-                'student': student,
-            }
-            return render(request, self.template_name, context=ctx)
+            student.picture.save(f'{student.pk}.{ext}', uploaded_file, save=True)
+
+            messages.success(request, "Picture updated correctly.")
+            return redirect('profile')
+
+        form = UserUpdateForm(request.POST, request.FILES, instance=student)
         if form.is_valid():
-            return self.form_invalid(form, request)
-            # return self.form_valid(form)
+            return self.form_valid(form)
         else:
-            return self.form_invalid(form, request)
-            # return render(request, self.template_name, context=ctx)
+            return self.form_invalid(form)
 
     def form_valid(self, form):
-        # Process the form
         form.save()
-        self.request.session['errors'] = None
-        self.request.session['msg'] = "Update successful!"
+        messages.success(self.request, "Profile updated correctly.")
         return redirect('profile')
 
-    def form_invalid(self, form, request):
-        request.session['errors'] = form.errors
-        request.session['msg'] = "Update failed!"
-        # ctx = {
-        #     'form': form,
-        #     'student': student,
-        # }
-        return redirect('profile')
-
-
-def generate_qr_code(data):
-    cache_key = f"qr_code_{data}"
-    cached_qr = cache.get(cache_key)
-    if cached_qr:
-        return cached_qr
-
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=10,
-        border=3,
-    )
-    qr.add_data(data)
-    qr.make(fit=True)
-
-    img = qr.make_image(fill_color="black", back_color="white")
-    buffered = BytesIO()
-    img.save(buffered, format="PNG")
-    img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
-
-    cache.set(cache_key, img_str, timeout=3600)  # Cache for 1 hour
-
-    return img_str
+    def form_invalid(self, form):
+        qr_code = get_qr_base64(self.request.user.id_number)
+        context = {
+            'form': form,
+            'student': self.request.user,
+            'qr_code': qr_code,
+        }
+        messages.error(self.request, "There were errors updating the profile.")
+        return render(self.request, self.template_name, context)
 
 
 class Library(TemplateView):

@@ -1,16 +1,12 @@
-import base64
 import uuid
 from datetime import datetime, timedelta
-from io import BytesIO
-from PIL import Image
 from django.utils import timezone
 from django.utils.timezone import now
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.http import HttpResponseForbidden
 
-from config.config_vars import Ranges
+from utils.config_vars import Ranges
 
 
 class IDType(models.TextChoices):

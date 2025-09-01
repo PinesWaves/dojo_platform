@@ -1,5 +1,3 @@
-from io import BytesIO
-import qrcode
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import models
@@ -7,6 +5,7 @@ from django.utils import timezone
 from secrets import token_urlsafe
 
 from user_management.models import User, Category
+from utils.utils import generate_qr_file
 
 
 class TechniqueCategory(models.TextChoices):
@@ -44,20 +43,12 @@ class Training(models.Model):
     techniques = models.ManyToManyField(Technique, related_name="techniques")
 
     def save(self, *args, **kwargs):
-
-        if self.status:
+        if self.status and not self.training_code:
             self.training_code = token_urlsafe(30)
-            # Generar el QR a partir del código
-            qr = qrcode.QRCode(version=1, box_size=10, border=5)
-            qr.add_data(self.training_code)
-            qr.make(fit=True)
 
-            # Guardar la imagen en un campo ImageField
-            qr_image = qr.make_image(fill_color="black", back_color="white")
-            buffer = BytesIO()
-            qr_image.save(buffer, format="PNG")
-            buffer.seek(0)
-            self.qr_image.save(f"{self.training_code}.png", File(buffer), save=False)
+        if self.training_code:
+            qr_buffer = generate_qr_file(self.training_code)
+            self.qr_image.save(f"training_{self.training_code}.png", File(qr_buffer), save=False)
         super().save(*args, **kwargs)
 
 

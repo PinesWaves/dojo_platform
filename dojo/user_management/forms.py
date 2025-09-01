@@ -1,8 +1,8 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
-from config.widgets import CustomSwitchWidget, CustomDatePickerWidget
-from config.config_vars import regulations, informed_consent
+from utils.widgets import CustomSwitchWidget, CustomDatePickerWidget
+from utils.config_vars import regulations, informed_consent
 from .models import User, Category
 
 

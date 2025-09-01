@@ -28,7 +28,7 @@ class TrainingAdmin(admin.ModelAdmin):
     list_filter = ('status', 'date')  # Add filters
     ordering = ('date',)  # Default ordering
     fieldsets = (
-        (None, {'fields': ('date', 'status', 'location', 'training_code', 'qr_image')}),
+        (None, {'fields': ('date', 'status', 'location')}),
         ('Relations', {'fields': ('attendants', 'techniques')}),
     )
     add_fieldsets = (
