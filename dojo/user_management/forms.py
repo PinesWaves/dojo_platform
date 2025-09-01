@@ -180,7 +180,7 @@ class UserRegisterForm(forms.ModelForm):
         user = super().save(commit=False)
         # Establecer la contraseña usando set_password para encriptarla
         user.set_password(self.cleaned_data["password1"])
-        user.category = Category.ESTUDIANTE
+        user.category = Category.STUDENT
         if commit:
             user.save()
         return user
@@ -220,12 +220,12 @@ class UserUpdateForm(forms.ModelForm):
         required=True
     )
 
-
     class Meta:
         model = User
         fields = [
             'first_name', 'last_name', 'category', 'id_type', 'id_number', 'birth_date', 'birth_place', 'profession',
-            'eps', 'date_joined', 'phone_number', 'address', 'city', 'country', 'email', 'level', 'parent', 'parent_phone_number',
+            'eps', 'date_joined', 'phone_number', 'address', 'city', 'country', 'email', 'level', 'parent',
+            'parent_phone_number',
             'medical_cond', 'drug_cons', 'allergies', 'other_activities', 'cardio_prob', 'injuries', 'physical_limit',
             'lost_cons'
         ]
@@ -233,10 +233,14 @@ class UserUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if self.instance and self.instance.pk:
-            country_code = self.instance.country
-            self.fields['country'].initial = country_code
-            self.fields['country'].widget.attrs['data-default'] = country_code
+        if self.instance:
+            if self.instance.pk:
+                country_code = self.instance.country
+                self.fields['country'].initial = country_code
+                self.fields['country'].widget.attrs['data-default'] = country_code
+
+            if self.instance.category != Category.SENSEI:
+                self.fields.pop('level', None)
 
         for field_name, field in self.fields.items():
             class_attr = field.widget.attrs.get('class', 'form-control')
