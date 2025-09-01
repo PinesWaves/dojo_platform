@@ -6,6 +6,7 @@ from secrets import token_urlsafe
 import qrcode
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.http import JsonResponse
@@ -29,7 +30,7 @@ class SenseiDashboard(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         user_cat = request.user.category
         if user_cat != Category.SENSEI:
             return redirect('student_dashboard')
-        trainings = Training.objects.all().order_by('-date')[:6]
+        trainings = Training.objects.prefetch_related('attendants', 'techniques').order_by('-date')[:6]
         ctx = {
             "trainings": trainings,
         }
@@ -40,16 +41,24 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
     template_name = "dashboard/sensei/manage_trainings.html"
 
     def get(self, request, *args, **kwargs):
-        trainings = Training.objects.all()
         now = datetime.now(timezone.utc)
-        for t in trainings:
-            if now > t.date + timedelta(hours=2) and t.status:
-                t.status = TrainingStatus.FINALIZADO
-                if t.qr_image:
-                    t.qr_image.delete(save=False)
-                    t.qr_image = None
-                t.training_code = ''
-                t.save()
+
+        # Efficiently update expired trainings
+        trainings_to_update = Training.objects.filter(
+            date__lt=now - timedelta(hours=2),
+            status=TrainingStatus.AGENDADO
+        )
+        for t in trainings_to_update:
+            if t.qr_image:
+                t.qr_image.delete(save=False)
+
+        trainings_to_update.update(
+            status=TrainingStatus.FINALIZADO,
+            qr_image=None,
+            training_code=''
+        )
+
+        trainings = Training.objects.prefetch_related('attendants', 'techniques').all()
         techniques = Technique.objects.all()
         ctx = {
             "trainings": trainings,
@@ -74,25 +83,28 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
             if training_status not in [TrainingStatus.AGENDADO, TrainingStatus.FINALIZADO, TrainingStatus.CANCELADO]:
                 raise ValidationError("Invalid training status value.")
 
-            training_techniques = request.POST.getlist('training_techniques')
+            training_techniques_ids = request.POST.getlist('training_techniques')
 
             train = Training(
                 date=training_date,
                 status=training_status,
             )
             train.save()
-            for tc_id in training_techniques:
-                technique = Technique.objects.get(pk=tc_id)
-                train.techniques.add(technique)
-            train.save()
+
+            # Efficiently add techniques
+            if training_techniques_ids:
+                techniques = Technique.objects.filter(pk__in=training_techniques_ids)
+                train.techniques.add(*techniques)
+
         except ValidationError as e:
             return JsonResponse({'errors': str(e)}, status=400)
         except Technique.DoesNotExist:
             return JsonResponse({'errors': 'One or more selected techniques do not exist.'}, status=400)
         except Exception as e:
-            return JsonResponse({'errors': 'An unexpected errors occurred.'}, status=500)
+            logger.error(f"Error creating training: {e}")
+            return JsonResponse({'errors': 'An unexpected error occurred.'}, status=500)
 
-        trainings = Training.objects.filter(status=True)
+        trainings = Training.objects.prefetch_related('attendants', 'techniques').filter(status=TrainingStatus.AGENDADO)
         techniques = Technique.objects.all()
         ctx = {
             "trainings": trainings,
@@ -146,7 +158,7 @@ class ManageStudents(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         call_command('cleanup_expired_tokens', verbosity=0)
         sensei = request.user
         #TODO: how to deal with a sensei with more than one dojo?
-        dojo = Dojo.objects.filter(sensei=sensei).first()
+        dojo = Dojo.objects.prefetch_related('students').filter(sensei=sensei).first()
         self.ctx['students'] = User.objects.filter(category=Category.ESTUDIANTE) # dojo.students.all() if dojo else []
         self.ctx['time_url'] = [
             (t.expires_at, reverse('signup', kwargs={'token': t.token}))
@@ -272,7 +284,7 @@ class StudentDashboard(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/student/dashboard.html"
 
     def get(self, request, *args, **kwargs):
-        trainings = Training.objects.all().order_by('-date')[:6]
+        trainings = Training.objects.prefetch_related('attendants', 'techniques').order_by('-date')[:6]
         pk = request.user.pk
         student = get_object_or_404(User, pk=pk)
         ctx = {
@@ -339,6 +351,11 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
 
 
 def generate_qr_code(data):
+    cache_key = f"qr_code_{data}"
+    cached_qr = cache.get(cache_key)
+    if cached_qr:
+        return cached_qr
+
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -352,6 +369,9 @@ def generate_qr_code(data):
     buffered = BytesIO()
     img.save(buffered, format="PNG")
     img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+
+    cache.set(cache_key, img_str, timeout=3600)  # Cache for 1 hour
+
     return img_str
 
 
@@ -359,7 +379,7 @@ class Library(TemplateView):
     template_name = "dashboard/student/learning/library.html"
 
     def get(self, request, *args, **kwargs):
-        series = KataSerie.objects.all()
+        series = KataSerie.objects.prefetch_related('katas').all()
         techniques = Technique.objects.all()
         ctx = {
             'series': series,
@@ -393,7 +413,7 @@ class KataSeries(TemplateView):
     template_name = "dashboard/student/learning/kata_series.html"
 
     def get(self, request, *args, **kwargs):
-        series = KataSerie.objects.all()
+        series = KataSerie.objects.prefetch_related('katas').all()
         ctx = {
             'series': series,
         }
@@ -410,7 +430,7 @@ class KataDetail(TemplateView):
 
     def get(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
-        kata = get_object_or_404(Kata, pk=pk)
+        kata = get_object_or_404(Kata.objects.prefetch_related('lessons'), pk=pk)
         ctx = {
             'kata': kata,
         }
@@ -427,7 +447,7 @@ class KataLessonDetail(TemplateView):
 
     def get(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
-        lesson = get_object_or_404(KataLesson, pk=pk)
+        lesson = get_object_or_404(KataLesson.objects.prefetch_related('activities'), pk=pk)
         ctx = {
             'lesson': lesson,
         }
