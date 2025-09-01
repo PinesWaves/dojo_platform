@@ -42,7 +42,7 @@ class CustomLoginView(View):
         if user.is_authenticated:  # Redirige si ya está autenticado
             if user.is_superuser or user.category == Category.SENSEI:
                 return redirect(reverse_lazy('sensei_dashboard'))  # Redirigir al dashboard del sensei
-            elif user.category == Category.ESTUDIANTE:
+            elif user.category == Category.STUDENT:
                 return redirect(reverse_lazy('student_dashboard'))  # Redirigir al dashboard del estudiante
         return render(request, self.template_name) #, {'errors': error, 'msg': msg})
 
@@ -73,7 +73,7 @@ class CustomLoginView(View):
 
             if user.is_superuser or user.category == Category.SENSEI:
                 return redirect(reverse_lazy('sensei_dashboard'))
-            elif user.category == Category.ESTUDIANTE:
+            elif user.category == Category.STUDENT:
                 return redirect(reverse_lazy('student_dashboard'))
             else:
                 return redirect(reverse_lazy('login'))

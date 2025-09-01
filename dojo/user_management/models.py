@@ -24,7 +24,7 @@ class IDType(models.TextChoices):
 class Category(models.TextChoices):
     SENSEI = 'SE', 'Sensei'
     SEMPAI = 'SP', 'Sempai'
-    ESTUDIANTE = 'ST', 'Student'
+    STUDENT = 'ST', 'Student'
 
 
 class MedicalConditions(models.TextChoices):
@@ -90,7 +90,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     category = models.CharField(
         choices=Category.choices,
-        default=Category.ESTUDIANTE
+        default=Category.STUDENT
     )
     id_number = models.CharField(max_length=30, unique=True, null=False, blank=False)
     birth_date = models.DateField(default=datetime(2000, 1, 1), null=False, blank=False)
