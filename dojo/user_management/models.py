@@ -140,16 +140,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
 
-    # def save_picture(self, image_file):
-    #     """Convert the image to Base64 and save it."""
-    #     buffer = BytesIO()
-    #     image = Image.open(image_file)
-    #     image.save(buffer, format=image.format)  # Preserve original format
-    #     buffer.seek(0)
-    #     encoded_image = base64.b64encode(buffer.read()).decode('utf-8')
-    #     self.picture = encoded_image
-    #     self.save()
-
 
 class TokenType(models.TextChoices):
     SIGNUP = 'SU', 'Sign up'

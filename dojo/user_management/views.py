@@ -209,34 +209,38 @@ class ForgotPass(FormView):
 
 
 # Vista de Recuperación de Contraseña
-class RecoverPass(TemplateView):
+class RecoverPass(FormView):
     template_name = 'login_register/recover-password.html'
     form_class = RecoverPassForm
     success_url = reverse_lazy('login')
 
     def dispatch(self, request, *args, **kwargs):
-        self.uidb64 = kwargs.get('uidb64')
-        self.token = kwargs.get('token')
+        self.token_str = kwargs.get('token')
         return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['token'] = self.token_str
+        return context
 
     def form_valid(self, form):
         try:
-            uid = force_str(urlsafe_base64_decode(self.uidb64))
-            user = User.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            user = None
+            token = Token.objects.get(token=self.token_str, type=TokenType.PASSWORD_RESET)
+            if not token.is_valid():
+                messages.error(self.request, "The reset link is invalid or expired.")
+                return redirect('forgot-password')
 
-        token_generator = PasswordResetTokenGenerator()
-        if user is not None and token_generator.check_token(user, self.token):
+            user = token.user
             user.set_password(form.cleaned_data['password1'])
             user.save()
+            token.delete()
             messages.success(self.request, "Your password has been reset successfully.")
-            return super().form_valid(form)
-        else:
+            return redirect(self.success_url)
+
+        except Token.DoesNotExist:
             messages.error(self.request, "The reset link is invalid or expired.")
             return redirect('forgot-password')
 
     def form_invalid(self, form):
-        self.request.session['errors'] = form.errors
-        self.request.session['msg'] = "Update failed!"
+        messages.error(self.request, "Update failed! Please check the form.")
         return self.render_to_response(self.get_context_data(form=form))
