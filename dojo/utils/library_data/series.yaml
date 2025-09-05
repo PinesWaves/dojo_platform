@@ -1,0 +1,136 @@
+series:
+  - name: Serie 1
+    description: "Conjunto de katas fundamentales del Karate Shotokan según el libro Karate-Do Kata Volumen 1 de la JKA.
+    Incluye los Heian, Tekki y las cuatro Sentei, formando la base técnica y táctica para el desarrollo del karateka en
+    sus etapas iniciales e intermedias."
+    image: series/book_vol_1.png
+    order: 1
+    katas:
+      - Heian Shodan (平安初段)
+      - Heian Nidan (平安二段)
+      - Heian Sandan (平安三段)
+      - Heian Yondan (平安四段)
+      - Heian Godan (平安五段)
+      - Tekki Shodan (鉄騎初段)
+      - Tekki Nidan (鉄騎二段)
+      - Tekki Sandan (鉄騎三段)
+      - Bassai Dai (披塞大)
+      - Kankū Dai (観空大)
+      - Jion (慈恩)
+      - Enpi (燕飛)
+
+  - name: Serie 2
+    description: "Conjunto de katas de nivel intermedio y avanzado, presentados en el libro Karate-Do Kata Volumen 2
+    de la JKA. Enfatiza el equilibrio, la fuerza interna y el combate a corta distancia, con técnicas provenientes de
+    las tradiciones clásicas de Okinawa y una marcada profundidad táctica."
+    image: series/book_vol_2.png
+    order: 2
+    katas:
+      - Gankaku (岩鶴)
+      - Jitte (十手)
+      - Hangetsu (半月)
+      - Tekki Nidan (鉄騎二段)
+      - Tekki Sandan (鉄騎三段)
+
+  - name: Serie 3
+    description: "Conjunto de katas de nivel avanzados del Karate Shotokan, presentados en el libro Karate-Do Kata
+    Volumen 3 de la JKA. Destacan por su complejidad técnica, riqueza en bunkai y profundidad simbólica, representando
+    el dominio del ritmo, la respiración y la interpretación marcial."
+    image: series/book_vol_3.png
+    order: 3
+    katas:
+      - Bassai Shō (披塞小)
+      - Kankū Shō (観空小)
+      - Sōchin (壯鎭)
+      - Nijūshiho (二十四歩)
+      - Unsu (雲手)
+
+  - name: Serie 4
+    description: "Conjunto de katas de nivel avanzados y de carácter técnico refinado, presentados en el libro Karate-Do
+    Kata Volumen 4 de la JKA. Destacan por su riqueza simbólica, complejidad estructural y profundidad marcial, siendo
+    parte del repertorio superior en la formación del karateka."
+    image: series/book_vol_4.png
+    order: 4
+    katas:
+      - Wankan (王冠)
+      - Gojūshiho Dai (五十四歩大)
+      - Gojushiho Sho (五十四歩小)
+      - Meikyō – Rohai (明鏡)
+      - Chinte (珍手)
+
+  - name: Serie Heian
+    description: "Conjunto de katas fundamentales desarrollados por el maestro Itosu para introducir a los estudiantes
+    en los principios básicos del Karate. Representan la base técnica y filosófica del estilo Shotokan."
+    image: series/heian_cover.png
+    order: 5
+    katas:
+      - Heian Shodan (平安初段)
+      - Heian Nidan (平安二段)
+      - Heian Sandan (平安三段)
+      - Heian Yondan (平安四段)
+      - Heian Godan (平安五段)
+
+  - name: Serie Sentei
+    description: "Conjunto de katas seleccionados por el maestro Gichin Funakoshi como base del programa intermedio del
+    Karate Shotokan. Representan una síntesis técnica y táctica de las escuelas clásicas de Okinawa."
+    image: series/sentei_cover.png
+    order: 6
+    katas:
+      - Bassai Dai (披塞大)
+      - Kankū Dai (観空大)
+      - Jion (慈恩)
+      - Enpi (燕飛)
+
+  - name: Serie Tekki
+    description: "Serie de katas centrados en la posición kiba-dachi y el desplazamiento lateral. Derivan del kata
+    Naihanchi y enfatizan la estabilidad, la fuerza interna y el combate a corta distancia."
+    image: series/tekki_cover.png
+    order: 7
+    katas:
+      - Tekki Shodan (鉄騎初段)
+      - Tekki Nidan (鉄騎二段)
+      - Tekki Sandan (鉄騎三段)
+
+  - name: Serie Avanzadas
+    description: "Katas de nivel superior que exigen dominio técnico, control interno y comprensión profunda del bunkai.
+    Son parte del repertorio avanzado del Karate Shotokan y se enseñan en etapas finales del proceso formativo."
+    image: series/avanzadas_cover.png
+    order: 8
+    katas:
+      - Gojūshiho Dai (五十四歩大)
+      - Gojushiho Sho (五十四歩小)
+      - Nijūshiho (二十四歩)
+      - Unsu (雲手)
+      - Meikyō – Rohai (明鏡)
+      - Wankan (王冠)
+      - Chinte (珍手)
+      - Hangetsu (半月)
+      - Gankaku (岩鶴)
+      - Sōchin (壯鎭)
+
+  - name: Serie Katas del Templo
+    description: "Katas con raíces filosóficas y espirituales, vinculadas a la tradición budista y al simbolismo de los
+    templos. Representan valores como la introspección, la armonía y la búsqueda del equilibrio interior."
+    image: series/templos_cover.png
+    order: 9
+    katas:
+      - Jion (慈恩)
+      - Jitte (十手)
+      - Jiin (慈陰)
+
+  - name: Serie Históricas
+    description: "Katas que conservan la esencia de las escuelas clásicas de Okinawa: Shuri-te, Tomari-te y Naha-te.
+    Representan la raíz técnica y filosófica del Karate, transmitida por maestros como Itosu, Matsumura, Azato y Kyan."
+    image: series/historicas_cover.png
+    order: 10
+    katas:
+      - Bassai Dai (披塞大)
+      - Bassai Shō (披塞小)
+      - Kankū Dai (観空大)
+      - Kankū Shō (観空小)
+      - Gankaku (岩鶴)
+      - Hangetsu (半月)
+      - Enpi (燕飛)
+      - Jion (慈恩)
+      - Jitte (十手)
+      - Jiin (慈陰)

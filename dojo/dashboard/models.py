@@ -96,7 +96,7 @@ class Kata(models.Model):
     level = models.CharField(max_length=50, choices=LEVEL_CHOICES)
     embusen_diagram = models.ImageField(upload_to='embusen/', blank=True, null=True)
     video_reference = models.URLField(blank=True, null=True)
-    order = models.PositiveIntegerField(default=1)
+    order = models.CharField(max_length=3)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
