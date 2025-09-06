@@ -9,7 +9,7 @@ from user_management.views import RegisterView, CustomLoginView, RecoverPass, Fo
 urlpatterns = [
     path('', landing_page, name='landing'),
     path('login/', CustomLoginView.as_view(), name='login'),
-    path('logout/', CustomLogoutView.as_view(next_page='login'), name='logout'),
+    path('logout/', CustomLogoutView.as_view(next_page='landing'), name='logout'),
     path('signup/<str:token>/', RegisterView.as_view(), name='signup'),
     path('forgot-password/', ForgotPass.as_view(), name='forgot-password'),
     path('recover-password/<str:token>/', RecoverPass.as_view(), name='recover-password'),

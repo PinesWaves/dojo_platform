@@ -5,7 +5,7 @@ from faker import Faker
 import logging
 
 from user_management.models import User, Category
-from config.config_vars import Ranges
+from utils.config_vars import Ranges
 from dashboard.models import Dojo, Training, Technique, TrainingStatus
 from django.utils import timezone
 

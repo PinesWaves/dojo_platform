@@ -1,0 +1,105 @@
+lessons:
+  - kata: Heian Shodan (平安初段)
+    title: "Unidad 1: Introducción a la Kata y al Karate-Do Shotokan JKA"
+    order: 1
+    objectives: |
+      - Comprender la importancia y el propósito de las katas en el Karate-Do.
+      - Conocer los principios básicos del Karate-Do Shotokan JKA (Dojo Kun, Niju Kun).
+      - Familiarizarse con el concepto de Heian y su relevancia en la serie de katas.
+      - Entender la estructura general del curso y el modelo de aprendizaje.
+    content: |
+      - Introducción a las katas y su papel en el Karate-Do.
+      - Historia y evolución del Karate-Do Shotokan JKA.
+      - Principios fundamentales del Karate-Do (Dojo Kun, Niju Kun).
+      - Explicación del concepto de Heian y su importancia en la serie de katas.
+      - Descripción general del curso y el modelo de aprendizaje.
+    activities:
+      - title: "¿Qué es una Kata y por qué es fundamental en el Karate-Do?"
+        description: "Explora la historia y el propósito de las katas en el Karate-Do."
+        order: 1
+        images: null
+        videos:
+          - description: video
+            url: "https://www.youtube.com/watch?v=rvh77oY4tH8"
+      - title: "Breve historia del Karate-Do Shotokan JKA y sus principios"
+        description: "Conoce los fundamentos del Karate-Do Shotokan JKA, incluyendo el Dojo Kun y Niju Kun."
+        order: 2
+        images:
+          - path: http://localhost:8000/media/activities/images/jka-dojo-kun-938x704.webp
+            caption: JKA Dojo Kun
+        videos:
+          - description: El Karate Do y su historia
+            url: "https://www.youtube.com/watch?v=kxvDPwS6Yh4"
+          - description: Dojo Kun JKA Tokyo
+            url: "https://www.youtube.com/watch?v=UgRd8UPHeo8"
+          - description: Niju Kun
+            url: "https://www.youtube.com/watch?v=thzZp5GvJiI"
+      - title: "Introducción a la serie Heian y la importancia de Heian Shodan"
+        description: "Descubre el significado de Heian y su relevancia en la serie de katas."
+        order: 3
+        images: null
+        videos:
+          - description: KATA HEIAN Y PINNAN, HISTORIA, SIGNIFICADO, CREACIÓN y EVOLUCIÓN, Kata chanan?
+            url: "https://www.youtube.com/watch?v=zNwxDuazJHo"
+      - title: "Material complementario"
+        description: "Filosofía del Karate Do Shotokan JKA: https://www.jka.or.jp/en/about-jka/philosophy/
+        Características del Karate Do Shotokan JKA: https://www.jka.or.jp/en/about-jka/features/
+        Rangos: https://www.jka.or.jp/en/about-jka/dan-ranking/
+        Historia de la JKA: https://www.jka.or.jp/en/about-jka/history/"
+        order: 4
+        images: null
+        videos: null
+
+  - kata: Heian Shodan (平安初段)
+    title: "Unidad 2: Fundamentos Básicos (Kihon) para Heian Shodan"
+    order: 2
+    objectives: |
+      - Dominar las posturas fundamentales de Heian Shodan (Zenkutsu Dachi, Kokutsu Dachi).
+      - Ejecutar correctamente las técnicas de bloqueo (Gedan Barai, Age Uke, Shuto Uke).
+      - Ejecutar correctamente las técnicas de golpeo (Oi Tsuki, Tettsui Uchi).
+      - Comprender y aplicar el concepto de kime (enfoque de energía).
+    content: |
+      - Práctica de posturas básicas utilizadas en Heian Shodan.
+      - Ejercicios de técnicas de bloqueo y golpeo específicas de la kata.
+      - Drills para mejorar la coordinación, el equilibrio y la fuerza.
+      - Introducción al concepto de kime y su aplicación en las técnicas.
+    activities: null
+
+  - kata: Heian Shodan (平安初段)
+    title: "Unidad 3: Desglose de Heian Shodan - Primera Sección"
+    order: 3
+    objectives: |
+      - Aprender los primeros movimientos de Heian Shodan, paso a paso.
+      - Integrar las posturas y técnicas aprendidas en la secuencia correcta.
+      - Entender los puntos clave de cada movimiento (dirección, rotación de cadera, etc.).
+    content: |
+      - Desglose detallado de los primeros movimientos de Heian Shodan.
+      - Práctica guiada para asegurar la correcta ejecución de cada técnica.
+      - Análisis de los puntos clave y correcciones comunes.
+    activities: null
+
+  - kata: Heian Shodan (平安初段)
+    title: "Unidad 4: Desglose de Heian Shodan - Segunda Sección y Kiai"
+    order: 4
+    objectives: |
+      - Aprender los movimientos restantes de Heian Shodan.
+      - Ejecutar correctamente la secuencia completa de la kata.
+      - Comprender el significado y la correcta aplicación del Kiai.
+    content: |
+      - Desglose detallado de los movimientos restantes de Heian Shodan.
+      - Práctica guiada para la ejecución completa de la kata.
+      - Introducción al Kiai: cuándo y cómo aplicarlo efectivamente.
+    activities: null
+
+  - kata: Heian Shodan (平安初段)
+    title: "Unidad 5: Refinamiento, Aplicación (Bunkai) y Evaluación"
+    order: 5
+    objectives: |
+      - Refinar la ejecución de Heian Shodan, prestando atención a los detalles y la fluidez.
+      - Comprender y visualizar posibles aplicaciones (Bunkai) de los movimientos de la kata.
+      - Realizar una autoevaluación y planificar la mejora continua.
+    content: |
+      - Práctica avanzada de Heian Shodan, enfocándose en la precisión y el ritmo.
+      - Introducción al Bunkai: análisis y demostración de aplicaciones prácticas.
+      - Técnicas de autoevaluación y establecimiento de metas para el progreso futuro.
+    activities: null

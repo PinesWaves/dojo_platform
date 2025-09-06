@@ -1,16 +1,12 @@
-import base64
 import uuid
 from datetime import datetime, timedelta
-from io import BytesIO
-from PIL import Image
 from django.utils import timezone
 from django.utils.timezone import now
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.http import HttpResponseForbidden
 
-from config.config_vars import Ranges
+from utils.config_vars import Ranges
 
 
 class IDType(models.TextChoices):
@@ -24,7 +20,7 @@ class IDType(models.TextChoices):
 class Category(models.TextChoices):
     SENSEI = 'SE', 'Sensei'
     SEMPAI = 'SP', 'Sempai'
-    ESTUDIANTE = 'ST', 'Student'
+    STUDENT = 'ST', 'Student'
 
 
 class MedicalConditions(models.TextChoices):
@@ -90,7 +86,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     category = models.CharField(
         choices=Category.choices,
-        default=Category.ESTUDIANTE
+        default=Category.STUDENT
     )
     id_number = models.CharField(max_length=30, unique=True, null=False, blank=False)
     birth_date = models.DateField(default=datetime(2000, 1, 1), null=False, blank=False)

@@ -3,26 +3,11 @@
 {% block title %}Seishin Dojo JKA | Dashboard{% endblock %}
 {% block main-menu %}
 <!-- User Account menu -->
-<li class="nav-item dropdown user-menu">
-  <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-    <img class="user-image img-circle elevation-2"
-        {% if student.picture %}
-         src="{{ student.picture.url }}"
-        {% elif student.gender == 'M' %}
-         src="{% static 'dist/img/avatar.png' %}"
-        {% elif student.gender == 'F' %}
-         src="{% static 'dist/img/avatar2.png' %}"
-        {% else %}
-         src="{% static 'dist/img/default_user.png' %}"
-        {% endif %}
-         alt="User Image">
-    <span class="d-none d-md-inline">{{ student.first_name }}</span>
-  </a>
-  <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-    <!-- User image -->
-    <li class="user-header bg-danger">
-      <img class="img-circle elevation-2"
-         {% if student.picture %}
+  {% if user.is_authenticated %}
+  <li class="nav-item dropdown user-menu">
+    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
+      <img class="user-image img-circle elevation-2"
+          {% if student.picture %}
            src="{{ student.picture.url }}"
           {% elif student.gender == 'M' %}
            src="{% static 'dist/img/avatar.png' %}"
@@ -31,123 +16,140 @@
           {% else %}
            src="{% static 'dist/img/default_user.png' %}"
           {% endif %}
-         alt="User Image">
-      <p>
-        <span class="level-circle level-{{ student.level|lower }}"></span>
-        {{ student.get_level_display }} - {{ student.get_category_display }}
-        <small>Member since {{ student.date_joined }}</small>
-      </p>
-    </li>
-    <!-- Menu Footer-->
-    <li class="user-footer">
-      <a href="{% url 'profile' %}" class="btn btn-default btn-flat">Profile</a>
-      <form class="float-right" action="{% url 'logout' %}" method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-default btn-flat">Logout</button>
-      </form>
-    </li>
-  </ul>
-</li>
-<!-- Messages Dropdown Menu -->
-<li class="nav-item dropdown">
-  <a class="nav-link" data-toggle="dropdown" href="#">
-    <i class="fas fa-comments"></i>
-    <span class="badge badge-danger navbar-badge">3</span>
-  </a>
-  <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-    <a class="dropdown-item" href="#">
-      <!-- Message Start -->
-      <div class="media">
-        <img alt="User Avatar" class="img-size-50 mr-3 img-circle"
-             src="{% static 'dist/img/user1-128x128.jpg' %}">
-        <div class="media-body">
-          <h3 class="dropdown-item-title">
-            Brad Diesel
-            <span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
-          </h3>
-          <p class="text-sm">Call me whenever you can...</p>
-          <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
+           alt="User Image">
+      <span class="d-none d-md-inline">{{ student.first_name }}</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+      <!-- User image -->
+      <li class="user-header bg-danger">
+        <img class="img-circle elevation-2"
+           {% if student.picture %}
+             src="{{ student.picture.url }}"
+            {% elif student.gender == 'M' %}
+             src="{% static 'dist/img/avatar.png' %}"
+            {% elif student.gender == 'F' %}
+             src="{% static 'dist/img/avatar2.png' %}"
+            {% else %}
+             src="{% static 'dist/img/default_user.png' %}"
+            {% endif %}
+           alt="User Image">
+        <p>
+          <span class="level-circle level-{{ student.level|lower }}"></span>
+          {{ student.get_level_display }} - {{ student.get_category_display }}
+          <small>Member since {{ student.date_joined }}</small>
+        </p>
+      </li>
+      <!-- Menu Footer-->
+      <li class="user-footer">
+        <a href="{% url 'profile' %}" class="btn btn-default btn-flat">Profile</a>
+        <form class="float-right" action="{% url 'logout' %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-default btn-flat">Logout</button>
+        </form>
+      </li>
+    </ul>
+  </li>
+  {% endif %}
+  <!-- Messages Dropdown Menu -->
+  <li class="nav-item dropdown">
+    <a class="nav-link" data-toggle="dropdown" href="#">
+      <i class="fas fa-comments"></i>
+      <span class="badge badge-danger navbar-badge">3</span>
+    </a>
+    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+      <a class="dropdown-item" href="#">
+        <!-- Message Start -->
+        <div class="media">
+          <img alt="User Avatar" class="img-size-50 mr-3 img-circle"
+               src="{% static 'dist/img/user1-128x128.jpg' %}">
+          <div class="media-body">
+            <h3 class="dropdown-item-title">
+              Brad Diesel
+              <span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
+            </h3>
+            <p class="text-sm">Call me whenever you can...</p>
+            <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
+          </div>
         </div>
-      </div>
-      <!-- Message End -->
-    </a>
-    <div class="dropdown-divider"></div>
-    <a class="dropdown-item" href="#">
-      <!-- Message Start -->
-      <div class="media">
-        <img alt="User Avatar" class="img-size-50 img-circle mr-3"
-             src="{% static 'dist/img/user8-128x128.jpg' %}">
-        <div class="media-body">
-          <h3 class="dropdown-item-title">
-            John Pierce
-            <span class="float-right text-sm text-muted"><i class="fas fa-star"></i></span>
-          </h3>
-          <p class="text-sm">I got your message bro</p>
-          <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
+        <!-- Message End -->
+      </a>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-item" href="#">
+        <!-- Message Start -->
+        <div class="media">
+          <img alt="User Avatar" class="img-size-50 img-circle mr-3"
+               src="{% static 'dist/img/user8-128x128.jpg' %}">
+          <div class="media-body">
+            <h3 class="dropdown-item-title">
+              John Pierce
+              <span class="float-right text-sm text-muted"><i class="fas fa-star"></i></span>
+            </h3>
+            <p class="text-sm">I got your message bro</p>
+            <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
+          </div>
         </div>
-      </div>
-      <!-- Message End -->
-    </a>
-    <div class="dropdown-divider"></div>
-    <a class="dropdown-item" href="#">
-      <!-- Message Start -->
-      <div class="media">
-        <img alt="User Avatar" class="img-size-50 img-circle mr-3"
-             src="{% static 'dist/img/user3-128x128.jpg' %}">
-        <div class="media-body">
-          <h3 class="dropdown-item-title">
-            Nora Silvester
-            <span class="float-right text-sm text-warning"><i
-                class="fas fa-star"></i></span>
-          </h3>
-          <p class="text-sm">The subject goes here</p>
-          <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
+        <!-- Message End -->
+      </a>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-item" href="#">
+        <!-- Message Start -->
+        <div class="media">
+          <img alt="User Avatar" class="img-size-50 img-circle mr-3"
+               src="{% static 'dist/img/user3-128x128.jpg' %}">
+          <div class="media-body">
+            <h3 class="dropdown-item-title">
+              Nora Silvester
+              <span class="float-right text-sm text-warning"><i
+                  class="fas fa-star"></i></span>
+            </h3>
+            <p class="text-sm">The subject goes here</p>
+            <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
+          </div>
         </div>
-      </div>
-      <!-- Message End -->
+        <!-- Message End -->
+      </a>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-item dropdown-footer" href="#">See All Messages</a>
+    </div>
+  </li>
+  <!-- Notifications Dropdown Menu -->
+  <li class="nav-item dropdown">
+    <a class="nav-link" data-toggle="dropdown" href="#">
+      <i class="far fa-bell"></i>
+      <span class="badge badge-warning navbar-badge">15</span>
     </a>
-    <div class="dropdown-divider"></div>
-    <a class="dropdown-item dropdown-footer" href="#">See All Messages</a>
-  </div>
-</li>
-<!-- Notifications Dropdown Menu -->
-<li class="nav-item dropdown">
-  <a class="nav-link" data-toggle="dropdown" href="#">
-    <i class="far fa-bell"></i>
-    <span class="badge badge-warning navbar-badge">15</span>
-  </a>
-  <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-    <span class="dropdown-header">15 Notifications</span>
-    <div class="dropdown-divider"></div>
-    <a class="dropdown-item" href="#">
-      <i class="fas fa-envelope mr-2"></i> 4 new messages
-      <span class="float-right text-muted text-sm">3 mins</span>
+    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+      <span class="dropdown-header">15 Notifications</span>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-item" href="#">
+        <i class="fas fa-envelope mr-2"></i> 4 new messages
+        <span class="float-right text-muted text-sm">3 mins</span>
+      </a>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-item" href="#">
+        <i class="fas fa-users mr-2"></i> 8 friend requests
+        <span class="float-right text-muted text-sm">12 hours</span>
+      </a>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-item" href="#">
+        <i class="fas fa-file mr-2"></i> 3 new reports
+        <span class="float-right text-muted text-sm">2 days</span>
+      </a>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-item dropdown-footer" href="#">See All Notifications</a>
+    </div>
+  </li>
+  <!-- Fullscreen option -->
+  <li class="nav-item">
+    <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+      <i class="fas fa-expand-arrows-alt"></i>
     </a>
-    <div class="dropdown-divider"></div>
-    <a class="dropdown-item" href="#">
-      <i class="fas fa-users mr-2"></i> 8 friend requests
-      <span class="float-right text-muted text-sm">12 hours</span>
-    </a>
-    <div class="dropdown-divider"></div>
-    <a class="dropdown-item" href="#">
-      <i class="fas fa-file mr-2"></i> 3 new reports
-      <span class="float-right text-muted text-sm">2 days</span>
-    </a>
-    <div class="dropdown-divider"></div>
-    <a class="dropdown-item dropdown-footer" href="#">See All Notifications</a>
-  </div>
-</li>
-<!-- Fullscreen option -->
-<li class="nav-item">
-  <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-    <i class="fas fa-expand-arrows-alt"></i>
-  </a>
-</li>
-{#        <li class="nav-item">#}
-{#          <a class="nav-link" data-slide="true" data-widget="control-sidebar" href="#" role="button">#}
-{#            <i class="fas fa-th-large"></i>#}
-{#          </a>#}
-{#        </li>#}
+  </li>
+  {#        <li class="nav-item">#}
+  {#          <a class="nav-link" data-slide="true" data-widget="control-sidebar" href="#" role="button">#}
+  {#            <i class="fas fa-th-large"></i>#}
+  {#          </a>#}
+  {#        </li>#}
 {% endblock %}
 {% block content %}
 <div class="content-header">
