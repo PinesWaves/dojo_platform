@@ -51,28 +51,28 @@
           <p>{{ activity.description }}</p>
 
           {% if activity.images.exists %}
-          <div class="row">
             {% for img in activity.images.all %}
-            <div class="col-md-6 mb-2 d-flex flex-column align-items-center">
-              <img src="{{ img.image.url }}" class="img-fluid mb-2" alt="{{ img.caption }}">
-              {% if img.caption %}
-                <small class="text-muted text-center">{{ img.caption }}</small>
-              {% endif %}
+            <div class="row justify-content-center">
+              <div class="col-md-8 mb-2 d-flex flex-column">
+                {% if img.caption %}
+                  <small class="text-muted text-center">{{ img.caption }}</small>
+                {% endif %}
+                <img src="{{ img.image.url }}" class="img-fluid mb-2" alt="{{ img.caption }}">
+              </div>
             </div>
             {% endfor %}
-          </div>
           {% endif %}
 
           {% if activity.videos.exists %}
           <div class="mt-2">
             {% for vid in activity.videos.all %}
+              {% if vid.description %}
+              <small class="text-muted">{{ vid.description }}</small>
+              {% endif %}
               {% if vid.embed_url %}
               <div class="embed-responsive embed-responsive-16by9 mb-2">
                 <iframe class="embed-responsive-item" src="{{ vid.embed_url }}" allowfullscreen></iframe>
               </div>
-              {% endif %}
-              {% if vid.description %}
-              <small class="text-muted">{{ vid.description }}</small>
               {% endif %}
             {% endfor %}
           </div>

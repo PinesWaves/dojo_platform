@@ -28,6 +28,13 @@ class Command(BaseCommand):
         KataLesson.objects.all().delete()
         KataLessonActivity.objects.all().delete()
         KataLessonActivityImage.objects.all().delete()
+        for img_obj in KataLessonActivityImage.objects.all():
+            if img_obj.image and img_obj.image.path:
+                Path(img_obj.image.path).unlink(missing_ok=True)
+        KataLessonActivityImage.objects.all().delete()
+        for vid_obj in KataLessonActivityVideo.objects.all():
+            if vid_obj.image and vid_obj.image.path:
+                Path(vid_obj.image.path).unlink(missing_ok=True)
         KataLessonActivityVideo.objects.all().delete()
 
         # Reset primary key sequences

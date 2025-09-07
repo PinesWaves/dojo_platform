@@ -1,0 +1,20 @@
+lessons:
+  - title: "Loren ipsum"
+    kata: "Heian Shodan"
+    order: 1
+    objectives: |
+      - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      - Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+    content: |
+      - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      - Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+    activities:
+      - title: "Lorem ipsum dolor sit amet"
+        description: "Consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        order: 1
+        images:
+          - path: http://localhost:8000/media/activities/images/jka-dojo-kun-938x704.webp
+            caption: JKA Dojo Kun
+        videos:
+          - description: video
+            url: "https://www.example.com/xyz"
