@@ -1,3 +1,5 @@
+import re
+
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import models
@@ -145,7 +147,7 @@ class KataLessonActivity(models.Model):
 class KataLessonActivityImage(models.Model):
     activity = models.ForeignKey(KataLessonActivity, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='activities/images/')
-    caption = models.CharField(max_length=255, blank=True)
+    caption = models.TextField(blank=True)
 
     def __str__(self):
         return f"Imagen de {self.activity.title}"
@@ -154,15 +156,30 @@ class KataLessonActivityImage(models.Model):
 class KataLessonActivityVideo(models.Model):
     activity = models.ForeignKey(KataLessonActivity, on_delete=models.CASCADE, related_name='videos')
     url = models.URLField()
-    description = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
 
     @property
     def embed_url(self):
-        from urllib.parse import urlparse, parse_qs
-        parsed = urlparse(self.url)
-        video_id = parse_qs(parsed.query).get('v')
-        if video_id:
-            return f"https://www.youtube.com/embed/{video_id[0]}"
+        if "youtube.com" in self.url or "youtu.be" in self.url:
+            from urllib.parse import urlparse, parse_qs
+            parsed = urlparse(self.url)
+            if 'shorts' in parsed.path:  # Handle YouTube Shorts URLs
+                video_id = parsed.path.split('/')[2]
+                return f"https://www.youtube.com/embed/{video_id}"
+            if parsed.netloc == 'youtu.be':  # Handle shortened YouTube URLs
+                video_id = parsed.path[1:]
+                return f"https://www.youtube.com/embed/{video_id}"
+            if parsed.path.startswith('/embed/'):  # Already an embed URL
+                return self.url
+            video_id = parse_qs(parsed.query).get('v')
+            if video_id:
+                return f"https://www.youtube.com/embed/{video_id[0]}"
+        elif "drive.google.com" in self.url:
+            match = re.search(r'/d/([a-zA-Z0-9_-]+)', self.url)
+            if match:
+                file_id = match.group(1)
+                return f"https://drive.google.com/file/d/{file_id}/preview"
+            return ""
         return None
 
     def __str__(self):

@@ -1,6 +1,6 @@
 lessons:
-  - kata: Heian Shodan (平安初段)
-    title: "Unidad 1: Introducción a la Kata y al Karate-Do Shotokan JKA"
+  - title: "Unidad 1: Introducción a la Kata y al Karate-Do Shotokan JKA"
+    kata: Heian Shodan (平安初段)
     order: 1
     objectives: |
       - Comprender la importancia y el propósito de las katas en el Karate-Do.
@@ -25,8 +25,35 @@ lessons:
         description: "Conoce los fundamentos del Karate-Do Shotokan JKA, incluyendo el Dojo Kun y Niju Kun."
         order: 2
         images:
-          - path: http://localhost:8000/media/activities/images/jka-dojo-kun-938x704.webp
-            caption: JKA Dojo Kun
+          - path: images/jka-dojo-kun.webp
+            caption: "JKA Dojo Kun
+            1. Buscar la perfección del carácter * HITOTSU! JIN KAKU KANSEI NI TSUTOMURU KOTO * 一丶人格完成に努むること。
+            2. Ser correcto, leal y puntual * HITOTSU! MAKOTO NO MICHI O MAMORU KOTO * 一丶誠の道を守ること。
+            3. Siempre superarse * HITOTSU! DORYOKU NO SEISHIN O YASHINAU KOTO * 一丶努力の精神を養うこと。
+            4. Respeto y cortesía hacia los demás * HITOTSU! REIGI O OMONZORU KOTO * 一丶礼儀を重んずること。
+            5. Abstenerse de comportamientos violentos * HITOTSU! KEKKI NO YU O IMASHIMURU KOTO * 一丶血気の勇を戒むること。"
+          - path: images/jka-niju-kun.png
+            caption: "JKA Niju Kun
+            1. Karate wa rei ni hajimari, rei ni owaru koto wo wasuruna: El Karate empieza y termina con «Rei» (Cortesía).
+            2. Karate ni sente nashi: En Karate no existe el primer ataque.
+            3. Karate wa gi no tasuke: El Karate ayuda a la justicia.
+            4. Mazu jiko wo shire, shikoshite tao wo shire: Antes de intentar conocer a los demás, conócete a ti mismo.
+            5. Gijutsu yori shinjutsu: El espíritu es más importante que la técnica.
+            6. Kokoro wa hanatan koto wo yosu: Es necesario liberar la mente.
+            7. Wazawai wa getai ni shozu: Los accidentes nacen de la falta de atención.
+            8. Dojo no mino karate to omou na: El Karate no es sólo para dentro del Dojo.
+            9. Karate no shugyo wa issho de aru: El aprendizaje de Karate requiere toda una vida.
+            10. Ara-yuru mono o karate-ka seyo, se soko ni myo-mi ari: Al incluir el Karate en la vida diaria, es posible descubrir sus aspectos más sutiles y profundos, llamados «Myo».
+            11. Karate wa yu no goto shi taezu netsudo wo ataezareba moto no mizu ni kaeru: El Karate es como el agua hirviendo; si no la mantienes al fuego, el agua se enfría.
+            12. Katsu kangae wa motsu na makenu kangae wa hitsuyo: No pienses que tienes que ganar. Piensa que no tienes que perder.
+            13. Tekki ni yotte tenka seyo: La victoria depende de la habilidad de distinguir cuales son los puntos vulnerables y cuales los invulnerables (de sí mismo y del oponente).
+            14. Tatta kai wa kyo-jitsu no soju ikan ni ari: Adapta tu actitud en función de tu adversario.
+            15. Hito no te ashi wo ken to omoe: Piensa en las manos y los pies como si fuesen espadas.
+            16. Danshi mon wo izureba hyakuman no tekki ari: Al salir de casa piensa que un millón de enemigos te esperan.
+            17. Kamae wa shoshinsha ni ato wa shizentai: Las posiciones son para los principiantes, después posturas naturales.
+            18. Kata wa tadashiku jissen wa bettsu mono: El kata es una forma de entrenamiento; un combate real es una circunstancia totalmente diferente.
+            19. Chikara no kyojaku, karada no shinshuku, waza no kankyu wo wasuruna: Nunca olvides: la correcta aplicación de la fuerza; la contracción y relajación del cuerpo; la velocidad en las técnicas.
+            20. Tsune ni shinen kufu seyo: Intenta siempre aplicar correctamente todo lo que has aprendido."
         videos:
           - description: El Karate Do y su historia
             url: "https://www.youtube.com/watch?v=kxvDPwS6Yh4"
@@ -50,8 +77,8 @@ lessons:
         images: null
         videos: null
 
-  - kata: Heian Shodan (平安初段)
-    title: "Unidad 2: Fundamentos Básicos (Kihon) para Heian Shodan"
+  - title: "Unidad 2: Fundamentos Básicos (Kihon) para Heian Shodan"
+    kata: Heian Shodan (平安初段)
     order: 2
     objectives: |
       - Dominar las posturas fundamentales de Heian Shodan (Zenkutsu Dachi, Kokutsu Dachi).
@@ -63,10 +90,96 @@ lessons:
       - Ejercicios de técnicas de bloqueo y golpeo específicas de la kata.
       - Drills para mejorar la coordinación, el equilibrio y la fuerza.
       - Introducción al concepto de kime y su aplicación en las técnicas.
-    activities: null
+    activities:
+      - title: "Zenkutsu Dachi"
+        description: "Formación y transición."
+        order: 1
+        images: null
+        videos:
+          - description: "JKA HQ 2020 technics and zenkutsu dachi part I R Shimizu sensei"
+            url: "https://www.youtube.com/watch?v=QuXAk41p6hU"
+          - description: "JKA HQ 2020 technics and zenkutsu dachi part II R Shimizu sensei"
+            url: "https://www.youtube.com/watch?v=MfE-kXELZMQ"
+      - title: "Kokutsu Dachi"
+        description: "Formación y transición."
+        order: 2
+        images: null
+        videos:
+          - description: "JKA HQ 2020 kokutsu dachi K Kurihara sensei"
+            url: "https://www.youtube.com/watch?v=yswq5-hPA6Q"
+          - description: "KOKUTSU DACHI, POSICIÓN DE COMBATE RETRASADA EN KARATE"
+            url: "https://www.youtube.com/watch?v=_rIOaIex_HY"
+          - description: "⛩️🥋APRENDE KOKUTSU DACHI - KARATE DO🔥 training karate do"
+            url: "https://www.youtube.com/watch?v=apjV1IKkp-8"
+      - title: "Gedan Barai"
+        description: "Ejecución y aplicación."
+        order: 3
+        images: null
+        videos:
+          - description: "Gedan Barai JKA Shotokan Karate"
+            url: "https://www.youtube.com/watch?v=3Yk0R32Dn-k"
+          - description: "Gedan barai - Exercise 1- Online education - Shotokan Karate-Do JKA"
+            url: "https://www.youtube.com/watch?v=DKQZA_-Nchc"
+          - description: "Gedan barai - Exercise 2 - Online education - Shotokan Karate-Do JKA"
+            url: "https://www.youtube.com/watch?v=S1YW-floI_s"
+          - description: "Aplicación de Gedan barai"
+            url: "https://www.youtube.com/watch?v=_OA2eWcyuc4"
+          - description: "Gedan Barai Applications (ScoreFit Seminar)"
+            url: "https://www.youtube.com/watch?v=bx0v2nJ_qcA"
+      - title: "Age Uke"
+        description: "Ejecución y aplicación."
+        order: 4
+        images: null
+        videos:
+          - description: "Age Uke JKA Shotokan Karate @KarateZine"
+            url: "https://www.youtube.com/watch?v=z4eihC_cQHM"
+          - description: "Age uke - Exercise 1 - Online education - Shotokan Karate-Do JKA"
+            url: "https://www.youtube.com/watch?v=XxSVpxX6pIs"
+          - description: "Age uke - Exercise 2 - Online education - Shotokan Karate-Do JKA"
+            url: "https://www.youtube.com/watch?v=vsYvQ09WCOo"
+          - description: "Practical Applications of Age Uke"
+            url: "https://www.youtube.com/watch?v=1ObIFYtKuKg"
+      - title: "Oi Tsuki"
+        description: "Ejecución y aplicación (enfocándose en la rotación de cadera)"
+        order: 5
+        images: null
+        videos:
+          - description: "6. Oizuki JKA"
+            url: "https://www.youtube.com/watch?v=TyufITaoXgw"
+          - description: "🔥El [GOLPE] más potente del KARATE 👊🏻 Oi Tsuki🥋"
+            url: "https://www.youtube.com/watch?v=SJ3VYDxF_cg"
+      - title: "Tetsui Uchi"
+        description: "Ejecución y aplicaciones."
+        order: 6
+        images: null
+        videos:
+          - description: "Aprende KARATE 🥋 PASO A PASO: TETSUI UCHI fácil y rápido ✅️ Ideal principiantes‼️"
+            url: "https://www.youtube.com/watch?v=BaJyW0jNtmA"
+          - description: "👊 🥋Golpe Martillo de karate 🔨TETSUI"
+            url: "https://www.youtube.com/watch?v=e2p50c4zU-Y"
+          - description: "✊TETSUI UCHI KARATE💥"
+            url: "https://www.youtube.com/watch?v=3ab8KZe7LTs"
+      - title: "Shuto Uke"
+        description: "Ejecución y aplicaciones."
+        order: 7
+        images: null
+        videos:
+          - description: "Shuto Uke JKA Shotokan Karate"
+            url: "https://www.youtube.com/watch?v=joHT4bJ-tR8"
+          - description: "SHUTO UKE"
+            url: "https://www.youtube.com/watch?v=3Po67EodOdM"
+          - description: "SHUTO UKE: Posibles Aplicaciones"
+            url: "https://www.youtube.com/watch?v=x0buCX60ncQ"
+      - title: "La importancia del Kimé en el Shotokan"
+        description: "KIME - La Clave del Karate"
+        order: 8
+        images: null
+        videos:
+          - description: "El Secreto del Kime La Fuerza Invisible Que Todo Karateka Debe Dominar"
+            url: "https://www.youtube.com/watch?v=i7dWHi4CeZQ"
 
-  - kata: Heian Shodan (平安初段)
-    title: "Unidad 3: Desglose de Heian Shodan - Primera Sección"
+  - title: "Unidad 3: Desglose de Heian Shodan - Primera Sección"
+    kata: Heian Shodan (平安初段)
     order: 3
     objectives: |
       - Aprender los primeros movimientos de Heian Shodan, paso a paso.
@@ -76,10 +189,54 @@ lessons:
       - Desglose detallado de los primeros movimientos de Heian Shodan.
       - Práctica guiada para asegurar la correcta ejecución de cada técnica.
       - Análisis de los puntos clave y correcciones comunes.
-    activities: null
+    activities:
+      - title: "Demostración Kata Heian Shodan"
+        description: "Demostración completa de Heian Shodan por un instructor calificado."
+        order: 1
+        images: null
+        videos:
+          - description: "JKA Heian Shodan"
+            url: "https://www.youtube.com/watch?v=c9a9jfl2xlU"
+      - title: "Movimientos 1-2"
+        description: "1. Gedan Barai (hidari)
+        2. Oi Tsuki (migi)"
+        order: 2
+        images: null
+        videos:
+          - description: "Movimientos 1-2"
+            url: "https://drive.google.com/file/d/18dpsvJ-owkeMGlqFOdXOJE2Taj2pA1Kk/preview"
+      - title: "Movimientos 3-5"
+        description: "3. Gedan Barai (migi)
+        4. Tettsui Uchi (migi)
+        5. Oi Tsuki (hidari)"
+        order: 3
+        images: null
+        videos:
+          - description: "Movimientos 3-5"
+            url: "https://drive.google.com/file/d/1_cCNhdOp-OSa8MYEqSqTYBdrhgzDFVZT/preview"
+      - title: "Movimientos 6-9"
+        description: "6. Gedan Barai (hidari)
+        7. Age Uke (migi)
+        8. Age Uke (hidari)
+        9. Age Uke (migi), 💥Kiai💥"
+        order: 4
+        images: null
+        videos:
+          - description: "6-9-kiai"
+            url: "https://drive.google.com/file/d/1TNjsiPW_zn2jtCtaSY_dPpLcfDZeB0M4/preview"
+      - title: "Embusen"
+        description: "Ruta y puntos de referencia en la kata.
+        Revisa el video del embusen de la kata (adjunto en Drive), basado en el video de youtube tambien adjunto."
+        order: 5
+        images: null
+        videos:
+          - description: "Heian Shodan embusen"
+            url: "https://drive.google.com/file/d/1lST6Oupg0JqbkVpht98ClzmHcnCUkR08/preview"
+          - description: "HEIAN SHODAN - Kata Shotokan"
+            url: "https://www.youtube.com/watch?v=hRtVzysElCc"
 
-  - kata: Heian Shodan (平安初段)
-    title: "Unidad 4: Desglose de Heian Shodan - Segunda Sección y Kiai"
+  - title: "Unidad 4: Desglose de Heian Shodan - Segunda Sección y Kiai"
+    kata: Heian Shodan (平安初段)
     order: 4
     objectives: |
       - Aprender los movimientos restantes de Heian Shodan.
@@ -89,10 +246,58 @@ lessons:
       - Desglose detallado de los movimientos restantes de Heian Shodan.
       - Práctica guiada para la ejecución completa de la kata.
       - Introducción al Kiai: cuándo y cómo aplicarlo efectivamente.
-    activities: null
+    activities:
+      - title: "Movimientos 10-11"
+        description: "10. Gedan Barai (hidari)
+        11. Oi Tsuki (migi)"
+        order: 1
+        images: null
+        videos:
+          - description: "10-11"
+            url: "https://drive.google.com/file/d/10x1Xd6VYdaZEJVqKGXV7Oflchy690dn2/preview"
+      - title: "Movimientos 12-13"
+        description: "12. Gedan Barai (migi)
+        13. Oi Tsuki (hidari)"
+        order: 2
+        images: null
+        videos:
+          - description: "12-13"
+            url: "https://drive.google.com/file/d/1DDZ6EJ_s4VyvQFf2phWLr309S_xrhNHW/preview"
+      - title: "Movimientos 14-17"
+        description: "14. Gedan Barai (hidari)
+        15. Oi Tsuki (migi)
+        16. Oi Tsuki (hidari)
+        17. Oi Tsuki (migi), 💥Kiai💥"
+        order: 3
+        images: null
+        videos:
+          - description: "14-17-kiai"
+            url: "https://drive.google.com/file/d/1S5OjvBmacpXVBVtdbxY0gqx4uNDpjAjp/preview"
+      - title: "Movimientos 18-21"
+        description: "18. Shuto Uke (hidari)
+        19. Shuto Uke (migi)
+        20. Shuto Uke (migi)
+        21. Shuto Uke (hidari)"
+        order: 4
+        images: null
+        videos:
+          - description: "18-19"
+            url: "https://drive.google.com/file/d/1QuUEg6-9cWVe_xDkVjN-9U3N-apDrKMC/preview"
+          - description: "20-21"
+            url: "https://drive.google.com/file/d/1SA_bEjtodL9IEl-C9_yNrl6WCGDtjjuA/preview"
+      - title: "El Kiai: Qué es y cómo aplicarlo"
+        description: "El Kiai es una expresión vocal que acompaña a un movimiento decisivo en la kata. Su propósito es
+        concentrar la energía, intimidar al oponente y fortalecer la técnica. En Heian Shodan, el Kiai se realiza en los
+        movimientos 9 y 17, coincidiendo con técnicas de ataque importantes. Para aplicarlo correctamente, se debe
+        exhalar con fuerza y proyectar la voz desde el abdomen, manteniendo una postura firme y enfocada."
+        order: 5
+        images: null
+        videos:
+          - description: "¿Qué es el Kiai? El Poderoso Grito que Transforma tu Técnica | Aprende a Dominar el Kiai"
+            url: "https://www.youtube.com/watch?v=iTLu3wwyf6k"
 
-  - kata: Heian Shodan (平安初段)
-    title: "Unidad 5: Refinamiento, Aplicación (Bunkai) y Evaluación"
+  - title: "Unidad 5: Refinamiento, Aplicación (Bunkai) y Evaluación"
+    kata: Heian Shodan (平安初段)
     order: 5
     objectives: |
       - Refinar la ejecución de Heian Shodan, prestando atención a los detalles y la fluidez.
@@ -102,4 +307,39 @@ lessons:
       - Práctica avanzada de Heian Shodan, enfocándose en la precisión y el ritmo.
       - Introducción al Bunkai: análisis y demostración de aplicaciones prácticas.
       - Técnicas de autoevaluación y establecimiento de metas para el progreso futuro.
-    activities: null
+    activities:
+      - title: "Errores comunes en Heian Shodan y cómo corregirlos"
+        description: "Identificación y corrección de errores frecuentes."
+        order: 1
+        images: null
+        videos:
+          - description: "⛩️ 4 ERRORES EN ZENKUTSU DACHI 🥋🔥"
+            url: "https://www.youtube.com/watch?v=CqVtuV4QRPI"
+          - description: "Shotokan Kata Series: Heian Shodan with Tips for Common Mistakes."
+            url: "https://www.youtube.com/watch?v=qp0efXRBW50"
+          - description: "Shotokan Karate | SHORT LESSON: Heian Shodan - Common Corrections"
+            url: "https://www.youtube.com/watch?v=cWDdB9xAUCw"
+          - description: "Catch the mistakes in Heian Shodan"
+            url: "https://www.youtube.com/shorts/Ck-j6qb0aK0"
+      - title: "Introducción al Bunkai de Heian Shodan"
+        description: "Análisis y demostración de aplicaciones prácticas."
+        order: 2
+        images: null
+        videos:
+          - description: "Heian Shodan Bunkai"
+            url: "https://www.youtube.com/watch?v=idQLrVrNpEU"
+          - description: "Heian Shodan Bunkai 1-4: Tips and Common Mistakes"
+            url: "https://www.youtube.com/watch?v=Z-ZPankx_p0"
+          - description: "Bunkaï Heian Shodan"
+            url: "https://www.youtube.com/watch?v=fa50XcWj-yI"
+          - description: "Heian Shodan bunkai preview"
+            url: "https://www.youtube.com/watch?v=pVGTHmiAOVY"
+      - title: "Principios de JKA para la ejecución de Katas"
+        description: "Principios fundamentales para la correcta ejecución de katas."
+        order: 3
+        images: null
+        videos:
+          - description: "Cómo mejorar la ejecución de Katas"
+            url: "https://www.youtube.com/watch?v=2nfrZ549ZFQ"
+          - description: "KATAS: Puntos importantes"
+            url: "https://www.youtube.com/shorts/oAfvOkzLXW0"
