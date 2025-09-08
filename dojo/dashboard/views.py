@@ -203,7 +203,7 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
         student = get_object_or_404(User, pk=pk)
-        form = UserUpdateForm(instance=student)
+        form = UserUpdateForm(instance=student, request=request)
         qr_code = get_qr_base64(student.id_number)
         ctx = {
             'form': form,
@@ -243,14 +243,14 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
             uploaded_file = self.request.FILES['picture']
             ext = uploaded_file.name.rsplit('.')[-1]
             student.picture.save(f'{pk}.{ext}', self.request.FILES['picture'], save=True)
-            form = UserUpdateForm(self.request.POST, self.request.FILES, instance=student)
+            form = UserUpdateForm(self.request.POST, self.request.FILES, instance=student, request=request)
             ctx = {
                 'form': form,
                 'student': student,
             }
             return render(request, self.template_name, context=ctx)
         else:
-            form = UserUpdateForm(request.POST, instance=student)
+            form = UserUpdateForm(request.POST, instance=student, request=request)
 
             if form.is_valid():
                 return self.form_valid(form)
@@ -297,7 +297,7 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         student = request.user
-        form = UserUpdateForm(instance=student)
+        form = UserUpdateForm(instance=student, request=request)
         qr_code = get_qr_base64(student.id_number)
         ctx = {
             'form': form,
@@ -320,7 +320,7 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
             messages.success(request, "Picture updated correctly.")
             return redirect('profile')
 
-        form = UserUpdateForm(request.POST, request.FILES, instance=student)
+        form = UserUpdateForm(request.POST, request.FILES, instance=student, request=request)
         if form.is_valid():
             return self.form_valid(form)
         else:

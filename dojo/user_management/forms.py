@@ -231,16 +231,18 @@ class UserUpdateForm(forms.ModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
-        if self.instance:
-            if self.instance.pk:
-                country_code = self.instance.country
-                self.fields['country'].initial = country_code
-                self.fields['country'].widget.attrs['data-default'] = country_code
-
-            if self.instance.category != Category.SENSEI:
+        if self.request and self.request.user.is_authenticated:
+            user_category = getattr(self.request.user, 'category', None)
+            if user_category != Category.SENSEI:
                 self.fields.pop('level', None)
+
+        if self.instance and self.instance.pk:
+            country_code = self.instance.country
+            self.fields['country'].initial = country_code
+            self.fields['country'].widget.attrs['data-default'] = country_code
 
         for field_name, field in self.fields.items():
             class_attr = field.widget.attrs.get('class', 'form-control')
