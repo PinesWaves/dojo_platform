@@ -2,7 +2,7 @@
 {% block students-link-status %}active{% endblock %}
 {% load static %}
 {% block title %} Profile {% endblock %}
-{% block extra_css %}
+{% block css %}
   <link rel="stylesheet" href="{% static 'dist/css/custom_style.css' %}">
   <!-- Country picker flags -->
   <link rel="stylesheet" href="{% static 'plugins/bootstrap-select-country-4.2.0/css/bootstrap-select-country.min.css' %}">
@@ -29,7 +29,7 @@
 
   {% include 'dashboard/common/profile.html' %}
 {% endblock %}
-{% block script %}
+{% block js %}
   <!-- Country picker flags -->
   <script src="{% static 'plugins/bootstrap-select-country-4.2.0/js/bootstrap-select-country.min.js' %}"></script>
   <!-- Cropper.js -->
@@ -39,6 +39,10 @@
   <script>
       $(document).ready(function () {
           $('#id_birth_date').datetimepicker({
+              format: 'L',
+              //locale: 'es'
+          });
+          $('#id_date_joined').datetimepicker({
               format: 'L',
               //locale: 'es'
           });

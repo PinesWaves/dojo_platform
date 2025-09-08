@@ -1,6 +1,6 @@
 {% extends 'dashboard/sensei/base.html' %}
 {% load static %}
-{% block extra_css %}
+{% block css %}
 	<!-- DataTables -->
 <link rel="stylesheet" href="{% static 'plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
 <link rel="stylesheet" href="{% static 'plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">
@@ -164,7 +164,7 @@
   </section>
   <!-- /.content -->
 {% endblock %}
-{% block script %}
+{% block js %}
   <!-- DataTables  & Plugins -->
   <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
   <script src="{% static 'plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
