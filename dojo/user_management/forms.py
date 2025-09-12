@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from django import forms
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 from utils.widgets import CustomSwitchWidget, CustomDatePickerWidget
 from utils.config_vars import regulations, informed_consent
@@ -178,9 +181,7 @@ class UserRegisterForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        # Establecer la contraseña usando set_password para encriptarla
         user.set_password(self.cleaned_data["password1"])
-        user.category = Category.STUDENT
         if commit:
             user.save()
         return user

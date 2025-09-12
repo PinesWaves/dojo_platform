@@ -1,34 +1,28 @@
 import logging
-from datetime import datetime
 from pathlib import Path
 
-import math
 from django.contrib import messages
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.contrib.auth.views import LoginView, LogoutView
-from django.core.mail import send_mail, EmailMultiAlternatives
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.views import LogoutView
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.templatetags.static import static
 from django.urls import reverse_lazy, reverse
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.utils.encoding import force_bytes, force_str
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils import timezone
 from django.views import View
-from django.views.generic import CreateView, UpdateView, DeleteView, TemplateView, FormView
-from django.shortcuts import get_object_or_404, render
+from django.views.generic import FormView
+from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 
 from dojo import settings
-from .forms import UserRegisterForm, UserUpdateForm, ForgotPassForm, RecoverPassForm
+from .forms import UserRegisterForm, ForgotPassForm, RecoverPassForm
 from .models import Category, Token, TokenType
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
 # Vista de login
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
-from django.urls import reverse_lazy
+
 from django.http import HttpResponse
 
 
@@ -40,7 +34,7 @@ class CustomLoginView(View):
         # error = request.session.pop('errors', None)
         # msg = request.session.pop('msg', None)
         if user.is_authenticated:  # Redirige si ya está autenticado
-            if user.is_superuser or user.category == Category.SENSEI:
+            if user.is_superuser or user.category in (Category.SENSEI, Category.SEMPAI):
                 return redirect(reverse_lazy('sensei_dashboard'))  # Redirigir al dashboard del sensei
             elif user.category == Category.STUDENT:
                 return redirect(reverse_lazy('student_dashboard'))  # Redirigir al dashboard del estudiante
@@ -51,7 +45,6 @@ class CustomLoginView(View):
         password = request.POST.get('password')
 
         user = authenticate(request, id_number=id_number, password=password)
-
         if user:
             if not user.is_active:
                 messages.error(request, "Your account is deactivated. Please contact support.")
@@ -71,7 +64,7 @@ class CustomLoginView(View):
             if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
                 return redirect(next_url)
 
-            if user.is_superuser or user.category == Category.SENSEI:
+            if user.is_superuser or user.category in (Category.SENSEI, Category.SEMPAI):
                 return redirect(reverse_lazy('sensei_dashboard'))
             elif user.category == Category.STUDENT:
                 return redirect(reverse_lazy('student_dashboard'))
@@ -93,6 +86,7 @@ class CustomLogoutView(LogoutView):
         messages.success(request, "You have been logged out successfully.")
 
         return response
+
 
 # Vista de Registro
 class RegisterView(FormView):
@@ -179,7 +173,7 @@ class ForgotPass(FormView):
                 {
                     'dojo_logo_url': dojo_logo_url,
                     'reset_link': reset_link,
-                    'current_year': datetime.now().year,
+                    'current_year': timezone.now().year,
                 }
             )
 
@@ -205,7 +199,6 @@ class ForgotPass(FormView):
         except User.DoesNotExist:
             messages.error(self.request, "No user found with that email address.")
             return redirect('forgot-password')
-        # return super().form_valid(form)
 
 
 # Vista de Recuperación de Contraseña

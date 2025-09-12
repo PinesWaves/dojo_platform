@@ -10,4 +10,4 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        Token.objects.filter(expires_at__lte=datetime.now()).delete()
+        Token.objects.filter(expires_at__lte=timezone.now()).delete()

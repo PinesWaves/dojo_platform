@@ -25,7 +25,7 @@ class SenseiDashboard(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         user_cat = request.user.category
-        if user_cat != Category.SENSEI:
+        if not (user_cat in (Category.SENSEI, Category.SEMPAI)):
             return redirect('student_dashboard')
         trainings = Training.objects.prefetch_related('attendants', 'techniques').order_by('-date')[:6]
         ctx = {
@@ -38,7 +38,7 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
     template_name = "dashboard/sensei/manage_trainings.html"
 
     def get(self, request, *args, **kwargs):
-        now = datetime.now(timezone.utc)
+        now = timezone.now()
 
         # Efficiently update expired trainings
         trainings_to_update = Training.objects.filter(
@@ -176,7 +176,7 @@ class ManageStudents(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
             Token.objects.create(
                 token=register_code,
                 type=TokenType.SIGNUP,
-                created_at=datetime.now(timezone.utc),
+                created_at=timezone.now(),
                 expires_at=expiration_datetime
             )
 
@@ -220,13 +220,13 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
             # Handle the switch action
             if student.is_active:
                 student.is_active = False
-                student.date_deactivated = datetime.now()
+                student.date_deactivated = timezone.now()
                 student.date_reactivated = None
                 student.save()
                 self.request.session['msg'] = "User deactivated successfully!"
             else:
                 student.is_active = True
-                student.date_reactivated = datetime.now()
+                student.date_reactivated = timezone.now()
                 student.date_deactivated = None
                 student.save()
                 self.request.session['msg'] = "User activated successfully!"
