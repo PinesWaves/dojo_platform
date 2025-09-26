@@ -9,9 +9,9 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+from email.policy import default
 from pathlib import Path
-import os
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,14 +21,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY = config("DJANGO_SECRET_KEY", default="", cast=str)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(int(os.environ.get("DEBUG", 0)))
-ALLOW_ADMIN = bool(int(os.environ.get("ALLOW_ADMIN", 0)))
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+DEBUG = config("DEBUG", default=0, cast=bool)
+ALLOW_ADMIN = config("ALLOW_ADMIN", default=0, cast=bool)
+ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default="", cast=str).split()
 if not DEBUG:
-    CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS").split(" ")
+    CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=str).split()
 else:
     CSRF_TRUSTED_ORIGINS = [
         'https://localhost',
@@ -38,7 +38,7 @@ else:
     ]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-GDAL_LIBRARY_PATH = '/usr/lib/libgdal.so'
+# GDAL_LIBRARY_PATH = '/usr/lib/libgdal.so'
 # Close session when the browser is closed
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # Set session timeout to 30 minutes (1800 seconds)
@@ -108,12 +108,12 @@ DATABASES = {
     #     'NAME': BASE_DIR / 'db.sqlite3',
     # }
     "default": {
-        "ENGINE": os.environ.get("DOJO_ENGINE", "django.db.backends.sqlite3"),
-        "NAME": os.environ.get("DOJO_DB_NAME", BASE_DIR / "db.sqlite3"),
-        "USER": os.environ.get("DOJO_DB_USER", "user"),
-        "PASSWORD": os.environ.get("DOJO_DB_PASS", "password"),
-        "HOST": os.environ.get("DOJO_DB_HOST", "localhost"),
-        "PORT": os.environ.get("DOJO_DB_PORT", "5432"),
+        "ENGINE": config("DOJO_ENGINE", default="django.db.backends.sqlite3", cast=str),
+        "NAME": config("DOJO_DB_NAME", default=BASE_DIR / "db.sqlite3", cast=str),
+        "USER": config("DOJO_DB_USER", default="user", cast=str),
+        "PASSWORD": config("DOJO_DB_PASS", default="password", cast=str),
+        "HOST": config("DOJO_DB_HOST", default="localhost", cast=str),
+        "PORT": config("DOJO_DB_PORT", default=5432, cast=int),
     }
 }
 
@@ -152,11 +152,11 @@ USE_TZ = True
 
 # Email settings for Gmail
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.environ.get("DOJO_EMAIL_HOST", "smtp.gmail.com")
-EMAIL_PORT = os.environ.get("DOJO_EMAIL_PORT", 587)
-EMAIL_USE_TLS = bool(int(os.environ.get("DOJO_EMAIL_USE_TLS", 1)))
-EMAIL_HOST_USER = os.environ.get("DOJO_EMAIL_HOST_USER", "jarh1992@gmail.com")
-EMAIL_HOST_PASSWORD = os.environ.get("DOJO_EMAIL_HOST_PASSWORD", "")  # NOT your normal password
+EMAIL_HOST = config("DOJO_EMAIL_HOST", default="smtp.gmail.com", cast=str)
+EMAIL_PORT = config("DOJO_EMAIL_PORT", default=587, cast=int)
+EMAIL_USE_TLS = config("DOJO_EMAIL_USE_TLS", default=1, cast=bool)
+EMAIL_HOST_USER = config("DOJO_EMAIL_HOST_USER", default="jarh1992@gmail.com", cast=str)
+EMAIL_HOST_PASSWORD = config("DOJO_EMAIL_HOST_PASSWORD", default="", cast=str)  # NOT your normal password
 # Optional, to identify sender
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
@@ -199,7 +199,7 @@ LOGGING = {
         'production_file': {
             'level': 'INFO',
             'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': os.path.join(logging_path, 'main.log'),
+            'filename': logging_path / 'main.log',
             'when': 'D',
             'backupCount': 0,
             'formatter': 'main_formatter',
@@ -208,7 +208,7 @@ LOGGING = {
         'debug_file': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(logging_path, 'main_debug.log'),
+            'filename': logging_path / 'main_debug.log',
             'maxBytes': 1024 * 1024 * 5,
             'backupCount': 7,
             'formatter': 'main_formatter',
