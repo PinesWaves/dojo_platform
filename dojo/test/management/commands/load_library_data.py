@@ -9,7 +9,7 @@ from django.db import connection
 
 from dashboard.models import (
     Kata, KataSerie, KataLesson, KataLessonActivity,
-    KataLessonActivityImage, KataLessonActivityVideo
+    KataLessonActivityImage, KataLessonActivityVideo, Kumite
 )
 from dojo.settings import BASE_DIR
 
@@ -17,6 +17,7 @@ BASE_PATH = BASE_DIR / "utils" / "library_data"
 KATAS_FILE = BASE_PATH / "katas.yaml"
 SERIES_FILE = BASE_PATH / "series.yaml"
 LESSONS_FILE = BASE_PATH / "lessons" / "heian_shodan_lessons.yaml"
+KUMITE_FILE = BASE_PATH / "kumite.yaml"
 
 
 class Command(BaseCommand):
@@ -36,6 +37,7 @@ class Command(BaseCommand):
             if vid_obj.image and vid_obj.image.path:
                 Path(vid_obj.image.path).unlink(missing_ok=True)
         KataLessonActivityVideo.objects.all().delete()
+        Kumite.objects.all().delete()
 
         # Reset primary key sequences
         with connection.cursor() as cursor:
@@ -46,6 +48,7 @@ class Command(BaseCommand):
             cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_katalessonactivityimage', 'id'), 1, false);")
             cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_katalessonactivityvideo', 'id'), 1, false);")
             cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_kataserie_katas', 'id'), 1, false);")
+            cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_kumite', 'id'), 1, false);")
         self.stdout.write(self.style.WARNING("📂 Loading Katas data..."))
 
         # --- KATAS ---
@@ -53,9 +56,10 @@ class Command(BaseCommand):
             katas_data = yaml.safe_load(f)
 
         katas = {}
-        summary = katas_data['summary']
-        ksdata = katas_data['katas']
-        for item in ksdata:
+        # TODO : load summary info
+        ka_summary = katas_data['summary']
+        ka_data = katas_data['katas']
+        for item in ka_data:
             kata, _ = Kata.objects.get_or_create(
                 name=item["name"],
                 defaults={
@@ -156,5 +160,26 @@ class Command(BaseCommand):
                     )
 
             self.stdout.write(self.style.SUCCESS(f"✔ Lesson loaded: {lesson_obj.title}"))
+
+        # --- KUMITES ---
+        with open(KUMITE_FILE, "r", encoding="utf-8") as f:
+            kumite_data = yaml.safe_load(f)
+
+        kumites = {}
+        # TODO : load summary info
+        ku_summary = kumite_data['summary']
+        ku_data = kumite_data['katas']
+        for item in ku_data:
+            kumite, _ = Kumite.objects.get_or_create(
+                name=item["name"],
+                defaults={
+                    "description": item.get("description", ""),
+                    "level": item.get("level", "beginner"),
+                    "video_reference": item.get("video_reference"),
+                    "order": item.get("order", 1),
+                },
+            )
+            kumites[item["name"]] = kumite
+            self.stdout.write(self.style.SUCCESS(f"✔ Kumite loaded: {kumite.name}"))
 
         self.stdout.write(self.style.SUCCESS("🎉 Data loaded correctly."))
