@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from secrets import token_urlsafe
 
 from django.contrib import messages
@@ -9,9 +9,12 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views.generic import TemplateView
+from django.utils import timezone
 import logging
 
-from dashboard.models import Training, Dojo, Technique, TechniqueCategory, TrainingStatus, KataSerie, Kata, KataLesson
+from dashboard.forms import TrainingSchedulingForm, TrainingForm
+from dashboard.models import Training, Dojo, Technique, TrainingType, TrainingStatus, KataSerie, Kata, KataLesson, \
+    TrainingScheduling
 from dojo.mixins.view_mixins import AdminRequiredMixin
 from user_management.models import User, Token, Category, TokenType
 from user_management.forms import UserUpdateForm
@@ -27,7 +30,8 @@ class SenseiDashboard(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         user_cat = request.user.category
         if not (user_cat in (Category.SENSEI, Category.SEMPAI)):
             return redirect('student_dashboard')
-        trainings = Training.objects.prefetch_related('attendants', 'techniques').order_by('-date')[:6]
+        today = timezone.now().date()
+        trainings = Training.objects.prefetch_related('attendances', 'techniques').filter(date__gte=today).order_by('date')[:6]
         ctx = {
             "trainings": trainings,
         }
@@ -43,70 +47,99 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         # Efficiently update expired trainings
         trainings_to_update = Training.objects.filter(
             date__lt=now - timedelta(hours=2),
-            status=TrainingStatus.AGENDADO
+            status=TrainingStatus.SCHEDULED
         )
-        for t in trainings_to_update:
-            if t.qr_image:
-                t.qr_image.delete(save=False)
 
         trainings_to_update.update(
-            status=TrainingStatus.FINALIZADO,
-            qr_image=None,
-            training_code=''
+            status=TrainingStatus.FINISHED,
         )
 
-        trainings = Training.objects.prefetch_related('attendants', 'techniques').all()
+        trainings = Training.objects.prefetch_related('attendances', 'techniques').all()
         techniques = Technique.objects.all()
+        training_form = TrainingForm()
+        scheduling_form = TrainingSchedulingForm()
+        schedules = TrainingScheduling.objects.all()
         ctx = {
+            "training_choices": TrainingStatus.choices,
             "trainings": trainings,
             "techniques": techniques,
+            "training_form": training_form,
+            "scheduling_form": scheduling_form,
+            "schedules": schedules,
         }
         return render(request, self.template_name, context=ctx)
 
     def post(self, request, *args, **kwargs):
-        try:
-            training_date = request.POST.get('training_date')
-            if not training_date:
-                raise ValidationError("Training date is required.")
+        ctx = dict()
+        if request.POST.get('action') == 'schedule':
+            form = TrainingSchedulingForm(request.POST)
+            if form.is_valid():
+                form.save()
+                self.request.session['msg'] = "Schedule created successfully!"
+            else:
+                self.request.session['errors'] = form.errors
+                self.request.session['msg'] = "Failed to create schedule!"
+
+        elif request.POST.get('action') == 'new_training':
+            date = request.POST.get('date')
+            type = request.POST.get('type')
+            status = request.POST.get('status')
+            techniques = request.POST.getlist('techniques')
+            details = request.POST.get('details')
+            katas = request.POST.getlist('katas')
+            kumites = request.POST.getlist('kumites')
+            breakpoint()
+            train = Training.ob(
+                date=date,
+                type=type,
+                status=status,
+                details=details,
+            )
 
             try:
-                # Ensure date is in the correct format
-                training_date = datetime.strptime(training_date, '%m/%d/%Y %I:%M %p')
-            except ValueError:
-                raise ValidationError("Invalid date format. Use MM/DD/YYYY HH:MM AM/PM.")
+                training_date = request.POST.get('training_date')
+                if not training_date:
+                    raise ValidationError("Training date is required.")
 
-            # Validate `training_status`
-            training_status = request.POST.get('training_status')
-            if training_status not in [TrainingStatus.AGENDADO, TrainingStatus.FINALIZADO, TrainingStatus.CANCELADO]:
-                raise ValidationError("Invalid training status value.")
+                try:
+                    # Ensure date is in the correct format
+                    training_date = datetime.strptime(training_date, '%m/%d/%Y %I:%M %p')
+                except ValueError:
+                    raise ValidationError("Invalid date format. Use MM/DD/YYYY HH:MM AM/PM.")
 
-            training_techniques_ids = request.POST.getlist('training_techniques')
+                # Validate `training_status`
+                training_status = request.POST.get('training_status')
+                breakpoint()
+                if training_status not in TrainingStatus.choices:
+                    raise ValidationError("Invalid training status value.")
 
-            train = Training(
-                date=training_date,
-                status=training_status,
-            )
-            train.save()
+                training_techniques_ids = request.POST.getlist('training_techniques')
 
-            # Efficiently add techniques
-            if training_techniques_ids:
-                techniques = Technique.objects.filter(pk__in=training_techniques_ids)
-                train.techniques.add(*techniques)
+                train = Training(
+                    date=training_date,
+                    status=training_status,
+                )
+                train.save()
 
-        except ValidationError as e:
-            return JsonResponse({'errors': str(e)}, status=400)
-        except Technique.DoesNotExist:
-            return JsonResponse({'errors': 'One or more selected techniques do not exist.'}, status=400)
-        except Exception as e:
-            logger.error(f"Error creating training: {e}")
-            return JsonResponse({'errors': 'An unexpected error occurred.'}, status=500)
+                # Efficiently add techniques
+                if training_techniques_ids:
+                    techniques = Technique.objects.filter(pk__in=training_techniques_ids)
+                    train.techniques.add(*techniques)
 
-        trainings = Training.objects.prefetch_related('attendants', 'techniques').filter(status=TrainingStatus.AGENDADO)
-        techniques = Technique.objects.all()
-        ctx = {
-            "trainings": trainings,
-            "techniques": techniques,
-        }
+            except ValidationError as e:
+                return JsonResponse({'errors': str(e)}, status=400)
+            except Technique.DoesNotExist:
+                return JsonResponse({'errors': 'One or more selected techniques do not exist.'}, status=400)
+            except Exception as e:
+                logger.error(f"Error creating training: {e}")
+                return JsonResponse({'errors': 'An unexpected error occurred.'}, status=500)
+
+            trainings = Training.objects.prefetch_related('attendances', 'techniques').filter(status=TrainingStatus.SCHEDULED)
+            techniques = Technique.objects.all()
+            ctx = {
+                "trainings": trainings,
+                "techniques": techniques,
+            }
         return render(request, self.template_name, context=ctx)
 
 
@@ -115,10 +148,10 @@ class ManageTechniques(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         techniques = Technique.objects.all()
-        categories = TechniqueCategory.choices
+        # categories = TechniqueCategory.choices
         ctx = {
             "techniques": techniques,
-            "categories": categories,
+            # "categories": categories,
         }
         return render(request, self.template_name, context=ctx)
 
@@ -126,11 +159,11 @@ class ManageTechniques(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         name = request.POST.get('technique_name')
         image = request.FILES.get('technique_image')
         category = request.POST.get('technique_category')
-        if not name or category not in dict(TechniqueCategory.choices):
-            return render(request, self.template_name, {
-                'errors': 'Invalid data submitted.',
-                'technique_categories': TechniqueCategory.choices
-            })
+        # if not name or category not in dict(TechniqueCategory.choices):
+        #     return render(request, self.template_name, {
+        #         'errors': 'Invalid data submitted.',
+        #         'technique_categories': TechniqueCategory.choices
+        #     })
 
         Technique.objects.create(
             name=name,
@@ -139,10 +172,10 @@ class ManageTechniques(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         )
 
         techniques = Technique.objects.all()
-        categories = TechniqueCategory.choices
+        # categories = TechniqueCategory.choices
         ctx = {
             "techniques": techniques,
-            "categories": categories,
+            # "categories": categories,
         }
         return render(request, self.template_name, context=ctx)
 
@@ -281,7 +314,7 @@ class StudentDashboard(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/student/dashboard.html"
 
     def get(self, request, *args, **kwargs):
-        trainings = Training.objects.prefetch_related('attendants', 'techniques').order_by('-date')[:6]
+        trainings = Training.objects.prefetch_related('attendances', 'techniques').order_by('-date')[:6]
         pk = request.user.pk
         student = get_object_or_404(User, pk=pk)
         ctx = {
