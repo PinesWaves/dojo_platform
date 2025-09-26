@@ -89,13 +89,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         choices=Category.choices,
         default=Category.STUDENT
     )
-    id_number = models.CharField(max_length=30, unique=True, null=False, blank=False)
+    id_number = models.CharField(max_length=30, unique=True, null=False, blank=False, default=0)
     birth_date = models.DateField(default=datetime(2000, 1, 1), null=False, blank=False)
     birth_place = models.CharField(max_length=30, default='')
     gender = models.CharField(choices=Genders.choices, default=Genders.MALE)
     profession = models.CharField(max_length=30, default='')
     eps = models.CharField(max_length=50, default='')
-    phone_number = models.CharField(max_length=15, null=False, blank=False)
+    phone_number = models.CharField(max_length=15, null=False, blank=False, default=0)
     address = models.CharField(max_length=255, default='')
     city = models.CharField(max_length=30, default='')
     country = models.CharField(max_length=30, default='')

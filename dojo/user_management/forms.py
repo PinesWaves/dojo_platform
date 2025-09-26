@@ -1,8 +1,5 @@
-from datetime import datetime
-
 from django import forms
 from django.core.exceptions import ValidationError
-from django.utils import timezone
 
 from utils.widgets import CustomSwitchWidget, CustomDatePickerWidget
 from utils.config_vars import regulations, informed_consent

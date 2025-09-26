@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from datetime import datetime
+from django.utils import timezone
 from user_management.models import Token
 
 
