@@ -1,13 +1,14 @@
 from django import forms
 
 from dashboard.models import TrainingScheduling, Training, Kata, Kumite, Technique
-from utils.widgets import CustomTimePickerWidget, CustomDateTimePickerWidget, CustomSelectMultipleWidget
+from utils.widgets import CustomDateTimePickerWidget, CustomSelectMultipleWidget
 
 
 class TrainingSchedulingForm(forms.ModelForm):
     time = forms.TimeField(
-        widget=CustomTimePickerWidget(
-            label_text="Time"
+        widget=CustomDateTimePickerWidget(
+            label_text="Time",
+            picker_type="time"
         ),
         required=True
     )
@@ -37,7 +38,8 @@ class TrainingSchedulingForm(forms.ModelForm):
 class TrainingForm(forms.ModelForm):
     date = forms.DateTimeField(
         widget=CustomDateTimePickerWidget(
-            label_text="Date and time"
+            label_text="Date and time",
+            picker_type="date-time"
         ),
         required=True
     )

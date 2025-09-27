@@ -13,7 +13,7 @@ from django.utils import timezone
 import logging
 
 from dashboard.forms import TrainingSchedulingForm, TrainingForm
-from dashboard.models import Training, Dojo, Technique, TrainingType, TrainingStatus, KataSerie, Kata, KataLesson, \
+from dashboard.models import Training, Dojo, Technique, TrainingStatus, KataSerie, Kata, KataLesson, \
     TrainingScheduling
 from dojo.mixins.view_mixins import AdminRequiredMixin
 from user_management.models import User, Token, Category, TokenType
@@ -41,6 +41,23 @@ class SenseiDashboard(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
 class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
     template_name = "dashboard/sensei/manage_trainings.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        trainings = Training.objects.prefetch_related('attendances', 'techniques').all()
+        techniques = Technique.objects.all()
+        training_form = TrainingForm()
+        scheduling_form = TrainingSchedulingForm()
+        schedules = TrainingScheduling.objects.all()
+        context.update({
+            "training_choices": TrainingStatus.choices,
+            "trainings": trainings,
+            "techniques": techniques,
+            "training_form": training_form,
+            "scheduling_form": scheduling_form,
+            "schedules": schedules,
+        })
+        return context
+
     def get(self, request, *args, **kwargs):
         now = timezone.now()
 
@@ -54,23 +71,10 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
             status=TrainingStatus.FINISHED,
         )
 
-        trainings = Training.objects.prefetch_related('attendances', 'techniques').all()
-        techniques = Technique.objects.all()
-        training_form = TrainingForm()
-        scheduling_form = TrainingSchedulingForm()
-        schedules = TrainingScheduling.objects.all()
-        ctx = {
-            "training_choices": TrainingStatus.choices,
-            "trainings": trainings,
-            "techniques": techniques,
-            "training_form": training_form,
-            "scheduling_form": scheduling_form,
-            "schedules": schedules,
-        }
+        ctx = self.get_context_data()
         return render(request, self.template_name, context=ctx)
 
     def post(self, request, *args, **kwargs):
-        ctx = dict()
         if request.POST.get('action') == 'schedule':
             form = TrainingSchedulingForm(request.POST)
             if form.is_valid():
@@ -81,65 +85,19 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
                 self.request.session['msg'] = "Failed to create schedule!"
 
         elif request.POST.get('action') == 'new_training':
-            date = request.POST.get('date')
-            type = request.POST.get('type')
-            status = request.POST.get('status')
-            techniques = request.POST.getlist('techniques')
-            details = request.POST.get('details')
-            katas = request.POST.getlist('katas')
-            kumites = request.POST.getlist('kumites')
-            breakpoint()
-            train = Training.ob(
-                date=date,
-                type=type,
-                status=status,
-                details=details,
-            )
-
-            try:
-                training_date = request.POST.get('training_date')
-                if not training_date:
-                    raise ValidationError("Training date is required.")
-
-                try:
-                    # Ensure date is in the correct format
-                    training_date = datetime.strptime(training_date, '%m/%d/%Y %I:%M %p')
-                except ValueError:
-                    raise ValidationError("Invalid date format. Use MM/DD/YYYY HH:MM AM/PM.")
-
-                # Validate `training_status`
-                training_status = request.POST.get('training_status')
-                breakpoint()
-                if training_status not in TrainingStatus.choices:
-                    raise ValidationError("Invalid training status value.")
-
-                training_techniques_ids = request.POST.getlist('training_techniques')
-
-                train = Training(
-                    date=training_date,
-                    status=training_status,
-                )
-                train.save()
-
-                # Efficiently add techniques
-                if training_techniques_ids:
-                    techniques = Technique.objects.filter(pk__in=training_techniques_ids)
-                    train.techniques.add(*techniques)
-
-            except ValidationError as e:
-                return JsonResponse({'errors': str(e)}, status=400)
-            except Technique.DoesNotExist:
-                return JsonResponse({'errors': 'One or more selected techniques do not exist.'}, status=400)
-            except Exception as e:
-                logger.error(f"Error creating training: {e}")
-                return JsonResponse({'errors': 'An unexpected error occurred.'}, status=500)
+            # Handle new training creation
+            form = TrainingForm(request.POST)
+            if form.is_valid():
+                form.save()
+                self.request.session['errors'] = None
+                self.request.session['msg'] = "Training created successfully!"
+            else:
+                self.request.session['errors'] = form.errors
+                self.request.session['msg'] = "Failed to create training!"
 
             trainings = Training.objects.prefetch_related('attendances', 'techniques').filter(status=TrainingStatus.SCHEDULED)
             techniques = Technique.objects.all()
-            ctx = {
-                "trainings": trainings,
-                "techniques": techniques,
-            }
+        ctx = self.get_context_data()
         return render(request, self.template_name, context=ctx)
 
 

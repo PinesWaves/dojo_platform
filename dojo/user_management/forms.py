@@ -1,15 +1,16 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
-from utils.widgets import CustomSwitchWidget, CustomDatePickerWidget
+from utils.widgets import CustomSwitchWidget, CustomDateTimePickerWidget
 from utils.config_vars import regulations, informed_consent
 from .models import User, Category
 
 
 class UserRegisterForm(forms.ModelForm):
     birth_date = forms.DateField(
-        widget=CustomDatePickerWidget(
+        widget=CustomDateTimePickerWidget(
             label_text="Birth Date",
+            picker_type="date"
         ),
         required=True
     )
@@ -84,8 +85,9 @@ class UserRegisterForm(forms.ModelForm):
         required=True
     )
     date_joined = forms.DateField(
-        widget=CustomDatePickerWidget(
+        widget=CustomDateTimePickerWidget(
             label_text="Date joined",
+            picker_type="date"
         ),
         required=True
     )
@@ -186,8 +188,9 @@ class UserRegisterForm(forms.ModelForm):
 
 class UserUpdateForm(forms.ModelForm):
     birth_date = forms.DateField(
-        widget=CustomDatePickerWidget(),
-        input_formats=['%m/%d/%Y'],
+        widget=CustomDateTimePickerWidget(
+            picker_type="date"
+        ),
         required=False
     )
     country = forms.CharField(
@@ -212,8 +215,9 @@ class UserUpdateForm(forms.ModelForm):
     physical_limit = forms.BooleanField(required=False)
     lost_cons = forms.BooleanField(required=False)
     date_joined = forms.DateField(
-        widget=CustomDatePickerWidget(
+        widget=CustomDateTimePickerWidget(
             label_text="Date joined",
+            picker_type="date"
         ),
         required=True
     )

@@ -1,8 +1,7 @@
 from django import forms
 from django.utils.safestring import mark_safe
-from django.utils.html import format_html
 from django.utils.dateformat import format as django_date_format
-from datetime import date, datetime
+from datetime import date, time, datetime
 
 
 class CustomSwitchWidget(forms.CheckboxInput):
@@ -30,113 +29,49 @@ class CustomSwitchWidget(forms.CheckboxInput):
         return mark_safe(switch_html)
 
 
-class CustomDatePickerWidget(forms.DateInput):
-    def __init__(self, label_text=None, attrs=None, format='%m/%d/%Y'):
-        self.label_text = label_text or ""
-        final_attrs = {'required': 'required'}
-        if attrs:
-            final_attrs.update(attrs)
-        super().__init__(attrs=final_attrs, format=format)
-
-    def render(self, name, value, attrs=None, renderer=None):
-        attrs = attrs or {}
-        datepicker_id = attrs.get("id", name)  # Get ID or use name
-
-        if isinstance(value, (datetime, date)):
-            value = value.strftime(self.format)
-
-        existing_class = attrs.get("class", "")
-        attrs["class"] = f"{existing_class} form-control datetimepicker-input".strip()
-        # attrs["class"] = "form-control datetimepicker-input"
-        attrs["data-target"] = f"#{datepicker_id}"
-        attrs["data-toggle"] = "datetimepicker"
-
-        input_html = super().render(name, value, attrs, renderer)
-        # checkbox_html = super().render(name, value, attrs)
-
-        # label_html = f"<label>{self.label_text}</label>" if self.label_text else ""
-        html = f"""
-            <div class="input-group date" id="{datepicker_id}" data-target-input="nearest">
-                {input_html}
-                <div class="input-group-append" data-target="#{datepicker_id}" data-toggle="datetimepicker">
-                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                </div>
-            </div>
-        """
-        return mark_safe(html)
-
-
-class CustomTimePickerWidget(forms.TimeInput):
-    def __init__(self, label_text=None, attrs=None, format='%H:%M'):
-        self.label_text = label_text or ""
-        final_attrs = {'required': 'required'}
-        if attrs:
-            final_attrs.update(attrs)
-        super().__init__(attrs=final_attrs, format=format)
-
-    def render(self, name, value, attrs=None, renderer=None):
-        attrs = attrs or {}
-        timepicker_id = attrs.get("id", name)  # Get ID or use name
-
-        if isinstance(value, (datetime, date)):
-            value = value.strftime(self.format)
-
-        # existing_class = attrs.get("class", "")
-        # attrs["class"] = f"{existing_class} form-control datetimepicker-input".strip()
-        attrs["class"] = "form-control datetimepicker-input"
-        attrs["data-target"] = f"#{timepicker_id}"
-        attrs["data-toggle"] = "datetimepicker"
-
-        input_html = super().render(name, value, attrs, renderer)
-        # checkbox_html = super().render(name, value, attrs)
-
-        # label_html = f"<label>{self.label_text}</label>" if self.label_text else ""
-        html = f"""
-            <div class="input-group time" id="{timepicker_id}" data-target-input="nearest">
-                {input_html}
-                <div class="input-group-append" data-target="#{timepicker_id}" data-toggle="datetimepicker">
-                    <div class="input-group-text"><i class="fa fa-clock"></i></div>
-                </div>
-            </div>
-        """
-        return mark_safe(html)
-
-
 class CustomDateTimePickerWidget(forms.DateTimeInput):
-    def __init__(self, label_text=None, attrs=None, format='%m/%d/%Y %H:%M'):
+    def __init__(self, label_text=None, picker_type="date-time", attrs=None):
+        if picker_type not in ["date", "time", "date-time"]:
+            raise ValueError("picker_type must be 'date', 'time', or 'date-time'")
+        else:
+            picker_format = 'm/d/Y H:M'
+            self.suffix = "_datetimepicker"
+            if picker_type == "date":
+                picker_format = 'm/d/Y'
+                self.suffix = "_datepicker"
+            elif picker_type == "time":
+                picker_format = 'H:M'
+                self.suffix = "_timepicker"
+
         self.label_text = label_text or ""
         final_attrs = {'required': 'required'}
         if attrs:
             final_attrs.update(attrs)
-        super().__init__(attrs=final_attrs, format=format)
+        super().__init__(attrs=final_attrs, format=picker_format)
 
     def render(self, name, value, attrs=None, renderer=None):
         attrs = attrs or {}
-        datetimepicker_id = attrs.get("id", name)  # Get ID or use name
-
-        if isinstance(value, (datetime, date)):
+        picker_id = f"{name}{self.suffix}"
+        if isinstance(value, (datetime, date, time)):
             value = django_date_format(value, self.format)
 
         existing_class = attrs.get("class", "")
         attrs["class"] = f"{existing_class} form-control datetimepicker-input".strip()
-        attrs["data-target"] = f"#{datetimepicker_id}"
+        attrs["data-target"] = f"#{picker_id}"
         attrs["data-toggle"] = "datetimepicker"
 
         input_html = super().render(name, value, attrs, renderer)
-        # checkbox_html = super().render(name, value, attrs)
-
-        # label_html = f"<label>{self.label_text}</label>" if self.label_text else ""
         html = f"""
-            <div class="input-group datetime" id="{datetimepicker_id}" data-target-input="nearest">
+            <div class="input-group datetime" id="{picker_id}" data-target-input="nearest">
                 {input_html}
-                <div class="input-group-append" data-target="#{datetimepicker_id}" data-toggle="datetimepicker">
+                <div class="input-group-append" data-target="#{picker_id}" data-toggle="datetimepicker">
                     <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                 </div>
             </div>
         """
         return mark_safe(html)
 
-# bootstrap duallistbox
+
 class CustomSelectMultipleWidget(forms.SelectMultiple):
     """
     Custom widget for Bootstrap Duallistbox.

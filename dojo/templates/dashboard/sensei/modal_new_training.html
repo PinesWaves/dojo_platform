@@ -13,35 +13,6 @@
           </button>
         </div>
         <form action="{% url 'manage_trainings' %}" class="form-horizontal" method="post">{% csrf_token %}
-{#          <div class="modal-body text-center">#}
-{#            <div class="form-group row">#}
-{#              <label for="training_date" class="col-sm-3 col-form-label">Date</label>#}
-{#              <div class="input-group date col-sm-8" id="timepicker" data-target-input="nearest">#}
-{#                <input type="text" class="form-control datetimepicker-input" data-target="#timepicker" id="training_date" name="training_date" placeholder="Enter training date"/>#}
-{#                <div class="input-group-prepend" data-target="#timepicker" data-toggle="datetimepicker">#}
-{#                    <div class="input-group-text"><i class="far fa-clock"></i></div>#}
-{#                </div>#}
-{#              </div>#}
-{#            </div>#}
-{#            <div class="form-group row">#}
-{#              <label for="training_status" class="col-sm-3 col-form-label">Status</label>#}
-{#              <div class="col-sm-8 btn-group btn-group-toggle" data-toggle="buttons" name="training_status" id="training_status">#}
-{#                {% for s in training_choices %}#}
-{#                <label class="btn btn-secondary active">#}
-{#                  <input type="radio" name="options" id="option_{{ s.0 }}" autocomplete="off" checked> {{ s.1 }}#}
-{#                </label>#}
-{#                {% endfor %}#}
-{#              </div>#}
-{#            </div>#}
-{#            <div class="form-group">#}
-{#              <label for="training_techniques">Techniques</label><br>#}
-{#              <select class="duallistbox" multiple="multiple" id="training_techniques" name="training_techniques">#}
-{#                {% for t in techniques %}#}
-{#                <option value="{{ t.id }}">{{ t.name}}</option>#}
-{#                {% endfor %}#}
-{#              </select>#}
-{#            </div>#}
-{#          </div>#}
           <div class="modal-body text-center">
             {% for field in training_form %}
               <div class="form-group row">
