@@ -9,24 +9,14 @@
           <div class="card-header">
             <h4 class="card-title w-100">
               <a class="d-block w-100" data-toggle="collapse" href="#collapse{{ forloop.counter }}">
-                {{ t.location }} - {{ t.date }}
+              {% if t.location %}{{ t.location }} - {% endif %}{{ t.date|date:"Y/m/d G:i (l)" }}
               </a>
             </h4>
           </div>
           <div id="collapse{{ forloop.counter }}" class="collapse" data-parent="#accordion">
             <div class="card-body">
-              <p>Training on {{ t.date }}</p>
-              {% if t.status == 'A' %}
-              <img class="img-fluid pad" src="{{ t.qr_image.url }}" alt="training" width="400">
-              <p class="card-text">
-                Scan QR and confirm attendance
-              </p>
-              {% elif t.status == 'F' %}
-              <p>Training has ended</p>
-              {% elif t.status == 'C' %}
-              <p>Training canceled</p>
-              {% endif %}
-              <p>Techniques</p>
+              <p>Training <b>{{ t.get_status_display }}</b></p>
+              <span>Content:</span>
               <ul>
                 {% for tech in t.techniques.all %}
                 <li>{{ tech.name }}</li>

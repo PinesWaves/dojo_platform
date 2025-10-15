@@ -33,68 +33,81 @@
   <div class="container-fluid">
     <!-- Main row -->
     <div class="row">
-      <section class="col-lg-3 connectedSortable">
+      <section class="col-md-5 connectedSortable">
         <div class="card card-danger">
           <div class="card-header">
             <h3 class="card-title">Schedule trainings</h3>
           </div>
           <div class="card-body">
-            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#modal-new-schedule">
-              New Schedule
-            </button>
-            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#modal-new-training">
-              New Training
-            </button>
-            {% if time_url %}
-            <label for="scheduling_table">Active scheduling:<br></label>
+            <div class="row">
+              <button type="button" class="btn btn-danger m-1" data-toggle="modal" data-target="#modal-new-schedule">
+                New Schedule
+              </button>
+              <button type="button" class="btn btn-danger m-1" data-toggle="modal" data-target="#modal-new-training">
+                New Training
+              </button>
+            </div>
+            <hr>
+            {% if schedules %}
+            <span class="pt-2 mt-2">Active scheduling:</span>
             <table id="scheduling_table" class="table table-bordered table-striped">
               <thead>
                 <tr>
-                  <th></th>
                   <th>Day</th>
                   <th>Time</th>
+                  <th>Details</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
-              {% for t in schedules %}
+                {% for t in schedules %}
                 <tr>
-                  <form action="{% url 'manage_students' %}" method="post">{% csrf_token %}
-                    <div class="form-group">
-                      <input type="hidden" name="_method" value="schedule">
-                      <div class="d-flex col-sm-6">
+                  <td>{{ t.get_day_of_week_display }}</td>
+                  <td>{{ t.time }}</td>
+                  <td>{{ t.details }}</td>
                         <td>
-                          <button type="submit" class="btn btn-danger btn-block btn-xs col-sm-8">
+                  <form action="{% url 'manage_trainings' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group mb-0">
+                      <input type="hidden" name="delete_schedule" value="{{ t.id }}">
+                      <div class="d-flex">
+                          <button type="submit" class="btn btn-danger btn-block btn-xs col-sm-10">
                             <i class="fas fa-trash"></i>
                           </button>
-                        </td>
-                        <td>{{ t.day_of_week }}</td>
-                        <td>{{ t.time }}</td>
                       </div>
                     </div>
                   </form>
+                        </td>
                 </tr>
-              {% endfor %}
+                {% endfor %}
               </tbody>
               <tfoot>
                 <tr>
-                    <th></th>
                     <th>Day</th>
                     <th>Time</th>
+                    <th>Details</th>
+                    <th></th>
                 </tr>
               </tfoot>
             </table>
             {% else %}
-              <label class="pt-2 mt-2" for="scheduling_table">No active scheduling<br></label>
+              <span class="pt-2 mt-2">No active scheduling<br></span>
             {% endif %}
           </div>
-
           <div class="card-footer">
-            <strong>Note:</strong> You can schedule trainings in advance and assign techniques to be covered.
+            <form action="{% url 'manage_trainings' %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="run_scheduling" value="true">
+              <button type="submit" class="btn btn-danger btn-block">
+                Schedule now
+              </button>
+            </form>
+            <br><strong>Note:</strong> You can schedule trainings in advance and assign techniques to be covered.
           </div>
         </div>
       </section>
 
-      <section class="col-lg-9 connectedSortable">
+      <section class="col-md-7 connectedSortable">
         <div class="card card-danger">
           <div class="card-header">
             <h3 class="card-title">Training history</h3>
@@ -115,49 +128,24 @@
                   <th>Date</th>
                   <th>Status</th>
                   <th>Techniques</th>
+                  <th>Details</th>
                 </tr>
               </thead>
               <tbody>
               {% for t in trainings %}
                 <tr>
-                  <td>{{ t.date }}</td>
+{#                  https://docs.djangoproject.com/en/5.2/ref/templates/builtins/#date#}
+                  <td>{{ t.date|date:"Y/m/d G:i (l)" }}</td>
                   <td>
-                    {% if t.status %}
-                      Pending
-                    {% else %}
-                      Completed                      
-                    {% endif %}
+                    {{ t.get_status_display }}
                   </td>
                   <td>
-                    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-default">
+                    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-list-techniques-{{ t.id }}">
                       List
                     </button>
-                    <div class="modal fade" id="modal-default">
-                      <div class="modal-dialog">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h4 class="modal-title">Technique list</h4>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                              <span aria-hidden="true">&times;</span>
-                            </button>
-                          </div>
-                          <div class="modal-body">
-                          {% for tc in t.techniques.all %}
-                            {{ tc.name }}<br>
-                          {% empty %}
-                            No lessons assigned
-                          {% endfor %}
-                          </div>
-                          <div class="modal-footer justify-content-between">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                          </div>
-                        </div>
-                        <!-- /.modal-content -->
-                      </div>
-                      <!-- /.modal-dialog -->
-                    </div>
-                    <!-- /.modal -->
+                    {% include 'dashboard/sensei/modal_list_techniques.html' with training=t %}
                   </td>
+                  <td>{{ t.details }}</td>
                 </tr>
               {% endfor %}
               </tbody>
@@ -166,6 +154,7 @@
                 <th>Date</th>
                 <th>Status</th>
                 <th>Techniques</th>
+                <th>Details</th>
               </tr>
               </tfoot>
             </table>
@@ -177,7 +166,7 @@
   </div><!-- /.container-fluid -->
 </section>
 {% include 'dashboard/sensei/modal_new_schedule.html' %}
-{% include 'dashboard/sensei/modal_new_training.html' %}
+{% include 'dashboard/sensei/modal_set_training.html' %}
 <!-- /.content -->
 {% endblock %}
 {% block js %}
@@ -198,18 +187,42 @@
   <script src="{% static 'plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js' %}"></script>
   <script>
     $(function () {
+      $("#scheduling_table").DataTable({
+        "responsive": true, "lengthChange": false, "autoWidth": false,
+      }).buttons().container().appendTo('#scheduling_table_wrapper .col-md-6:eq(0)');
+
       $("#trainings_table").DataTable({
         "responsive": true, "lengthChange": false, "autoWidth": false,
-        "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+        "buttons": ["copy", "csv", "excel", "pdf", "print"]
       }).buttons().container().appendTo('#trainings_table_wrapper .col-md-6:eq(0)');
 
       $('#time_timepicker').datetimepicker({
-        format: 'LT'
+        format: 'HH:mm'
       });
-      $('#date_datetimepicker').datetimepicker({ icons: { time: 'far fa-clock' } });
+      $('#date_datetimepicker').datetimepicker({
+        icons: { time: 'far fa-clock' },
+        format: 'YYYY-MM-DD HH:mm'
+      });
 
       //Bootstrap Duallistbox
       $('.duallistbox').bootstrapDualListbox();
+
+      $('#form-new-schedule, #form-new-training').on('submit', function(e) {
+          e.preventDefault();
+          $.ajax({
+              url: $(this).attr('action'),
+              type: 'POST',
+              data: $(this).serialize(),
+              success: function(response) {
+                  location.reload();
+              },
+              error: function(xhr) {
+                  // Replace modal body with error messages from response
+                  $('.modal-body').html($(xhr.responseText).find('.modal-body').html());
+              }
+          });
+      });
+
     });
   </script>
 {% endblock %}

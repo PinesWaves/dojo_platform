@@ -79,3 +79,17 @@ class TrainingForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['type'].widget.attrs['class'] = 'form-control select2'
         self.fields['status'].widget.attrs['class'] = 'form-control select2'
+
+    # def is_valid(self):
+    #     # change date to timezone aware
+    #     date = self.data.get('date')
+    #     if date:
+    #         from django.utils import timezone
+    #         from django.conf import settings
+    #         import pytz
+    #         user_tz = pytz.timezone(settings.TIME_ZONE)
+    #         naive_date = timezone.datetime.fromisoformat(date)
+    #         aware_date = user_tz.localize(naive_date)
+    #         self.data = self.data.copy()
+    #         self.data['date'] = aware_date.isoformat()
+    #     return super().is_valid()

@@ -1,4 +1,3 @@
-# dojo/management/commands/load_katas.py
 import yaml
 import shutil
 from pathlib import Path
@@ -19,7 +18,7 @@ SERIES_FILE = BASE_PATH / "series.yaml"
 LESSONS_FILE = BASE_PATH / "lessons" / "heian_shodan_lessons.yaml"
 KUMITE_FILE = BASE_PATH / "kumite.yaml"
 
-
+# TODO: Add JKA historical data (Gasshuku, championships,) etc.)
 class Command(BaseCommand):
     help = "Load Katas, Series and Lessons from YAML file"
 

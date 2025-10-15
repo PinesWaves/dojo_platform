@@ -166,7 +166,7 @@ class Migration(migrations.Migration):
             name='TrainingScheduling',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('day_of_week', models.CharField(choices=[('MON', 'Monday'), ('TUE', 'Tuesday'), ('WED', 'Wednesday'), ('THU', 'Thursday'), ('FRI', 'Friday'), ('SAT', 'Saturday'), ('SUN', 'Sunday')], default='MON', max_length=3)),
+                ('day_of_week', models.IntegerField(choices=[(0, 'Monday'), (1, 'Tuesday'), (2, 'Wednesday'), (3, 'Thursday'), (4, 'Friday'), (5, 'Saturday'), (6, 'Sunday')], default=0, max_length=3)),
                 ('time', models.TimeField()),
                 ('details', models.TextField(blank=True, null=True)),
                 ('training', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dashboard.training')),
