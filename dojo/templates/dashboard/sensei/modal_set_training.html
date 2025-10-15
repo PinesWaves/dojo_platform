@@ -3,7 +3,7 @@
 <div class="modal fade" id="modal-new-training" tabindex="-1" aria-labelledby="modalNewTrainingLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content bg-default">
-      <form id="form-new-training" method="POST" enctype="multipart/form-data" action="{% url 'manage_trainings' %}">
+      <form id="form-new-training" action="{% url 'manage_trainings' %}">
         <input type="hidden" name="action" value="new_training">
         {% csrf_token %}
         <div class="modal-header bg-danger">
