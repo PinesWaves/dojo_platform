@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from datetime import datetime
+from django.utils import timezone
 from user_management.models import Token
 
 
@@ -10,4 +10,4 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        Token.objects.filter(expires_at__lte=datetime.now()).delete()
+        Token.objects.filter(expires_at__lte=timezone.now()).delete()

@@ -2,6 +2,10 @@
 {% load static %}
 {% block title %}Seishin Dojo JKA |  Profile{% endblock %}
 {% block css %}
+  <!-- Tempusdominus Bootstrap 4 (Datepicker) -->
+  <link rel="stylesheet" href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+  <!-- Country picker flags -->
+  <link rel="stylesheet" href="{% static 'plugins/bootstrap-select-country-4.2.0/css/bootstrap-select-country.min.css' %}">
   <!-- Cropper.js -->
   <link href="{% static 'plugins/cropperjs-v1.6.2/css/cropper.min.css' %}" rel="stylesheet">
 {% endblock %}
@@ -39,8 +43,28 @@
   </div>
 {% endblock %}
 {% block js %}
+  <!-- Tempusdominus Bootstrap 4 -->
+  <script src="{% static 'plugins/moment/moment.min.js' %}"></script>
+  <!-- For datepicker -->
+  <script src="{% static 'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+  <!-- Country picker flags -->
+  <script src="{% static 'plugins/bootstrap-select-country-4.2.0/js/bootstrap-select-country.min.js' %}"></script>
   <!-- Cropper.js -->
   <script src="{% static 'plugins/cropperjs-v1.6.2/js/cropper.min.js' %}" rel="stylesheet"></script>
   <!-- Custom JS for modal and crop -->
   <script src="{% static 'dist/js/custom.js' %}" rel="stylesheet"></script>
+  <script>
+      $(document).ready(function () {
+          $('#id_birth_date').datetimepicker({
+              format: 'L',
+              //locale: 'es'
+          });
+          $('#id_date_joined').datetimepicker({
+              format: 'L',
+              //locale: 'es'
+          });
+
+          $('.countrypicker').countrypicker();
+      });
+  </script>
 {% endblock %}

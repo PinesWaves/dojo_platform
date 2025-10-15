@@ -14,20 +14,23 @@ echo "PostgreSQL is available"
 mkdir -p /app/dojo/logs
 chmod -R 777 /app/dojo/logs
 
-# Run create migrations
+echo "Run create migrations"
 python manage.py makemigrations
 
-# Run Django migrations
+echo "Run Django migrations"
 python manage.py migrate --noinput
 
-# Collect static files (optional)
+echo "Collect static files (optional)"
 python manage.py collectstatic --noinput
 
-# Load dummy data
+echo "Load dummy data"
 python manage.py create_test_data
 
-# Start the Django server
+echo "Load library"
+python manage.py load_library_data
+
+echo "Start the Django server"
 python manage.py runserver 0.0.0.0:8000
 
-# Execute the command specified as arguments to this script
+echo "Execute the command specified as arguments to this script"
 exec "$@"

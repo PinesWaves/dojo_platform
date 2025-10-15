@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Dojo, Training, KataSerie, Kata, KataLesson, KataLessonActivity, KataLessonActivityImage, \
-    KataLessonActivityVideo
+    KataLessonActivityVideo, Attendance
 
 
 @admin.register(Dojo)
@@ -21,20 +21,27 @@ class DojoAdmin(admin.ModelAdmin):
     )
 
 
+class AttendanceInline(admin.TabularInline):
+    model = Attendance
+    extra = 0
+    readonly_fields = ('timestamp',)
+
 @admin.register(Training)
 class TrainingAdmin(admin.ModelAdmin):
-    list_display = ('date', 'status', 'location', 'training_code')  # Customize columns
-    search_fields = ('location', 'training_code')  # Add search fields
+    inlines = [AttendanceInline]
+    list_display = ('date', 'type', 'status', 'location')  # Customize columns
+    search_fields = ('date', 'location')  # YYYY-MM-DDsearch_fields = ('date', 'location')  # YYYY-MM-DD
+    search_help_text = "Search by date using the format YYYY-MM-DD"
     list_filter = ('status', 'date')  # Add filters
     ordering = ('date',)  # Default ordering
     fieldsets = (
         (None, {'fields': ('date', 'status', 'location')}),
-        ('Relations', {'fields': ('attendants', 'techniques')}),
+        ('Relations', {'fields': ('techniques', 'katas', 'kumites')}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('date', 'status', 'location', 'training_code'),
+            'fields': ('date', 'status', 'location'),
         }),
     )
 
@@ -85,7 +92,6 @@ class KataLessonAdmin(admin.ModelAdmin):
             'fields': ('title', 'kata', 'objectives', 'content', 'order'),
         }),
     )
-
 
 class KataLessonActivityImageInline(admin.TabularInline):
     model = KataLessonActivityImage

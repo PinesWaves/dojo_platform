@@ -1,15 +1,16 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
-from utils.widgets import CustomSwitchWidget, CustomDatePickerWidget
+from utils.widgets import CustomSwitchWidget, CustomDateTimePickerWidget
 from utils.config_vars import regulations, informed_consent
 from .models import User, Category
 
 
 class UserRegisterForm(forms.ModelForm):
     birth_date = forms.DateField(
-        widget=CustomDatePickerWidget(
+        widget=CustomDateTimePickerWidget(
             label_text="Birth Date",
+            picker_type="date"
         ),
         required=True
     )
@@ -84,8 +85,9 @@ class UserRegisterForm(forms.ModelForm):
         required=True
     )
     date_joined = forms.DateField(
-        widget=CustomDatePickerWidget(
+        widget=CustomDateTimePickerWidget(
             label_text="Date joined",
+            picker_type="date"
         ),
         required=True
     )
@@ -178,9 +180,7 @@ class UserRegisterForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        # Establecer la contraseña usando set_password para encriptarla
         user.set_password(self.cleaned_data["password1"])
-        user.category = Category.STUDENT
         if commit:
             user.save()
         return user
@@ -188,8 +188,9 @@ class UserRegisterForm(forms.ModelForm):
 
 class UserUpdateForm(forms.ModelForm):
     birth_date = forms.DateField(
-        widget=CustomDatePickerWidget(),
-        input_formats=['%m/%d/%Y'],
+        widget=CustomDateTimePickerWidget(
+            picker_type="date"
+        ),
         required=False
     )
     country = forms.CharField(
@@ -214,8 +215,9 @@ class UserUpdateForm(forms.ModelForm):
     physical_limit = forms.BooleanField(required=False)
     lost_cons = forms.BooleanField(required=False)
     date_joined = forms.DateField(
-        widget=CustomDatePickerWidget(
+        widget=CustomDateTimePickerWidget(
             label_text="Date joined",
+            picker_type="date"
         ),
         required=True
     )
@@ -231,16 +233,18 @@ class UserUpdateForm(forms.ModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
-        if self.instance:
-            if self.instance.pk:
-                country_code = self.instance.country
-                self.fields['country'].initial = country_code
-                self.fields['country'].widget.attrs['data-default'] = country_code
-
-            if self.instance.category != Category.SENSEI:
+        if self.request and self.request.user.is_authenticated:
+            user_category = getattr(self.request.user, 'category', None)
+            if user_category != Category.SENSEI:
                 self.fields.pop('level', None)
+
+        if self.instance and self.instance.pk:
+            country_code = self.instance.country
+            self.fields['country'].initial = country_code
+            self.fields['country'].widget.attrs['data-default'] = country_code
 
         for field_name, field in self.fields.items():
             class_attr = field.widget.attrs.get('class', 'form-control')
