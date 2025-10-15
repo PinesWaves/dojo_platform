@@ -80,8 +80,7 @@ class CustomSelectMultipleWidget(forms.SelectMultiple):
 
     def __init__(self, attrs=None):
         default_attrs = {
-            "class": "duallistbox",
-            "required": "required"
+            "class": "duallistbox"
         }
         if attrs:
             default_attrs.update(attrs)

@@ -31,7 +31,14 @@ class SenseiDashboard(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         if not (user_cat in (Category.SENSEI, Category.SEMPAI)):
             return redirect('student_dashboard')
         today = timezone.now().date()
-        trainings = Training.objects.prefetch_related('attendances', 'techniques').filter(date__gte=today).order_by('date')[:6]
+        trainings = Training.objects.prefetch_related(
+            'attendances', 'techniques'
+        ).filter(
+            date__range=(
+                today - timedelta(days=1),
+                today + timedelta(days=6)
+            )
+        ).order_by('date')
         ctx = {
             "trainings": trainings,
         }
@@ -44,17 +51,14 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         trainings = Training.objects.prefetch_related('attendances', 'techniques').all()
-        techniques = Technique.objects.all()
         training_form = TrainingForm()
         scheduling_form = TrainingSchedulingForm()
         schedules = TrainingScheduling.objects.all()
         context.update({
-            "training_choices": TrainingStatus.choices,
             "trainings": trainings,
-            "techniques": techniques,
             "training_form": training_form,
-            "scheduling_form": scheduling_form,
             "schedules": schedules,
+            "scheduling_form": scheduling_form,
         })
         return context
 
@@ -84,6 +88,43 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
                 self.request.session['errors'] = form.errors
                 self.request.session['msg'] = "Failed to create schedule!"
 
+        elif schedule_id := request.POST.get('delete_schedule'):
+            try:
+                schedule = TrainingScheduling.objects.get(id=schedule_id)
+                schedule.delete()
+                self.request.session['msg'] = "Schedule deleted successfully!"
+            except TrainingScheduling.DoesNotExist:
+                self.request.session['errors'] = "Schedule not found."
+                self.request.session['msg'] = "Failed to delete schedule!"
+
+        elif request.POST.get('run_scheduling'):
+            schedules = TrainingScheduling.objects.all()
+            today = timezone.now().date()
+            end_of_year = today.replace(month=12, day=31)
+            for schedule in schedules:
+                try:
+                    init_date = get_next_closest_day(today, schedule.day_of_week)
+                    schedule_dates = []
+                    while init_date <= end_of_year:
+                        if init_date.weekday() == schedule.day_of_week:
+                            schedule_dates.append(
+                                datetime.combine(init_date, schedule.time)
+                            )
+                        init_date += timedelta(days=7)
+
+                    # Filter out dates that already have a training scheduled
+                    existing_trainings = Training.objects.filter(
+                        date__in=schedule_dates
+                    ).values_list('date', flat=True)
+                    trainings = [Training(date=d) for d in schedule_dates if d not in existing_trainings]
+                    Training.objects.bulk_create(trainings)
+
+                except ValidationError as e:
+                    logger.error(f"Failed to create training from schedule {schedule.id}: {e}")
+                    continue  # Skip invalid schedules
+
+            self.request.session['msg'] = f"{created_count} trainings created from schedules."
+
         elif request.POST.get('action') == 'new_training':
             # Handle new training creation
             form = TrainingForm(request.POST)
@@ -95,8 +136,27 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
                 self.request.session['errors'] = form.errors
                 self.request.session['msg'] = "Failed to create training!"
 
-            trainings = Training.objects.prefetch_related('attendances', 'techniques').filter(status=TrainingStatus.SCHEDULED)
-            techniques = Technique.objects.all()
+        elif request.POST.get('action') == 'update_training':
+            training_id = request.POST.get('training_id')
+            training = get_object_or_404(Training, id=training_id)
+            form = TrainingForm(request.POST, instance=training)
+            if form.is_valid():
+                form.save()
+                self.request.session['errors'] = None
+                self.request.session['msg'] = "Training updated successfully!"
+            else:
+                self.request.session['errors'] = form.errors
+                self.request.session['msg'] = "Failed to update training!"
+
+        elif training_id := request.POST.get('delete_training'):
+            try:
+                training = Training.objects.get(id=training_id)
+                training.delete()
+                self.request.session['msg'] = "Training deleted successfully!"
+            except Training.DoesNotExist:
+                self.request.session['errors'] = "Training not found."
+                self.request.session['msg'] = "Failed to delete training!"
+
         ctx = self.get_context_data()
         return render(request, self.template_name, context=ctx)
 

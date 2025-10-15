@@ -103,7 +103,7 @@
             <div class="card-body">
               <form action="{% url 'manage_students' %}" method="post">{% csrf_token %}
                 <div class="form-group">
-                  <label for="reg_time">Activate registration form until:</label>
+                  <label for="reg_datetimepicker">Activate registration form until:</label>
                   <div class="input-group date" id="reg_datetimepicker" data-target-input="nearest">
                     <div class="input-group-prepend" data-target="#reg_datetimepicker" data-toggle="datetimepicker">
                         <div class="input-group-text"><i class="far fa-clock"></i></div>

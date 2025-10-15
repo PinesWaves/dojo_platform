@@ -213,50 +213,24 @@ class Command(BaseCommand):
         """
 
         self.stdout.write("Loading trainings...")
-
-        schedules = {
-            0: [(17, 0), (19, 0)],  # lunes
-            1: [(19, 0)],  # martes
-            2: [(17, 0), (19, 0)],  # miércoles
-            3: [(19, 0)],  # jueves
-            5: [(8, 0), (10, 0)],  # sábado
-        }
-
+        dates = get_test_training_dates()
         now = timezone.now()
-        weeks_back = 2  # semanas atrás
-        weeks_forward = 2  # semanas adelante
+        for d in dates:
+            end_time = d + timedelta(minutes=90)
+            if d > now:
+                status = TrainingStatus.SCHEDULED
+            elif d <= now <= end_time:
+                status = TrainingStatus.ONGOING
+            else:
+                status = TrainingStatus.FINISHED
 
-        for week in range(-weeks_back, weeks_forward + 1):
-            for weekday, times in schedules.items():
-                for hour, minute in times:
-                    # Fecha/hora del entrenamiento
-                    start_time = (now + timedelta(weeks=week))
-                    start_time = start_time - timedelta(days=start_time.weekday())  # mover al lunes de esa semana
-                    start_time = start_time + timedelta(days=weekday)
-                    start_time = start_time.replace(hour=hour, minute=minute, second=0, microsecond=0)
-
-                    # Duración fija de 90 min
-                    end_time = start_time + timedelta(minutes=90)
-
-                    # Determinar estado
-                    if start_time > now:
-                        status = TrainingStatus.SCHEDULED
-                    elif start_time <= now <= end_time:
-                        status = TrainingStatus.ONGOING
-                    else:
-                        status = TrainingStatus.FINISHED
-
-                    # Aleatoriamente algunos cancelados
-                    if status in [TrainingStatus.SCHEDULED, TrainingStatus.FINISHED] and random.random() < 0.1:
-                        status = TrainingStatus.CANCELED
-
-                    Training.objects.create(
-                        date=start_time,
-                        type=random.choice(list(TrainingType.values)),
-                        status=status,
-                        details=f"Training {calendar.day_name[weekday]} {hour:02d}:{minute:02d}",
-                        location="Main Dojo",
-                    )
+            Training.objects.create(
+                date=d,
+                type=random.choice(list(TrainingType.values)),
+                status=status,
+                details=f"Training {calendar.day_name[d.weekday()]} {d.hour:02d}:{d.minute:02d}",
+                location="Main Dojo",
+            )
         self.stdout.write(self.style.SUCCESS(f"✅  Trainings loaded successfully."))
 
 
@@ -294,7 +268,6 @@ class Command(BaseCommand):
                     notes=''  # Optional notes
                 )
         self.stdout.write(self.style.SUCCESS(f"✅  Assists loaded successfully."))
-        # self.stdout.write(self.style.SUCCESS(f"✔ "))
 
 
     def truncate_all_tables_and_reset_sequences(self):
@@ -307,17 +280,9 @@ class Command(BaseCommand):
 
             for model in apps.get_models():
                 table = model._meta.db_table
-                pk_column = model._meta.pk.column
 
                 # Deletes all data in the table
                 cursor.execute(f'TRUNCATE TABLE "{table}" RESTART IDENTITY CASCADE;')
-
-                # Extra: si quisieras solo borrar y luego resetear manualmente:
-                # cursor.execute(f'DELETE FROM "{table}";')
-                # if model._meta.pk.get_internal_type() in ("AutoField", "BigAutoField"):
-                #     cursor.execute(
-                #         f"SELECT setval(pg_get_serial_sequence('{table}', '{pk_column}'), 1, false);"
-                #     )
 
             # Restore FK restrictions
             cursor.execute("SET session_replication_role = 'origin';")
@@ -325,3 +290,48 @@ class Command(BaseCommand):
         # Confirm transaction
         transaction.commit()
         self.stdout.write(self.style.SUCCESS(f"✅  All tables have been truncated and sequences reset."))
+
+
+def get_test_training_dates():
+    """
+    Returns a list of datetime objects representing test training dates and times 2 weeks before and after today's date.
+    """
+    schedules = {
+        0: [(17, 0), (19, 0)],  # lunes
+        1: [(19, 0)],  # martes
+        2: [(17, 0), (19, 0)],  # miércoles
+        3: [(19, 0)],  # jueves
+        4: [(17, 0), (19, 0)],  # viernes
+        5: [(8, 0), (10, 0)],  # sábado
+    }
+
+    today = timezone.now()
+    days_before = 14
+    days_after = 14
+    dates = []
+    for i in range(-days_before, days_after + 1):
+        day = today + timedelta(days=i)
+        if day.weekday() in [0, 1, 2, 3, 4, 5]:  # Monday-Saturday
+            aware_day = timezone.make_aware(
+                datetime(
+                    day.year,
+                    day.month,
+                    day.day,
+                    schedules[day.weekday()][0][0],
+                    0,
+                )
+            )
+            dates.append(aware_day)
+            if day.weekday() in [0, 2, 4, 5]:  # Monday-Friday + Saturday
+                aware_day = timezone.make_aware(
+                    datetime(
+                        day.year,
+                        day.month,
+                        day.day,
+                        schedules[day.weekday()][1][0],
+                        0,
+                    )
+                )
+                dates.append(aware_day)
+    dates.reverse()  # Optional: earliest to latest
+    return dates

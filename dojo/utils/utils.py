@@ -2,6 +2,7 @@ import base64
 from io import BytesIO
 import qrcode
 from django.core.cache import cache
+from datetime import date, timedelta
 
 
 def generate_qr_file(data):
@@ -33,3 +34,16 @@ def get_qr_base64(data):
     buffer = generate_qr_file(data)
     img_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
     return f"data:image/png;base64,{img_base64}"
+
+
+def get_next_closest_day(st_date: date, day: int) -> date:
+    """Get the next closest day of the week from a given date.
+    Args:
+        st_date (date): The starting date.
+        day (int): The target day of the week (0=Monday, 6=Sunday).
+    Returns:
+        date: The next closest date that falls on the specified day of the week.
+    """
+    days_ahead = (day - st_date.weekday() + 7) % 7
+    days_ahead = days_ahead if days_ahead != day else 7
+    return day + timedelta(days=days_ahead)

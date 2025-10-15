@@ -1,13 +1,10 @@
 import re
 
 from django.core.exceptions import ValidationError
-from django.core.files import File
 from django.db import models
 from django.utils import timezone
-from secrets import token_urlsafe
 
 from user_management.models import User, Category
-from utils.utils import generate_qr_file
 
 
 LEVEL_CHOICES = [
@@ -200,7 +197,7 @@ class TrainingType(models.TextChoices):
 
 
 class Training(models.Model):
-    date = models.DateTimeField(auto_now=False)
+    date = models.DateTimeField(auto_now=False, unique=True)
     type = models.CharField(choices=TrainingType.choices, default=TrainingType.MIXED, max_length=10)
     status = models.CharField(choices=TrainingStatus.choices, default=TrainingStatus.SCHEDULED, max_length=2)
     techniques = models.ManyToManyField('Technique', related_name='trainings', blank=True)
@@ -218,30 +215,24 @@ class Training(models.Model):
         verbose_name_plural = "Trainings"
 
 
-class DayChoices(models.TextChoices):
-    MONDAY = 'MON', 'Monday'
-    TUESDAY = 'TUE', 'Tuesday'
-    WEDNESDAY = 'WED', 'Wednesday'
-    THURSDAY = 'THU', 'Thursday'
-    FRIDAY = 'FRI', 'Friday'
-    SATURDAY = 'SAT', 'Saturday'
-    SUNDAY = 'SUN', 'Sunday'
+class DayChoices(models.IntegerChoices):
+    MONDAY = 0, 'Monday'
+    TUESDAY = 1, 'Tuesday'
+    WEDNESDAY = 2, 'Wednesday'
+    THURSDAY = 3, 'Thursday'
+    FRIDAY = 4, 'Friday'
+    SATURDAY = 5, 'Saturday'
+    SUNDAY = 6, 'Sunday'
 
 class TrainingScheduling(models.Model):
-
     # dojo = models.ForeignKey(Dojo, on_delete=models.CASCADE, related_name="training_schedules")
-    day_of_week = models.CharField(
-        choices=DayChoices.choices,
-        default=DayChoices.MONDAY,
-        max_length=3
-    )
+    day_of_week = models.IntegerField(choices=DayChoices.choices, default=DayChoices.MONDAY)
     time = models.TimeField()
     # location = models.CharField(max_length=100, default='')
-    training = models.ForeignKey('Training', on_delete=models.CASCADE)
     details = models.TextField(blank=True, null=True)
 
     class Meta:
-        unique_together = ("day_of_week", "time", "training")
+        unique_together = ("day_of_week", "time")
         ordering = ["day_of_week", "time"]
         verbose_name = "Automatic Training Schedule"
         verbose_name_plural = "Automatic Training Schedules"
