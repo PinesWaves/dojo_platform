@@ -1,9 +1,25 @@
 from django.shortcuts import render
 from django.templatetags.static import static
 
+from pathlib import Path
+from django.conf import settings
+
+
+def rename_images_in_galery():
+    galery_path = Path(settings.STATIC_ROOT) / 'img' / 'galery'
+    images = [f for f in galery_path.iterdir() if f.suffix.lower() in ('.png', '.jpg', '.jpeg')]
+    images.sort()
+    for idx, file_path in enumerate(images, 1):
+        new_name = f"{idx:02}{file_path.suffix}"
+        file_path.rename(galery_path / new_name)
+
+
 def landing_page(request):
+    galery_path = Path(settings.STATIC_ROOT) / 'img' / 'galery'
+    galery_images = [static('img/galery/' + f.name) for f in galery_path.iterdir() if f.suffix.lower() in ('.png', '.jpg', '.jpeg')]
+
     ctx = {
-        'galery': [static(f'img/galery/{x:02}.png') for x in range(1, 16)],
+        'galery': galery_images,
             # 'https://dummyimage.com/600x400/000/fff',
             # 'https://dummyimage.com/600x400/111/fff',
             # 'https://dummyimage.com/600x400/222/fff',
