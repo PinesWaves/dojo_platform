@@ -1,0 +1,37 @@
+{% load static %}
+<!-- Modal: Add new training -->
+<div class="modal fade" id="modal-new-training" tabindex="-1" aria-labelledby="modalNewTrainingLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-default">
+      <form id="form-new-training" action="{% url 'manage_trainings' %}">
+        <input type="hidden" name="action" value="new_training">
+        {% csrf_token %}
+        <div class="modal-header bg-danger">
+          <h5 class="modal-title" id="modalNewTrainingLabel">Create training - {% now 'Y b j' %}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form action="{% url 'manage_trainings' %}" class="form-horizontal" method="post">{% csrf_token %}
+          <div class="modal-body text-center">
+            {% for field in training_form %}
+              <div class="form-group row">
+                <label for="{{ field.id_for_label }}" class="col-sm-3 col-form-label">{{ field.label }}</label>
+                <div class="col-sm-8">
+                  {{ field }}
+                  {% if field.errors %}
+                    <span class="text-danger">{{ field.errors }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+          <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-danger">Submit</button>
+          </div>
+        </form>
+      </form>
+    </div>
+  </div>
+</div>

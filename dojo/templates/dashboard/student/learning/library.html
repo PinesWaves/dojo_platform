@@ -1,0 +1,60 @@
+{% extends 'dashboard/student/dashboard.html' %}
+{% load static %}
+{% block title %}Seishin Dojo JKA | Library{% endblock %}
+{% block content %}
+<div class="content-header">
+  <div class="container py-3">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="mb-2 text-bold">Library</h1>
+      </div><!-- /.col -->
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item">
+            <a href="
+            {% if user.is_authenticated %}
+              {% if user.is_staff %}
+                {% url 'sensei_dashboard' %}
+              {% else %}
+                {% url 'student_dashboard' %}
+              {% endif %}
+            {% else %}
+              {% url 'landing' %}
+            {% endif %}">Home</a>
+          </li>
+          <li class="breadcrumb-item active">Library</li>
+        </ol>
+      </div><!-- /.col -->
+    </div><!-- /.row -->
+  </div><!-- /.container-fluid -->
+</div>
+<div class="content">
+  <div class="container">
+    <div class="card card-success">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-12 col-lg-6 col-xl-6">
+            <div class="card mb-2">
+              <img class="card-img-top" src="{% static 'img/techniques_banner.png' %}" alt="Techniques banner">
+              <div class="card-img-overlay d-flex flex-column">
+                <h3 class="text-light align-text-bottom"><b>Techniques</b></h3><br>
+                <a href="{% url 'techniques' %}" class="mt-auto text-black btn btn-light"><b>Go to techniques page</b></a>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-12 col-lg-6 col-xl-6">
+            <div class="card mb-2">
+              <img class="card-img-top" src="{% static 'img/series_banner.png' %}" alt="Series banner">
+              <div class="card-img-overlay d-flex flex-column">
+                <h3 class="text-light align-text-bottom"><b>Kata Series</b></h3><br>
+                <a href="{% url 'series' %}" class="mt-auto text-black btn btn-light"><b>Go to series page</b></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /.content -->
+{% endblock %}

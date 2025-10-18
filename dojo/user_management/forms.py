@@ -1,15 +1,16 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
-from config.widgets import CustomSwitchWidget, CustomDatePickerWidget
-from config.config_vars import regulations, informed_consent
+from utils.widgets import CustomSwitchWidget, CustomDateTimePickerWidget
+from utils.config_vars import regulations, informed_consent
 from .models import User, Category
 
 
 class UserRegisterForm(forms.ModelForm):
     birth_date = forms.DateField(
-        widget=CustomDatePickerWidget(
+        widget=CustomDateTimePickerWidget(
             label_text="Birth Date",
+            picker_type="date"
         ),
         required=True
     )
@@ -84,8 +85,9 @@ class UserRegisterForm(forms.ModelForm):
         required=True
     )
     date_joined = forms.DateField(
-        widget=CustomDatePickerWidget(
+        widget=CustomDateTimePickerWidget(
             label_text="Date joined",
+            picker_type="date"
         ),
         required=True
     )
@@ -178,9 +180,7 @@ class UserRegisterForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        # Establecer la contraseña usando set_password para encriptarla
         user.set_password(self.cleaned_data["password1"])
-        user.category = Category.ESTUDIANTE
         if commit:
             user.save()
         return user
@@ -188,8 +188,9 @@ class UserRegisterForm(forms.ModelForm):
 
 class UserUpdateForm(forms.ModelForm):
     birth_date = forms.DateField(
-        widget=CustomDatePickerWidget(),
-        input_formats=['%m/%d/%Y'],
+        widget=CustomDateTimePickerWidget(
+            picker_type="date"
+        ),
         required=False
     )
     country = forms.CharField(
@@ -214,24 +215,31 @@ class UserUpdateForm(forms.ModelForm):
     physical_limit = forms.BooleanField(required=False)
     lost_cons = forms.BooleanField(required=False)
     date_joined = forms.DateField(
-        widget=CustomDatePickerWidget(
+        widget=CustomDateTimePickerWidget(
             label_text="Date joined",
+            picker_type="date"
         ),
         required=True
     )
-
 
     class Meta:
         model = User
         fields = [
             'first_name', 'last_name', 'category', 'id_type', 'id_number', 'birth_date', 'birth_place', 'profession',
-            'eps', 'date_joined', 'phone_number', 'address', 'city', 'country', 'email', 'level', 'parent', 'parent_phone_number',
+            'eps', 'date_joined', 'phone_number', 'address', 'city', 'country', 'email', 'level', 'parent',
+            'parent_phone_number',
             'medical_cond', 'drug_cons', 'allergies', 'other_activities', 'cardio_prob', 'injuries', 'physical_limit',
             'lost_cons'
         ]
 
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
+
+        if self.request and self.request.user.is_authenticated:
+            user_category = getattr(self.request.user, 'category', None)
+            if user_category != Category.SENSEI:
+                self.fields.pop('level', None)
 
         if self.instance and self.instance.pk:
             country_code = self.instance.country

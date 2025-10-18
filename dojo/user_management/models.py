@@ -1,16 +1,12 @@
-import base64
 import uuid
 from datetime import datetime, timedelta
-from io import BytesIO
-from PIL import Image
 from django.utils import timezone
 from django.utils.timezone import now
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.http import HttpResponseForbidden
 
-from config.config_vars import Ranges
+from utils.config_vars import Ranges
 
 
 class IDType(models.TextChoices):
@@ -24,7 +20,7 @@ class IDType(models.TextChoices):
 class Category(models.TextChoices):
     SENSEI = 'SE', 'Sensei'
     SEMPAI = 'SP', 'Sempai'
-    ESTUDIANTE = 'ST', 'Student'
+    STUDENT = 'ST', 'Student'
 
 
 class MedicalConditions(models.TextChoices):
@@ -58,7 +54,8 @@ class UserManager(BaseUserManager):
         if not id_number:
             raise ValueError('The ID number field must be set')
 
-        user = self.model(id_number=id_number, **extra_fields)
+        category = extra_fields.pop("category", Category.STUDENT)
+        user = self.model(id_number=id_number, category=category, **extra_fields)
         user.set_password(password)  # Establece la contraseña de manera segura
         user.save(using=self._db)  # Guarda el usuario en la base de datos
         return user
@@ -71,10 +68,10 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
 
         # Verificar que las propiedades esenciales para el superusuario estén establecidas
-        if extra_fields.get('is_staff') is not True:
+        if not extra_fields.get('is_staff'):
             raise ValueError('Superuser must have is_staff=True')
 
-        if extra_fields.get('is_superuser') is not True:
+        if not extra_fields.get('is_superuser'):
             raise ValueError('Superuser must have is_superuser=True')
 
         # Crear un superusuario usando el método `create_user`
@@ -90,15 +87,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     category = models.CharField(
         choices=Category.choices,
-        default=Category.ESTUDIANTE
+        default=Category.STUDENT
     )
-    id_number = models.CharField(max_length=30, unique=True, null=False, blank=False)
+    id_number = models.CharField(max_length=30, unique=True, null=False, blank=False, default=0)
     birth_date = models.DateField(default=datetime(2000, 1, 1), null=False, blank=False)
     birth_place = models.CharField(max_length=30, default='')
     gender = models.CharField(choices=Genders.choices, default=Genders.MALE)
     profession = models.CharField(max_length=30, default='')
     eps = models.CharField(max_length=50, default='')
-    phone_number = models.CharField(max_length=15, null=False, blank=False)
+    phone_number = models.CharField(max_length=15, null=False, blank=False, default=0)
     address = models.CharField(max_length=255, default='')
     city = models.CharField(max_length=30, default='')
     country = models.CharField(max_length=30, default='')
@@ -121,7 +118,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     sec_recom = models.BooleanField(default=False)
     # I have read, understand the questions, completed and answered the questionnaire with my acceptance?
     agreement = models.BooleanField(default=False)
-    date_joined = models.DateTimeField(default=timezone.now, editable=True)
+    date_joined = models.DateField(default=timezone.now, editable=True)
     date_deactivated = models.DateTimeField(null=True)
     date_reactivated = models.DateTimeField(null=True)
     payment = models.IntegerField(default=0)
@@ -139,16 +136,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
-
-    # def save_picture(self, image_file):
-    #     """Convert the image to Base64 and save it."""
-    #     buffer = BytesIO()
-    #     image = Image.open(image_file)
-    #     image.save(buffer, format=image.format)  # Preserve original format
-    #     buffer.seek(0)
-    #     encoded_image = base64.b64encode(buffer.read()).decode('utf-8')
-    #     self.picture = encoded_image
-    #     self.save()
 
 
 class TokenType(models.TextChoices):
@@ -178,7 +165,7 @@ class Token(models.Model):
             token=token_str,
             user=user,
             type=token_type,
-            expires_at=now() + timedelta(hours=hours_valid)
+            expires_at=timezone.now() + timedelta(hours=hours_valid)
         )
 
     def is_valid(self):

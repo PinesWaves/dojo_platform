@@ -14,7 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path, include
+from django.urls import path
 
 from dashboard.views import (
     StudentDashboard,
@@ -23,15 +23,25 @@ from dashboard.views import (
     ManageTrainings,
     ManageTechniques,
     ManageStudents,
-    ManageProfile
+    ManageProfile,
+    Library,
+    Techniques,
+    KataSeries,
+    KataDetail,
+    KataLessonDetail,
 )
 
 urlpatterns = [
     path('', SenseiDashboard.as_view(), name='sensei_dashboard'),
-    path('student/', StudentDashboard.as_view(), name='student_dashboard'),
-    path('student/profile/', StudentProfile.as_view(), name='profile'),
     path('manage_trainings/', ManageTrainings.as_view(), name='manage_trainings'),
     path('manage_techniques/', ManageTechniques.as_view(), name='manage_techniques'),
     path('manage_students/', ManageStudents.as_view(), name='manage_students'),
     path('manage_profile/<int:pk>/', ManageProfile.as_view(), name='manage_profile'),
+    path('student/', StudentDashboard.as_view(), name='student_dashboard'),
+    path('student/profile/', StudentProfile.as_view(), name='profile'),
+    path('library/', Library.as_view(), name='library'),
+    path('library/techniques/', Techniques.as_view(), name='techniques'),
+    path('library/series/', KataSeries.as_view(), name='series'),
+    path('library/kata/<int:pk>/', KataDetail.as_view(), name='kata_detail'),
+    path('library/kata/lesson/<int:pk>/', KataLessonDetail.as_view(), name='kata_lesson_detail'),
 ]

@@ -1,34 +1,28 @@
 import logging
-from datetime import datetime
 from pathlib import Path
 
-import math
 from django.contrib import messages
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.contrib.auth.views import LoginView, LogoutView
-from django.core.mail import send_mail, EmailMultiAlternatives
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.views import LogoutView
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.templatetags.static import static
 from django.urls import reverse_lazy, reverse
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.utils.encoding import force_bytes, force_str
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils import timezone
 from django.views import View
-from django.views.generic import CreateView, UpdateView, DeleteView, TemplateView, FormView
-from django.shortcuts import get_object_or_404, render
+from django.views.generic import FormView
+from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 
 from dojo import settings
-from .forms import UserRegisterForm, UserUpdateForm, ForgotPassForm, RecoverPassForm
+from .forms import UserRegisterForm, ForgotPassForm, RecoverPassForm
 from .models import Category, Token, TokenType
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
 # Vista de login
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
-from django.urls import reverse_lazy
+
 from django.http import HttpResponse
 
 
@@ -40,9 +34,9 @@ class CustomLoginView(View):
         # error = request.session.pop('errors', None)
         # msg = request.session.pop('msg', None)
         if user.is_authenticated:  # Redirige si ya está autenticado
-            if user.is_superuser or user.category == Category.SENSEI:
+            if user.is_superuser or user.category in (Category.SENSEI, Category.SEMPAI):
                 return redirect(reverse_lazy('sensei_dashboard'))  # Redirigir al dashboard del sensei
-            elif user.category == Category.ESTUDIANTE:
+            elif user.category == Category.STUDENT:
                 return redirect(reverse_lazy('student_dashboard'))  # Redirigir al dashboard del estudiante
         return render(request, self.template_name) #, {'errors': error, 'msg': msg})
 
@@ -51,19 +45,28 @@ class CustomLoginView(View):
         password = request.POST.get('password')
 
         user = authenticate(request, id_number=id_number, password=password)
-
         if user:
             if not user.is_active:
                 messages.error(request, "Your account is deactivated. Please contact support.")
                 return redirect(reverse_lazy('login'))
 
             # Si las credenciales son válidas, iniciar sesión
+            login(request, user)
             messages.success(request, "Login successful!")
 
-            login(request, user)
-            if user.is_superuser or user.category == Category.SENSEI:
+            # --- Check for the 'next' URL from the form submission ---
+            next_url = request.POST.get('next')
+
+            # Use Django's built-in is_safe_url for robust validation
+            from django.utils.http import url_has_allowed_host_and_scheme
+
+            # Redirect to the 'next' URL if it exists and is safe
+            if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+                return redirect(next_url)
+
+            if user.is_superuser or user.category in (Category.SENSEI, Category.SEMPAI):
                 return redirect(reverse_lazy('sensei_dashboard'))
-            elif user.category == Category.ESTUDIANTE:
+            elif user.category == Category.STUDENT:
                 return redirect(reverse_lazy('student_dashboard'))
             else:
                 return redirect(reverse_lazy('login'))
@@ -83,6 +86,7 @@ class CustomLogoutView(LogoutView):
         messages.success(request, "You have been logged out successfully.")
 
         return response
+
 
 # Vista de Registro
 class RegisterView(FormView):
@@ -169,7 +173,7 @@ class ForgotPass(FormView):
                 {
                     'dojo_logo_url': dojo_logo_url,
                     'reset_link': reset_link,
-                    'current_year': datetime.now().year,
+                    'current_year': timezone.now().year,
                 }
             )
 
@@ -195,38 +199,41 @@ class ForgotPass(FormView):
         except User.DoesNotExist:
             messages.error(self.request, "No user found with that email address.")
             return redirect('forgot-password')
-        # return super().form_valid(form)
 
 
 # Vista de Recuperación de Contraseña
-class RecoverPass(TemplateView):
+class RecoverPass(FormView):
     template_name = 'login_register/recover-password.html'
     form_class = RecoverPassForm
     success_url = reverse_lazy('login')
 
     def dispatch(self, request, *args, **kwargs):
-        self.uidb64 = kwargs.get('uidb64')
-        self.token = kwargs.get('token')
+        self.token_str = kwargs.get('token')
         return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['token'] = self.token_str
+        return context
 
     def form_valid(self, form):
         try:
-            uid = force_str(urlsafe_base64_decode(self.uidb64))
-            user = User.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            user = None
+            token = Token.objects.get(token=self.token_str, type=TokenType.PASSWORD_RESET)
+            if not token.is_valid():
+                messages.error(self.request, "The reset link is invalid or expired.")
+                return redirect('forgot-password')
 
-        token_generator = PasswordResetTokenGenerator()
-        if user is not None and token_generator.check_token(user, self.token):
+            user = token.user
             user.set_password(form.cleaned_data['password1'])
             user.save()
+            token.delete()
             messages.success(self.request, "Your password has been reset successfully.")
-            return super().form_valid(form)
-        else:
+            return redirect(self.success_url)
+
+        except Token.DoesNotExist:
             messages.error(self.request, "The reset link is invalid or expired.")
             return redirect('forgot-password')
 
     def form_invalid(self, form):
-        self.request.session['errors'] = form.errors
-        self.request.session['msg'] = "Update failed!"
+        messages.error(self.request, "Update failed! Please check the form.")
         return self.render_to_response(self.get_context_data(form=form))

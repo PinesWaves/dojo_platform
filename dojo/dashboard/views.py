@@ -1,23 +1,24 @@
-import base64
-from datetime import datetime, timezone, timedelta
-from io import BytesIO
+from datetime import datetime, timedelta
 from secrets import token_urlsafe
 
-import qrcode
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.views.generic import TemplateView
+from django.utils import timezone
 import logging
 
-from dashboard.models import Training, Dojo, Technique, TechniqueCategory, TrainingStatus
+from dashboard.forms import TrainingSchedulingForm, TrainingForm
+from dashboard.models import Training, Dojo, Technique, TrainingStatus, KataSerie, Kata, KataLesson, \
+    TrainingScheduling
 from dojo.mixins.view_mixins import AdminRequiredMixin
 from user_management.models import User, Token, Category, TokenType
 from user_management.forms import UserUpdateForm
+from utils.utils import get_qr_base64
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +28,17 @@ class SenseiDashboard(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         user_cat = request.user.category
-        if user_cat != Category.SENSEI:
+        if not (user_cat in (Category.SENSEI, Category.SEMPAI)):
             return redirect('student_dashboard')
-        trainings = Training.objects.all().order_by('-date')[:6]
+        today = timezone.now().date()
+        trainings = Training.objects.prefetch_related(
+            'attendances', 'techniques'
+        ).filter(
+            date__range=(
+                today - timedelta(days=1),
+                today + timedelta(days=6)
+            )
+        ).order_by('date')
         ctx = {
             "trainings": trainings,
         }
@@ -39,77 +48,128 @@ class SenseiDashboard(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
 class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
     template_name = "dashboard/sensei/manage_trainings.html"
 
-    def get(self, request, *args, **kwargs):
-        trainings = Training.objects.all()
-        now = datetime.now(timezone.utc)
-        for t in trainings:
-            if now > t.date + timedelta(hours=2) and t.status:
-                t.status = TrainingStatus.FINALIZADO
-                if t.qr_image:
-                    t.qr_image.delete(save=False)
-                    t.qr_image = None
-                t.training_code = ''
-                t.save()
-        techniques = Technique.objects.all()
-        ctx = {
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        trainings = Training.objects.prefetch_related('attendances', 'techniques').all()
+        training_form = TrainingForm()
+        scheduling_form = TrainingSchedulingForm()
+        schedules = TrainingScheduling.objects.all()
+        context.update({
             "trainings": trainings,
-            "techniques": techniques,
-        }
+            "training_form": training_form,
+            "schedules": schedules,
+            "scheduling_form": scheduling_form,
+        })
+        return context
+
+    def get(self, request, *args, **kwargs):
+        now = timezone.now()
+
+        # Efficiently update expired trainings
+        trainings_to_update = Training.objects.filter(
+            date__lt=now - timedelta(hours=2),
+            status=TrainingStatus.SCHEDULED
+        )
+
+        trainings_to_update.update(
+            status=TrainingStatus.FINISHED,
+        )
+
+        ctx = self.get_context_data()
         return render(request, self.template_name, context=ctx)
 
     def post(self, request, *args, **kwargs):
-        try:
-            training_date = request.POST.get('training_date')
-            if not training_date:
-                raise ValidationError("Training date is required.")
+        if request.POST.get('action') == 'schedule':
+            form = TrainingSchedulingForm(request.POST)
+            if form.is_valid():
+                form.save()
+                self.request.session['msg'] = "Schedule created successfully!"
+            else:
+                self.request.session['errors'] = form.errors
+                self.request.session['msg'] = "Failed to create schedule!"
 
+        elif schedule_id := request.POST.get('delete_schedule'):
             try:
-                # Ensure date is in the correct format
-                training_date = datetime.strptime(training_date, '%m/%d/%Y %I:%M %p')
-            except ValueError:
-                raise ValidationError("Invalid date format. Use MM/DD/YYYY HH:MM AM/PM.")
+                schedule = TrainingScheduling.objects.get(id=schedule_id)
+                schedule.delete()
+                self.request.session['msg'] = "Schedule deleted successfully!"
+            except TrainingScheduling.DoesNotExist:
+                self.request.session['errors'] = "Schedule not found."
+                self.request.session['msg'] = "Failed to delete schedule!"
 
-            # Validate `training_status`
-            training_status = request.POST.get('training_status')
-            if training_status not in [TrainingStatus.AGENDADO, TrainingStatus.FINALIZADO, TrainingStatus.CANCELADO]:
-                raise ValidationError("Invalid training status value.")
+        elif request.POST.get('run_scheduling'):
+            schedules = TrainingScheduling.objects.all()
+            today = timezone.now().date()
+            end_of_year = today.replace(month=12, day=31)
+            for schedule in schedules:
+                try:
+                    init_date = get_next_closest_day(today, schedule.day_of_week)
+                    schedule_dates = []
+                    while init_date <= end_of_year:
+                        if init_date.weekday() == schedule.day_of_week:
+                            schedule_dates.append(
+                                datetime.combine(init_date, schedule.time)
+                            )
+                        init_date += timedelta(days=7)
 
-            training_techniques = request.POST.getlist('training_techniques')
+                    # Filter out dates that already have a training scheduled
+                    existing_trainings = Training.objects.filter(
+                        date__in=schedule_dates
+                    ).values_list('date', flat=True)
+                    trainings = [Training(date=d) for d in schedule_dates if d not in existing_trainings]
+                    Training.objects.bulk_create(trainings)
 
-            train = Training(
-                date=training_date,
-                status=training_status,
-            )
-            train.save()
-            for tc_id in training_techniques:
-                technique = Technique.objects.get(pk=tc_id)
-                train.techniques.add(technique)
-            train.save()
-        except ValidationError as e:
-            return JsonResponse({'errors': str(e)}, status=400)
-        except Technique.DoesNotExist:
-            return JsonResponse({'errors': 'One or more selected techniques do not exist.'}, status=400)
-        except Exception as e:
-            return JsonResponse({'errors': 'An unexpected errors occurred.'}, status=500)
+                except ValidationError as e:
+                    logger.error(f"Failed to create training from schedule {schedule.id}: {e}")
+                    continue  # Skip invalid schedules
 
-        trainings = Training.objects.filter(status=True)
-        techniques = Technique.objects.all()
-        ctx = {
-            "trainings": trainings,
-            "techniques": techniques,
-        }
+            self.request.session['msg'] = f"{created_count} trainings created from schedules."
+
+        elif request.POST.get('action') == 'new_training':
+            # Handle new training creation
+            form = TrainingForm(request.POST)
+            if form.is_valid():
+                form.save()
+                self.request.session['errors'] = None
+                self.request.session['msg'] = "Training created successfully!"
+            else:
+                self.request.session['errors'] = form.errors
+                self.request.session['msg'] = "Failed to create training!"
+
+        elif request.POST.get('action') == 'update_training':
+            training_id = request.POST.get('training_id')
+            training = get_object_or_404(Training, id=training_id)
+            form = TrainingForm(request.POST, instance=training)
+            if form.is_valid():
+                form.save()
+                self.request.session['errors'] = None
+                self.request.session['msg'] = "Training updated successfully!"
+            else:
+                self.request.session['errors'] = form.errors
+                self.request.session['msg'] = "Failed to update training!"
+
+        elif training_id := request.POST.get('delete_training'):
+            try:
+                training = Training.objects.get(id=training_id)
+                training.delete()
+                self.request.session['msg'] = "Training deleted successfully!"
+            except Training.DoesNotExist:
+                self.request.session['errors'] = "Training not found."
+                self.request.session['msg'] = "Failed to delete training!"
+
+        ctx = self.get_context_data()
         return render(request, self.template_name, context=ctx)
 
 
 class ManageTechniques(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
-    template_name = "dashboard/sensei/manage_techniques.html"
+    template_name = "dashboard/sensei/../templates/dashboard/student/learning/manage_techniques.html"
 
     def get(self, request, *args, **kwargs):
         techniques = Technique.objects.all()
-        categories = TechniqueCategory.choices
+        # categories = TechniqueCategory.choices
         ctx = {
             "techniques": techniques,
-            "categories": categories,
+            # "categories": categories,
         }
         return render(request, self.template_name, context=ctx)
 
@@ -117,11 +177,11 @@ class ManageTechniques(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         name = request.POST.get('technique_name')
         image = request.FILES.get('technique_image')
         category = request.POST.get('technique_category')
-        if not name or category not in dict(TechniqueCategory.choices):
-            return render(request, self.template_name, {
-                'errors': 'Invalid data submitted.',
-                'technique_categories': TechniqueCategory.choices
-            })
+        # if not name or category not in dict(TechniqueCategory.choices):
+        #     return render(request, self.template_name, {
+        #         'errors': 'Invalid data submitted.',
+        #         'technique_categories': TechniqueCategory.choices
+        #     })
 
         Technique.objects.create(
             name=name,
@@ -130,10 +190,10 @@ class ManageTechniques(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         )
 
         techniques = Technique.objects.all()
-        categories = TechniqueCategory.choices
+        # categories = TechniqueCategory.choices
         ctx = {
             "techniques": techniques,
-            "categories": categories,
+            # "categories": categories,
         }
         return render(request, self.template_name, context=ctx)
 
@@ -146,8 +206,8 @@ class ManageStudents(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         call_command('cleanup_expired_tokens', verbosity=0)
         sensei = request.user
         #TODO: how to deal with a sensei with more than one dojo?
-        dojo = Dojo.objects.filter(sensei=sensei).first()
-        self.ctx['students'] = User.objects.filter(category=Category.ESTUDIANTE) # dojo.students.all() if dojo else []
+        dojo = Dojo.objects.prefetch_related('students').filter(sensei=sensei).first()
+        self.ctx['students'] = User.objects.filter(category=Category.STUDENT) # dojo.students.all() if dojo else []
         self.ctx['time_url'] = [
             (t.expires_at, reverse('signup', kwargs={'token': t.token}))
             for t in Token.objects.all()
@@ -167,7 +227,7 @@ class ManageStudents(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
             Token.objects.create(
                 token=register_code,
                 type=TokenType.SIGNUP,
-                created_at=datetime.now(timezone.utc),
+                created_at=timezone.now(),
                 expires_at=expiration_datetime
             )
 
@@ -194,12 +254,12 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
         student = get_object_or_404(User, pk=pk)
-        form = UserUpdateForm(instance=student)
-        qr_code = generate_qr_code(student.id_number)
+        form = UserUpdateForm(instance=student, request=request)
+        qr_code = get_qr_base64(student.id_number)
         ctx = {
             'form': form,
             'student': student,
-            'qr_code': f"data:image/png;base64,{qr_code}",
+            'qr_code': qr_code,
         }
         return render(request, self.template_name, context=ctx)
 
@@ -211,13 +271,13 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
             # Handle the switch action
             if student.is_active:
                 student.is_active = False
-                student.date_deactivated = datetime.now()
+                student.date_deactivated = timezone.now()
                 student.date_reactivated = None
                 student.save()
                 self.request.session['msg'] = "User deactivated successfully!"
             else:
                 student.is_active = True
-                student.date_reactivated = datetime.now()
+                student.date_reactivated = timezone.now()
                 student.date_deactivated = None
                 student.save()
                 self.request.session['msg'] = "User activated successfully!"
@@ -234,14 +294,14 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
             uploaded_file = self.request.FILES['picture']
             ext = uploaded_file.name.rsplit('.')[-1]
             student.picture.save(f'{pk}.{ext}', self.request.FILES['picture'], save=True)
-            form = UserUpdateForm(self.request.POST, self.request.FILES, instance=student)
+            form = UserUpdateForm(self.request.POST, self.request.FILES, instance=student, request=request)
             ctx = {
                 'form': form,
                 'student': student,
             }
             return render(request, self.template_name, context=ctx)
         else:
-            form = UserUpdateForm(request.POST, instance=student)
+            form = UserUpdateForm(request.POST, instance=student, request=request)
 
             if form.is_valid():
                 return self.form_valid(form)
@@ -265,11 +325,14 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
+######################################### STUDENT VIEWS #########################################
+
+
 class StudentDashboard(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/student/dashboard.html"
 
     def get(self, request, *args, **kwargs):
-        trainings = Training.objects.all().order_by('-date')[:6]
+        trainings = Training.objects.prefetch_related('attendances', 'techniques').order_by('-date')[:6]
         pk = request.user.pk
         student = get_object_or_404(User, pk=pk)
         ctx = {
@@ -284,69 +347,131 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/student/profile.html"
 
     def get(self, request, *args, **kwargs):
-        pk = request.user.pk
-        student = get_object_or_404(User, pk=pk)
-        form = UserUpdateForm(instance=student)
-        qr_code = generate_qr_code(student.id_number)
+        student = request.user
+        form = UserUpdateForm(instance=student, request=request)
+        qr_code = get_qr_base64(student.id_number)
         ctx = {
             'form': form,
             'student': student,
-            'qr_code': f"data:image/png;base64,{qr_code}",
+            'qr_code': qr_code,
         }
         return render(request, self.template_name, context=ctx)
 
     def post(self, request, *args, **kwargs):
-        pk = request.user.pk
-        student = get_object_or_404(User, pk=pk)
-        form = UserUpdateForm(request.POST, request.FILES, instance=student)
-        if request.FILES.get('picture'):
+        student = request.user
+        if 'picture' in request.FILES:
+            uploaded_file = request.FILES['picture']
+            ext = uploaded_file.name.rsplit('.')[-1]
+
             if student.picture:
                 student.picture.delete(save=False)
 
-            uploaded_file = request.FILES['picture']
-            ext = uploaded_file.name.rsplit('.')[-1]
-            student.picture.save(f'{pk}.{ext}', request.FILES['picture'], save=True)
-            ctx = {
-                'form': form,
-                'student': student,
-            }
-            return render(request, self.template_name, context=ctx)
+            student.picture.save(f'{student.pk}.{ext}', uploaded_file, save=True)
+
+            messages.success(request, "Picture updated correctly.")
+            return redirect('profile')
+
+        form = UserUpdateForm(request.POST, request.FILES, instance=student, request=request)
         if form.is_valid():
-            return self.form_invalid(form, request)
-            # return self.form_valid(form)
+            return self.form_valid(form)
         else:
-            return self.form_invalid(form, request)
-            # return render(request, self.template_name, context=ctx)
+            return self.form_invalid(form)
 
     def form_valid(self, form):
-        # Process the form
         form.save()
-        self.request.session['errors'] = None
-        self.request.session['msg'] = "Update successful!"
+        messages.success(self.request, "Profile updated correctly.")
         return redirect('profile')
 
-    def form_invalid(self, form, request):
-        request.session['errors'] = form.errors
-        request.session['msg'] = "Update failed!"
-        # ctx = {
-        #     'form': form,
-        #     'student': student,
-        # }
-        return redirect('profile')
+    def form_invalid(self, form):
+        qr_code = get_qr_base64(self.request.user.id_number)
+        context = {
+            'form': form,
+            'student': self.request.user,
+            'qr_code': qr_code,
+        }
+        messages.error(self.request, "There were errors updating the profile.")
+        return render(self.request, self.template_name, context)
 
 
-def generate_qr_code(data):
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=10,
-        border=3,
-    )
-    qr.add_data(data)
-    qr.make(fit=True)
+class Library(TemplateView):
+    template_name = "dashboard/student/learning/library.html"
 
-    img = qr.make_image(fill_color="black", back_color="white")
-    buffered = BytesIO()
-    img.save(buffered, format="PNG")
-    img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
-    return img_str
+    def get(self, request, *args, **kwargs):
+        series = KataSerie.objects.prefetch_related('katas').all()
+        techniques = Technique.objects.all()
+        ctx = {
+            'series': series,
+            'techniques': techniques,
+        }
+        if request.user.is_authenticated:
+            pk = request.user.pk
+            student = get_object_or_404(User, pk=pk)
+            ctx['student'] = student
+
+        return render(request, self.template_name, context=ctx)
+
+
+class Techniques(TemplateView):
+    template_name = "dashboard/student/learning/techniques.html"
+
+    def get(self, request, *args, **kwargs):
+        techniques = Technique.objects.all()
+        ctx = {
+            'techniques': techniques,
+        }
+        if request.user.is_authenticated:
+            pk = request.user.pk
+            student = get_object_or_404(User, pk=pk)
+            ctx['student'] = student
+
+        return render(request, self.template_name, context=ctx)
+
+
+class KataSeries(TemplateView):
+    template_name = "dashboard/student/learning/kata_series.html"
+
+    def get(self, request, *args, **kwargs):
+        series = KataSerie.objects.prefetch_related('katas').all()
+        ctx = {
+            'series': series,
+        }
+        if request.user.is_authenticated:
+            pk = request.user.pk
+            student = get_object_or_404(User, pk=pk)
+            ctx['student'] = student
+
+        return render(request, self.template_name, context=ctx)
+
+
+class KataDetail(TemplateView):
+    template_name = "dashboard/student/learning/kata_detail.html"
+
+    def get(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        kata = get_object_or_404(Kata.objects.prefetch_related('lessons'), pk=pk)
+        ctx = {
+            'kata': kata,
+        }
+        if request.user.is_authenticated:
+            pk = request.user.pk
+            student = get_object_or_404(User, pk=pk)
+            ctx['student'] = student
+
+        return render(request, self.template_name, context=ctx)
+
+
+class KataLessonDetail(TemplateView):
+    template_name = "dashboard/student/learning/kata_lesson_detail.html"
+
+    def get(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        lesson = get_object_or_404(KataLesson.objects.prefetch_related('activities'), pk=pk)
+        ctx = {
+            'lesson': lesson,
+        }
+        if request.user.is_authenticated:
+            pk = request.user.pk
+            student = get_object_or_404(User, pk=pk)
+            ctx['student'] = student
+
+        return render(request, self.template_name, context=ctx)

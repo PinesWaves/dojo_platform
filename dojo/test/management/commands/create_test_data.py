@@ -1,17 +1,16 @@
+import calendar
+import random
 from datetime import datetime, timedelta
+
+from django.apps import apps
 from django.core.management.base import BaseCommand
-from django.db import connection
+from django.db import connection, transaction
 from faker import Faker
-import logging
 
 from user_management.models import User, Category
-from config.config_vars import Ranges
-from dashboard.models import Dojo, Training, Technique, TrainingStatus
+from utils.config_vars import Ranges
+from dashboard.models import Dojo, Training, Technique, TrainingStatus, TrainingType, Attendance
 from django.utils import timezone
-
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -30,31 +29,30 @@ class Command(BaseCommand):
         self.load_testing_data()
 
     def load_testing_data(self):
-        logger.info('Reset DB from testing data')
         self.stdout.write('Reset DB from testing data')
-        Training.objects.all().delete()
-        Dojo.objects.all().delete()
-        Technique.objects.all().delete()
-        User.objects.all().delete()
+        # Training.objects.all().delete()
+        # Dojo.objects.all().delete()
+        # Technique.objects.all().delete()
+        # User.objects.all().delete()
+        #
+        # # Reset primary key sequences
+        # with connection.cursor() as cursor:
+        #     cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_training', 'id'), 1, false);")
+        #     cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_dojo', 'id'), 1, false);")
+        #     cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_technique', 'id'), 1, false);")
+        #     cursor.execute("SELECT setval(pg_get_serial_sequence('user_management_user', 'id'), 1, false);")
 
-        # Reset primary key sequences
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_training', 'id'), 1, false);")
-            cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_dojo', 'id'), 1, false);")
-            cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_technique', 'id'), 1, false);")
-            cursor.execute("SELECT setval(pg_get_serial_sequence('user_management_user', 'id'), 1, false);")
+        self.truncate_all_tables_and_reset_sequences()
 
-        logger.info('Loading testing data')
         self.load_users()
         self.load_techniques()
         self.load_dojos()
         self.load_trainings()
-        logger.info(self.style.SUCCESS('Testing dataset loaded successfully'))
-        self.stdout.write(self.style.SUCCESS('Testing dataset loaded successfully'))
+        self.load_attendances()
+        self.stdout.write(self.style.SUCCESS(f'✅  Testing dataset loaded successfully'))
 
     def load_users(self):
         # Create 90 students with random data
-        logger.info('Loading users')
         self.stdout.write('Loading users')
         users = []
         for i in range(90):
@@ -88,7 +86,7 @@ class Command(BaseCommand):
                 'physical_cond': 'A',
                 'sec_recom': True,
                 'agreement': True,
-                'date_joined': datetime.now(),
+                'date_joined': timezone.now(),
                 'payment': self.fake.random_int(min=0, max=1000),
                 'payment_status': self.fake.boolean(),
                 'is_active': True if i < 80 else False,  # Last 10 users are inactive
@@ -97,12 +95,10 @@ class Command(BaseCommand):
             })
 
         # Create users in the database
-        logger.info('Creating users in the database')
         self.stdout.write('Creating users in the database')
         User.objects.bulk_create([User(**row) for row in users])
 
         # Following users are created for testing purposes
-        logger.info('Creating specific users for testing')
         self.stdout.write('Creating specific users for testing')
         # Create a superuser
         User.objects.create_superuser(
@@ -158,9 +154,10 @@ class Command(BaseCommand):
             password = 'rosales3'
         )
 
+        self.stdout.write(self.style.SUCCESS(f"✅  Users loaded successfully."))
+
     def load_techniques(self):
         # Create Techniques
-        logger.info('Loading techniques')
         self.stdout.write('Loading techniques')
         techniques = []
         tcs_list = [
@@ -179,15 +176,16 @@ class Command(BaseCommand):
         for i in range(11):
             techniques.append({
                 'name': tcs_list[i],
-                'category': 'K'
+                'type': 'KI'
             })
         
         for row in techniques:
             Technique.objects.create(**row)
 
+        self.stdout.write(self.style.SUCCESS(f"✅  Techniques loaded successfully."))
+
     def load_dojos(self):
         # Create 3 Dojos
-        logger.info('Loading dojos')
         self.stdout.write('Loading dojos')
         dojos = []
         for i in range(3):
@@ -202,23 +200,138 @@ class Command(BaseCommand):
             })
 
         Dojo.objects.bulk_create([Dojo(**row) for row in dojos])
+        self.stdout.write(self.style.SUCCESS(f"✅  Dojos loaded successfully."))
+
 
     def load_trainings(self):
-        logger.info('Loading trainings')
-        self.stdout.write('Loading trainings')
-        # Create 10 Training sessions with different statuses
-        today = datetime.now().date()
-        for i in range(1, 11):
-            for j in range(2):
-                tr = Training(
-                    date=timezone.make_aware(
-                        datetime(today.year, today.month, today.day, 17, 0) - timedelta(days=i - 1)
-                        if j == 0
-                        else datetime(today.year, today.month, today.day, 19, 0) - timedelta(days=i - 1)
-                    ),
-                    status=TrainingStatus.AGENDADO if i == 1 else TrainingStatus.CANCELADO if i == 2 else TrainingStatus.FINALIZADO,
-                    location='Seishin Dojo'
+        """
+        Create test trainings with different statuses based on the date:
+          - Futures → SCHEDULED
+          - Currently in progress → ONGOING
+          - Past → FINISHED
+          - A percentage of past/future → CANCELED
+        """
+
+        self.stdout.write("Loading trainings...")
+        dates = get_test_training_dates()
+        now = timezone.now()
+        for d in dates:
+            end_time = d + timedelta(minutes=90)
+            if d > now:
+                status = TrainingStatus.SCHEDULED
+            elif d <= now <= end_time:
+                status = TrainingStatus.ONGOING
+            else:
+                status = TrainingStatus.FINISHED
+
+            Training.objects.create(
+                date=d,
+                type=random.choice(list(TrainingType.values)),
+                status=status,
+                details=f"Training {calendar.day_name[d.weekday()]} {d.hour:02d}:{d.minute:02d}",
+                location="Main Dojo",
+            )
+        self.stdout.write(self.style.SUCCESS(f"✅  Trainings loaded successfully."))
+
+
+    def load_attendances(self):
+        """
+        Creates test assistances:
+          - Only for training sessions that are not cancelled.
+          - Marks some students as present, and others absent.
+        """
+
+        self.stdout.write("Loading attendances...")
+
+        # Filtrar entrenamientos válidos
+        trainings = Training.objects.exclude(status=TrainingStatus.CANCELED)
+
+        # Tomar todos los estudiantes registrados
+        students = User.objects.filter(category=Category.STUDENT)
+
+        if not students.exists():
+            self.stdout.write(self.style.WARNING("No students to register attendance."))
+            return
+
+        for training in trainings:
+            # Seleccionar aleatoriamente quién asistió
+            attending_students = random.sample(
+                list(students), k=random.randint(0, students.count())
+            )
+
+            for student in students:
+                Attendance.objects.create(
+                    training=training,
+                    student=student,
+                    status='P' if student in attending_students else 'A',
+                    timestamp=training.date + timedelta(minutes=random.randint(0, 15)),  # Arrival time
+                    notes=''  # Optional notes
                 )
-                tr.save()
-                tr.attendants.set(User.objects.all()[:10])
-                tr.techniques.set(Technique.objects.all())
+        self.stdout.write(self.style.SUCCESS(f"✅  Assists loaded successfully."))
+
+
+    def truncate_all_tables_and_reset_sequences(self):
+        """
+        Deletes all records from all tables and resets the ID sequence counters to 1 in PostgreSQL.
+        """
+        with connection.cursor() as cursor:
+            # Disables FK restrictions temporarily
+            cursor.execute("SET session_replication_role = 'replica';")
+
+            for model in apps.get_models():
+                table = model._meta.db_table
+
+                # Deletes all data in the table
+                cursor.execute(f'TRUNCATE TABLE "{table}" RESTART IDENTITY CASCADE;')
+
+            # Restore FK restrictions
+            cursor.execute("SET session_replication_role = 'origin';")
+
+        # Confirm transaction
+        transaction.commit()
+        self.stdout.write(self.style.SUCCESS(f"✅  All tables have been truncated and sequences reset."))
+
+
+def get_test_training_dates():
+    """
+    Returns a list of datetime objects representing test training dates and times 2 weeks before and after today's date.
+    """
+    schedules = {
+        0: [(17, 0), (19, 0)],  # lunes
+        1: [(19, 0)],  # martes
+        2: [(17, 0), (19, 0)],  # miércoles
+        3: [(19, 0)],  # jueves
+        4: [(17, 0), (19, 0)],  # viernes
+        5: [(8, 0), (10, 0)],  # sábado
+    }
+
+    today = timezone.now()
+    days_before = 14
+    days_after = 14
+    dates = []
+    for i in range(-days_before, days_after + 1):
+        day = today + timedelta(days=i)
+        if day.weekday() in [0, 1, 2, 3, 4, 5]:  # Monday-Saturday
+            aware_day = timezone.make_aware(
+                datetime(
+                    day.year,
+                    day.month,
+                    day.day,
+                    schedules[day.weekday()][0][0],
+                    0,
+                )
+            )
+            dates.append(aware_day)
+            if day.weekday() in [0, 2, 4, 5]:  # Monday-Friday + Saturday
+                aware_day = timezone.make_aware(
+                    datetime(
+                        day.year,
+                        day.month,
+                        day.day,
+                        schedules[day.weekday()][1][0],
+                        0,
+                    )
+                )
+                dates.append(aware_day)
+    dates.reverse()  # Optional: earliest to latest
+    return dates

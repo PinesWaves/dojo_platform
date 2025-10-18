@@ -1,0 +1,199 @@
+katas:
+  - name: Taikyoku Shodan
+    description: Primera Kata Taikyoku. Significa Gran Principio.
+    level: beginner
+    embusen_diagram: null
+    video_reference: null
+    order: b0
+
+  - name: Heian Shodan (平安初段)
+    description: Primera Kata Heian. Significa Mente traquila.
+    level: beginner
+    embusen_diagram: null
+    video_reference: null
+    order: b1
+
+  - name: Heian Nidan (平安二段)
+    description: Segunda Kata Heian. Significa Mente traquila.
+    level: beginner
+    embusen_diagram: null
+    video_reference: null
+    order: b2
+
+  - name: Heian Sandan (平安三段)
+    description: Tercera Kata Heian. Significa Mente traquila.
+    level: beginner
+    embusen_diagram: null
+    video_reference: null
+    order: b3
+
+  - name: Heian Yondan (平安四段)
+    description: Cuarta Kata Heian. Significa Mente traquila.
+    level: beginner
+    embusen_diagram: null
+    video_reference: null
+    order: b4
+
+  - name: Heian Godan (平安五段)
+    description: Quinta Kata Heian. Significa Mente traquila.
+    level: beginner
+    embusen_diagram: null
+    video_reference: null
+    order: b5
+
+  - name: Tekki Shodan (鉄騎初段)
+    description: Caballo de hierro – Naihanchi – resguardar lo cercano.
+    level: intermediate
+    embusen_diagram: null
+    video_reference: null
+    order: i1
+
+  - name: Bassai Dai (披塞大)
+    description: Asalto a la fortaleza – Passai – reacción, extracción, retirada.
+    level: intermediate
+    embusen_diagram: null
+    video_reference: null
+    order: i2
+
+  - name: Kankū Dai (観空大)
+    description: Mirada al cielo – Kusanku – forma libro.
+    level: intermediate
+    embusen_diagram: null
+    video_reference: null
+    order: i3
+
+  - name: Enpi (燕飛)
+    description: Vuelo de Golondrina – Wanshu – kata de las proyecciones.
+    level: intermediate
+    embusen_diagram: null
+    video_reference: null
+    order: i4
+
+  - name: Jion (慈恩)
+    description: Kata del Templo 1 – búsqueda del amor fraternal.
+    level: intermediate
+    embusen_diagram: null
+    video_reference: null
+    order: i5
+
+  - name: Jitte (十手)
+    description: Diez manos – kata del templo 2 – bastón largo o «bo».
+    level: intermediate
+    embusen_diagram: null
+    video_reference: null
+    order: i6
+
+  - name: Hangetsu (半月)
+    description: Media luna – Seisan – 13 manos.
+    level: advanced
+    embusen_diagram: null
+    video_reference: null
+    order: a01
+
+  - name: Tekki Nidan (鉄騎二段)
+    description: Caballo de hierro 2.
+    level: intermediate
+    embusen_diagram: null
+    video_reference: null
+    order: i8
+
+  - name: Bassai Shō (披塞小)
+    description: Asalto a la fortaleza menor – Passai Sho – técnicas del bastón largo o bo.
+    level: advanced
+    embusen_diagram: null
+    video_reference: null
+    order: a02
+
+  - name: Kankū Shō (観空小)
+    description: Mirada al cielo menor – Bo Kanku – técnicas del bastón largo o bo.
+    level: advanced
+    embusen_diagram: null
+    video_reference: null
+    order: a03
+
+  - name: Gankaku (岩鶴)
+    description: Grulla sobre la roca – Chinto – terreno inestable.
+    level: advanced
+    embusen_diagram: null
+    video_reference: null
+    order: a04
+
+  - name: Sōchin (壯鎭)
+    description: Fuerza tranquila – Ssoshin – kata del guardián.
+    level: advanced
+    embusen_diagram: null
+    video_reference: null
+    order: a05
+
+  - name: Tekki Sandan (鉄騎三段)
+    description: Caballo de hierro 3.
+    level: advanced
+    embusen_diagram: null
+    video_reference: null
+    order: a06
+
+  - name: Chinte (珍手)
+    description: Mano preciosa, extraña – Shoin – kata nocturno.
+    level: advanced
+    embusen_diagram: null
+    video_reference: null
+    order: a07
+
+  - name: Jiin (慈陰)
+    description: Kata del templo 3.
+    level: advanced
+    embusen_diagram: null
+    video_reference: null
+    order: a08
+
+  - name: Nijūshiho (二十四歩)
+    description: 24 pasos – Niseishi.
+    level: advanced
+    embusen_diagram: null
+    video_reference: null
+    order: a09
+
+  - name: Meikyō – Rohai (明鏡)
+    description: Espejo del alma.
+    level: advanced
+    embusen_diagram: null
+    video_reference: null
+    order: a10
+
+  - name: Unsu (雲手)
+    description: Manos sobre las nubes – Unshu – manos como nubes.
+    level: advanced
+    embusen_diagram: null
+    video_reference: null
+    order: a11
+
+  - name: Wankan (王冠)
+    description: Corona del Rey – Okan, Matsukaze – viento libre entre pinos.
+    level: advanced
+    embusen_diagram: null
+    video_reference: null
+    order: a12
+
+  - name: Gojūshiho Dai (五十四歩大)
+    description: 54 pasos mayor – Useishi, Sushiho.
+    level: advanced
+    embusen_diagram: null
+    video_reference: null
+    order: a13
+
+  - name: Gojushiho Sho (五十四歩小)
+    description: 54 pasos menor – Useishi.
+    level: advanced
+    embusen_diagram: null
+    video_reference: null
+    order: a14
+
+summary:
+  description: "Estos katas tienen su origen en las interpretaciones transmitidas por distintos maestros del linaje 
+  okinawense —entre ellos Itosu, Sokon Matsamura, Azato, Chofu Kyan, Kōsaku Matsumora y Seisho Arakaki—, quienes
+  formaron parte de las tradiciones marciales del «Te» o «Tuidi». Estas escuelas dieron lugar a tres estilos
+  fundamentales del Karate clásico de Okinawa: Shuri-te, Tomari-te y Naha-te."
+  total_katas: 26
+  beginner_katas: 6
+  intermediate_katas: 7
+  advanced_katas: 14

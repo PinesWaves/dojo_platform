@@ -1,0 +1,59 @@
+katas:
+  - name: Kihon Ippon Kumite
+    description: kumite básico de un paso.
+    level: beginner
+    video_reference: null
+    order: 1
+
+  - name: Jiyu Ippon Kumite
+    description: kumite libre de un paso.
+    level: intermediate
+    video_reference: null
+    order: 2
+
+  - name: Sanbon Kumite
+    description: kumite de tres pasos.
+    level: intermediate
+    video_reference: null
+    order: 3
+
+  - name: Gohon Kumite
+    description: kumite de cinco pasos.
+    level: beginner
+    video_reference: null
+    order: 4
+
+  - name: Jiyu Kumite
+    description: kumite libre.
+    level: advanced
+    video_reference: null
+    order: 5
+
+  - name: Okuri Jiyu Ippon Kumite
+    description: kumite de un paso con desplazamiento.
+    level: advanced
+    video_reference: null
+    order: 6
+
+  - name: Kaeshi Ippon Kumite
+    description: kumite de un paso con contraataque.
+    level: advanced
+    video_reference: null
+    order: 7
+
+summary:
+  description: "Kumite (組手) significa 'mano enfrentada' o 'lucha con las manos' y se refiere a la práctica del combate
+  en el Karate. Esta sección abarca diversas formas de kumite (combate) que son esenciales para el entrenamiento en
+  karate. El kumite es una parte fundamental del karate que permite a los practicantes aplicar las técnicas aprendidas
+  en situaciones de combate controlado. Los diferentes tipos de kumite presentados aquí, desde el kumite básico de un
+  paso hasta el kumite libre, ofrecen una variedad de enfoques para desarrollar habilidades de defensa y ataque, así
+  como la capacidad de reaccionar rápidamente en situaciones de combate.
+  Estos ejercicios son cruciales para mejorar la coordinación, el timing y la estrategia en el combate de karate.
+  A medida que los practicantes avanzan en su entrenamiento, el kumite se vuelve más dinámico y desafiante, lo que
+  les permite perfeccionar sus habilidades y prepararse para situaciones de defensa personal.
+  El kumite no solo es una parte esencial del entrenamiento en karate, sino que también fomenta la disciplina,
+  el respeto y la camaradería entre los practicantes, ya que se realiza en un entorno controlado y seguro."
+  total_kumites: 7
+  beginner_kumites: 2
+  intermediate_kumites: 2
+  advanced_kumites: 2

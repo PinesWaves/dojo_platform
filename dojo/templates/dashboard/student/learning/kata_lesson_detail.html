@@ -1,0 +1,88 @@
+{% extends 'dashboard/student/dashboard.html' %}
+{% block title %}Seishin Dojo JKA | {{ lesson.title }}{% endblock %}
+{% block content %}
+<div class="content-header">
+  <div class="container py-3">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="mb-2 text-bold">{{ lesson.title }}</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item">
+            <a href="
+            {% if user.is_authenticated %}
+              {% if user.is_staff %}
+                {% url 'sensei_dashboard' %}
+              {% else %}
+                {% url 'student_dashboard' %}
+              {% endif %}
+            {% else %}
+              {% url 'landing' %}
+            {% endif %}">Home</a>
+          </li>
+          <li class="breadcrumb-item"><a href="{% url 'library' %}">Library</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'series' %}">Series</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'kata_detail' lesson.kata.id %}">{{ lesson.kata.name }}</a></li>
+          <li class="breadcrumb-item active">Lesson {{ lesson.order }}</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+  <div class="container">
+    <div class="card card-outline card-danger">
+      <div class="card-body">
+        <p><strong>Objetivos:</strong> {{ lesson.objectives }}</p>
+        <p>{{ lesson.content }}</p>
+      </div>
+    </div>
+
+    {% if lesson.activities.exists %}
+      <h5 class="mt-4">📝 Actividades</h5>
+      {% for activity in lesson.activities.all %}
+      <div class="card card-outline card-secondary mb-3">
+        <div class="card-header">
+          <strong>{{ activity.title }}</strong>
+        </div>
+        <div class="card-body">
+          <p>{{ activity.description }}</p>
+
+          {% if activity.images.exists %}
+            {% for img in activity.images.all %}
+            <div class="row justify-content-center">
+              <div class="col-md-8 mb-2 d-flex flex-column">
+                {% if img.caption %}
+                  <small class="text-muted text-center">{{ img.caption }}</small>
+                {% endif %}
+                <img src="{{ img.image.url }}" class="img-fluid mb-2" alt="{{ img.caption }}">
+              </div>
+            </div>
+            {% endfor %}
+          {% endif %}
+
+          {% if activity.videos.exists %}
+          <div class="mt-2">
+            {% for vid in activity.videos.all %}
+              {% if vid.description %}
+              <small class="text-muted">{{ vid.description }}</small>
+              {% endif %}
+              {% if vid.embed_url %}
+              <div class="embed-responsive embed-responsive-16by9 mb-2">
+                <iframe class="embed-responsive-item" src="{{ vid.embed_url }}" allowfullscreen></iframe>
+              </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-muted">No hay actividades registradas para esta lección.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
