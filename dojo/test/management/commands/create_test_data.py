@@ -1,6 +1,7 @@
 import calendar
 import random
 from datetime import datetime, timedelta
+from decouple import config
 
 from django.apps import apps
 from django.core.management.base import BaseCommand
@@ -24,26 +25,15 @@ class Command(BaseCommand):
     #     )
 
     def handle(self, *args, **kwargs):
-        # if kwargs['testing']:
+        if config('DOJO_ENV').lower() in ['production', 'prod']:
+            self.stdout.write(self.style.ERROR('❌  Cannot load testing data in production environment.'))
+            return
         self.fake = Faker()
         self.load_testing_data()
 
     def load_testing_data(self):
         self.stdout.write('Reset DB from testing data')
-        # Training.objects.all().delete()
-        # Dojo.objects.all().delete()
-        # Technique.objects.all().delete()
-        # User.objects.all().delete()
-        #
-        # # Reset primary key sequences
-        # with connection.cursor() as cursor:
-        #     cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_training', 'id'), 1, false);")
-        #     cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_dojo', 'id'), 1, false);")
-        #     cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_technique', 'id'), 1, false);")
-        #     cursor.execute("SELECT setval(pg_get_serial_sequence('user_management_user', 'id'), 1, false);")
-
         self.truncate_all_tables_and_reset_sequences()
-
         self.load_users()
         self.load_techniques()
         self.load_dojos()
