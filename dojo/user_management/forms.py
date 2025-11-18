@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 
 from utils.widgets import CustomSwitchWidget, CustomDateTimePickerWidget
 from utils.config_vars import regulations, informed_consent
-from .models import User, Category
+from .models import User, Category, DocumentType
 
 
 class UserRegisterForm(forms.ModelForm):
@@ -274,6 +274,30 @@ class UserUpdateForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
+class MultipleFileField(forms.FileField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = single_file_clean(data, initial)
+        return result
+
+
+class UploadDocumentsForm(forms.Form):
+    document_type = forms.ChoiceField(choices=DocumentType.choices)
+    title = forms.CharField(max_length=100, required=False)
+    files = MultipleFileField(label='Archivos')
 
 
 class ForgotPassForm(forms.Form):

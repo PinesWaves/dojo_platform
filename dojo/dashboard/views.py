@@ -16,9 +16,9 @@ from dashboard.forms import TrainingSchedulingForm, TrainingForm
 from dashboard.models import Training, Dojo, Technique, TrainingStatus, KataSerie, Kata, KataLesson, \
     TrainingScheduling
 from dojo.mixins.view_mixins import AdminRequiredMixin
-from user_management.models import User, Token, Category, TokenType
-from user_management.forms import UserUpdateForm
-from utils.utils import get_qr_base64
+from user_management.models import User, Token, Category, TokenType, UserDocument
+from user_management.forms import UserUpdateForm, UploadDocumentsForm
+from utils.utils import get_qr_base64, get_next_closest_day
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +101,7 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
             schedules = TrainingScheduling.objects.all()
             today = timezone.now().date()
             end_of_year = today.replace(month=12, day=31)
+            created_count = 0
             for schedule in schedules:
                 try:
                     init_date = get_next_closest_day(today, schedule.day_of_week)
@@ -108,7 +109,7 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
                     while init_date <= end_of_year:
                         if init_date.weekday() == schedule.day_of_week:
                             schedule_dates.append(
-                                datetime.combine(init_date, schedule.time)
+                                timezone.make_aware(datetime.combine(init_date, schedule.time))
                             )
                         init_date += timedelta(days=7)
 
@@ -117,11 +118,14 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
                         date__in=schedule_dates
                     ).values_list('date', flat=True)
                     trainings = [Training(date=d) for d in schedule_dates if d not in existing_trainings]
+                    created_count += len(trainings)
                     Training.objects.bulk_create(trainings)
 
                 except ValidationError as e:
                     logger.error(f"Failed to create training from schedule {schedule.id}: {e}")
                     continue  # Skip invalid schedules
+                except:
+                    breakpoint()
 
             self.request.session['msg'] = f"{created_count} trainings created from schedules."
 
@@ -255,9 +259,11 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         pk = kwargs.get('pk')
         student = get_object_or_404(User, pk=pk)
         form = UserUpdateForm(instance=student, request=request)
+        docs_form = UploadDocumentsForm()
         qr_code = get_qr_base64(student.id_number)
         ctx = {
             'form': form,
+            'docs_form': docs_form,
             'student': student,
             'qr_code': qr_code,
         }
@@ -295,6 +301,49 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
             ext = uploaded_file.name.rsplit('.')[-1]
             student.picture.save(f'{pk}.{ext}', self.request.FILES['picture'], save=True)
             form = UserUpdateForm(self.request.POST, self.request.FILES, instance=student, request=request)
+            ctx = {
+                'form': form,
+                'student': student,
+            }
+            return render(request, self.template_name, context=ctx)
+        elif self.request.POST.get('action') == 'docs':
+            """
+            from django.core.files.uploadedfile import InMemoryUploadedFile
+    
+            # Subir un diploma
+            diploma = UserDocument.objects.create(
+                user=user_instance,
+                document_type=DocumentType.DIPLOMA,
+                title="Cinturón Negro 1er Dan JKA",
+                description="Diploma otorgado por Sensei César Peña",
+                file=uploaded_file
+            )
+            
+            # Subir múltiples documentos
+            files = request.FILES.getlist('diplomas')  # En un formulario con multiple=True
+            for file in files:
+                UserDocument.objects.create(
+                    user=request.user,
+                    document_type=DocumentType.DIPLOMA,
+                    title=file.name,
+                    file=file
+                )
+            """
+            form = UploadDocumentsForm(request.POST, request.FILES)
+            if form.is_valid():
+                files = request.FILES.getlist('files')
+                document_type = form.cleaned_data['document_type']
+                title = form.cleaned_data['title']
+
+                for file in files:
+                    UserDocument.objects.create(
+                        user=request.user,
+                        document_type=document_type,
+                        title=title or file.name,
+                        file=file
+                    )
+
+                return redirect('profile')
             ctx = {
                 'form': form,
                 'student': student,

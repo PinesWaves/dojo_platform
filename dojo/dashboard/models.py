@@ -201,7 +201,7 @@ class Training(models.Model):
     type = models.CharField(choices=TrainingType.choices, default=TrainingType.MIXED, max_length=10)
     status = models.CharField(choices=TrainingStatus.choices, default=TrainingStatus.SCHEDULED, max_length=2)
     techniques = models.ManyToManyField('Technique', related_name='trainings', blank=True)
-    details = models.TextField(blank=True, null=True, help_text="Comentarios o detalles adicionales.")
+    details = models.TextField(blank=True, default='', help_text="Comentarios o detalles adicionales.")
     location = models.CharField(max_length=100, default='')
     katas = models.ManyToManyField(Kata, blank=True, related_name="trainings")
     kumites = models.ManyToManyField(Kumite, blank=True, related_name="trainings")
