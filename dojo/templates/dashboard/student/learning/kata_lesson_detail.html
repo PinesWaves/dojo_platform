@@ -35,8 +35,36 @@
   <div class="container">
     <div class="card card-outline card-danger">
       <div class="card-body">
-        <p><strong>Objetivos:</strong> {{ lesson.objectives }}</p>
-        <p>{{ lesson.content }}</p>
+        <p><strong>Objetivos:</strong>
+          {% if lesson.objectives %}
+            {% if lesson.objectives.0 and lesson.objectives.0|length > 1 %}
+              <ul class="mb-0">
+                {% for obj in lesson.objectives %}
+                  <li>{{ obj }}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              {{ lesson.objectives }}
+            {% endif %}
+          {% else %}
+            <span class="text-muted">No hay objetivos especificados.</span>
+          {% endif %}
+        </p>
+        <p><strong>Contenido:</strong>
+          {% if lesson.content %}
+            {% if lesson.content.0 and lesson.content.0|length > 1 %}
+              <ul class="mb-0">
+                {% for content_item in lesson.content %}
+                  <li>{{ content_item }}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              {{ lesson.content }}
+            {% endif %}
+          {% else %}
+            <span class="text-muted">No hay contenido especificado.</span>
+          {% endif %}
+        </p>
       </div>
     </div>
 
@@ -53,11 +81,21 @@
           {% if activity.images.exists %}
             {% for img in activity.images.all %}
             <div class="row justify-content-center">
-              <div class="col-md-8 mb-2 d-flex flex-column">
+              <div class="col-md-10 mb-2 d-flex flex-column">
+                <p class="text-center"><strong>{{ img.title }}</strong></p>
                 {% if img.caption %}
-                  <small class="text-muted text-center">{{ img.caption }}</small>
+                  {% if img.caption.0 and img.caption.0|length > 1 %}
+                    <ol class="mb-0">
+                      {% for line in img.caption %}
+                        <li>{{ line }}</li>
+                      {% endfor %}
+                    </ol>
+                  {% else %}
+                    {{ img.caption }}
+                  {% endif %}
                 {% endif %}
-                <img src="{{ img.image.url }}" class="img-fluid mb-2" alt="{{ img.caption }}">
+                <br>
+                <img src="{{ img.image.url }}" class="img-fluid mb-2" alt="{{ img.title }}">
               </div>
             </div>
             {% endfor %}
@@ -67,7 +105,7 @@
           <div class="mt-2">
             {% for vid in activity.videos.all %}
               {% if vid.description %}
-              <small class="text-muted">{{ vid.description }}</small>
+              <p><strong>{{ vid.description }}</strong></p>
               {% endif %}
               {% if vid.embed_url %}
               <div class="embed-responsive embed-responsive-16by9 mb-2">

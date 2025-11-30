@@ -73,9 +73,9 @@ class KataSerie(models.Model):
 class KataLesson(models.Model):
     kata = models.ForeignKey(Kata, on_delete=models.CASCADE, related_name='lessons')
     title = models.CharField(max_length=100)
-    objectives = models.TextField()
-    content = models.TextField(blank=True)
-    order = models.PositiveIntegerField(default=1)
+    objectives = models.JSONField(default=list, help_text="List of lesson objectives")
+    content = models.JSONField(default=list, blank=True, help_text="List of content items")
+    order = models.CharField(default='b0', max_length=10)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -101,7 +101,8 @@ class KataLessonActivity(models.Model):
 class KataLessonActivityImage(models.Model):
     activity = models.ForeignKey(KataLessonActivity, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='activities/images/')
-    caption = models.TextField(blank=True)
+    title = models.CharField(max_length=100, blank=True)
+    caption = models.JSONField(default=list, blank=True, null=True)
 
     def __str__(self):
         return f"Imagen de {self.activity.title}"
