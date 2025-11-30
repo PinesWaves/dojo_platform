@@ -102,6 +102,7 @@
 {#              <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Timeline</a></li>#}
               <li class="nav-item"><a class="nav-link active" href="#info" data-toggle="tab">Info</a></li>
               <li class="nav-item"><a class="nav-link" href="#docs" data-toggle="tab">Docs</a></li>
+              <li class="nav-item"><a class="nav-link" href="#password" data-toggle="tab">Change Password</a></li>
             </ul>
           </div><!-- /.card-header -->
           <div class="card-body">
@@ -370,6 +371,34 @@
                     <small>{{ doc.uploaded_at|date:"d/m/Y" }}</small>
                   </div>
                 {% endfor %}
+              </div>
+              <!-- /.tab-pane -->
+              <div class="tab-pane" id="password">
+                <form method="post" class="form-horizontal"
+                    {% if 'student/profile' in request.path %}
+                      action="{% url 'profile' %}"
+                    {% elif 'manage_profile/' in request.path %}
+                      action="{% url 'manage_profile' student.id %}"
+                    {% endif %}>
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="change_password">
+                  {% for field in password_form %}
+                    <div class="form-group row">
+                      <label for="{{ field.id_for_label }}" class="col-sm-3 col-form-label">{{ field.label }}</label>
+                      <div class="col-sm-9">
+                        {{ field }}
+                        {% if field.errors %}
+                          <span class="text-danger">{{ field.errors }}</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  {% endfor %}
+                  <div class="form-group row">
+                    <div class="offset-sm-3 col-sm-9">
+                      <button type="submit" class="btn btn-danger">Change Password</button>
+                    </div>
+                  </div>
+                </form>
               </div>
               <!-- /.tab-pane -->
             </div>

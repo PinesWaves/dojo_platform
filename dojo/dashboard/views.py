@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from secrets import token_urlsafe
 
 from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
@@ -17,7 +18,7 @@ from dashboard.models import Training, Dojo, Technique, TrainingStatus, KataSeri
     TrainingScheduling
 from dojo.mixins.view_mixins import AdminRequiredMixin
 from user_management.models import User, Token, Category, TokenType, UserDocument
-from user_management.forms import UserUpdateForm, UploadDocumentsForm
+from user_management.forms import UserUpdateForm, UploadDocumentsForm, CustomPasswordChangeForm
 from utils.utils import get_qr_base64, get_next_closest_day
 
 logger = logging.getLogger(__name__)
@@ -260,10 +261,12 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         student = get_object_or_404(User, pk=pk)
         form = UserUpdateForm(instance=student, request=request)
         docs_form = UploadDocumentsForm()
+        password_form = CustomPasswordChangeForm(user=student)
         qr_code = get_qr_base64(student.id_number)
         ctx = {
             'form': form,
             'docs_form': docs_form,
+            'password_form': password_form,
             'student': student,
             'qr_code': qr_code,
         }
@@ -349,6 +352,29 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
                 'student': student,
             }
             return render(request, self.template_name, context=ctx)
+        elif self.request.POST.get('action') == 'change_password':
+            password_form = CustomPasswordChangeForm(user=student, data=request.POST)
+            if password_form.is_valid():
+                password_form.save()
+                # Update session auth hash to prevent logout after password change
+                if request.user.pk == student.pk:
+                    update_session_auth_hash(request, password_form.user)
+                self.request.session['msg'] = "Password changed successfully!"
+                return redirect('manage_profile', pk=pk)
+            else:
+                form = UserUpdateForm(instance=student, request=request)
+                docs_form = UploadDocumentsForm()
+                qr_code = get_qr_base64(student.id_number)
+                self.request.session['errors'] = password_form.errors
+                self.request.session['msg'] = "Failed to change password!"
+                ctx = {
+                    'form': form,
+                    'docs_form': docs_form,
+                    'password_form': password_form,
+                    'student': student,
+                    'qr_code': qr_code,
+                }
+                return render(request, self.template_name, context=ctx)
         else:
             form = UserUpdateForm(request.POST, instance=student, request=request)
 
@@ -398,9 +424,13 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         student = request.user
         form = UserUpdateForm(instance=student, request=request)
+        docs_form = UploadDocumentsForm()
+        password_form = CustomPasswordChangeForm(user=student)
         qr_code = get_qr_base64(student.id_number)
         ctx = {
             'form': form,
+            'docs_form': docs_form,
+            'password_form': password_form,
             'student': student,
             'qr_code': qr_code,
         }
@@ -420,6 +450,28 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
             messages.success(request, "Picture updated correctly.")
             return redirect('profile')
 
+        elif request.POST.get('action') == 'change_password':
+            password_form = CustomPasswordChangeForm(user=student, data=request.POST)
+            if password_form.is_valid():
+                password_form.save()
+                # Update session auth hash to prevent logout after password change
+                update_session_auth_hash(request, password_form.user)
+                messages.success(request, "Password changed successfully!")
+                return redirect('profile')
+            else:
+                form = UserUpdateForm(instance=student, request=request)
+                docs_form = UploadDocumentsForm()
+                qr_code = get_qr_base64(student.id_number)
+                context = {
+                    'form': form,
+                    'docs_form': docs_form,
+                    'password_form': password_form,
+                    'student': student,
+                    'qr_code': qr_code,
+                }
+                messages.error(request, "There were errors changing the password.")
+                return render(request, self.template_name, context)
+
         form = UserUpdateForm(request.POST, request.FILES, instance=student, request=request)
         if form.is_valid():
             return self.form_valid(form)
@@ -433,8 +485,12 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
 
     def form_invalid(self, form):
         qr_code = get_qr_base64(self.request.user.id_number)
+        docs_form = UploadDocumentsForm()
+        password_form = CustomPasswordChangeForm(user=self.request.user)
         context = {
             'form': form,
+            'docs_form': docs_form,
+            'password_form': password_form,
             'student': self.request.user,
             'qr_code': qr_code,
         }
@@ -499,6 +555,7 @@ class KataDetail(TemplateView):
         pk = kwargs.get('pk')
         kata = get_object_or_404(Kata.objects.prefetch_related('lessons'), pk=pk)
         ctx = {
+            'current_year': timezone.now().year,
             'kata': kata,
         }
         if request.user.is_authenticated:
@@ -516,6 +573,7 @@ class KataLessonDetail(TemplateView):
         pk = kwargs.get('pk')
         lesson = get_object_or_404(KataLesson.objects.prefetch_related('activities'), pk=pk)
         ctx = {
+            'current_year': timezone.now().year,
             'lesson': lesson,
         }
         if request.user.is_authenticated:
