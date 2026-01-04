@@ -1,4 +1,4 @@
-asgiref==3.10.0
+asgiref==3.11.0
 bcrypt==5.0.0
 Django==5.2.8
 Faker==37.12.0
