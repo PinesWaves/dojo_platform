@@ -1,6 +1,6 @@
 asgiref==3.11.0
 bcrypt==5.0.0
-Django==5.2.8
+Django==6.0
 Faker==38.2.0
 gunicorn==23.0.0
 packaging==25.0
