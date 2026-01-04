@@ -233,22 +233,52 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="{% url 'student_dashboard' %}" class="nav-link {% block stdashboard-link-status %}{% endblock %}">
+            <a href="{% url 'student_dashboard' %}" class="nav-link">
               <i class="nav-icon fas fa-book-reader"></i>
               <p>Student dashboard</p>
             </a>
           </li>
-          <li class="nav-item">
-            <a href="{% url 'manage_trainings' %}" class="nav-link {% block training-link-status %}{% endblock %}">
+          <li class="nav-item {% block training-menu-class%}{% endblock %}">
+            <a href="#" class="nav-link">
               <i class="nav-icon fas fa-running"></i>
               <p>Trainings</p>
+              <i class="right fas fa-angle-left"></i>
             </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{% url 'training_calendar' %}" class="nav-link {% block calendar-link-status %}{% endblock %}">
+                  <i class="nav-icon far fa-calendar-alt"></i>
+                  <p>Calendar</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'manage_trainings' %}" class="nav-link {% block training-link-status %}{% endblock %}">
+                  <i class="nav-icon fas fa-running"></i>
+                  <p>Manage</p>
+                </a>
+              </li>
+            </ul>
           </li>
-          <li class="nav-item">
-            <a href="{% url 'manage_students' %}" class="nav-link {% block students-link-status %}{% endblock %}">
-              <i class="nav-icon fas fa-users"></i>
+          <li class="nav-item {% block students-menu-class%}{% endblock %}">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-school"></i>
               <p>Students</p>
+              <i class="right fas fa-angle-left"></i>
             </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{% url 'manage_students' %}" class="nav-link {% block students-link-status %}{% endblock %}">
+                  <i class="nav-icon fas fa-users"></i>
+                  <p>Students</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'student_progress' %}" class="nav-link {% block progress-link-status %}{% endblock %}">
+                  <i class="nav-icon fas fa-book-open"></i>
+                  <p>Lessons progress</p>
+                </a>
+              </li>
+            </ul>
           </li>
           <li class="nav-item">
             <a href="{% url 'manage_techniques' %}" class="nav-link {% block techniques-link-status %}{% endblock %}">
@@ -257,9 +287,9 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="{% url 'manage_techniques' %}" class="nav-link {% block assesments-link-status %}{% endblock %}">
+            <a href="{% url 'manage_techniques' %}" class="nav-link {% block assessments-link-status %}{% endblock %}">
               <i class="nav-icon fas fa-tasks"></i>
-              <p>Assesments</p>
+              <p>Assessments</p>
             </a>
           </li>
           <li class="nav-item">

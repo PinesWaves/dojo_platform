@@ -13,9 +13,9 @@ if there is an update, run:
 ```sh
 docker compose --env-file .env_local -f docker-compose-local.yml down -v
 docker rm nginx
-docker rm web
+docker rm kapp_web_local
 docker compose --env-file .env_local -f .\docker-compose-local.yml build nginx
-docker compose --env-file .env_local -f .\docker-compose-local.yml build web_local
+docker compose --env-file .env_local -f .\docker-compose-local.yml build kapp_web_local
 docker-compose --env-file .env_local -f docker-compose-local.yml up -d
 ```
 

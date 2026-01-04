@@ -36,14 +36,15 @@ def get_qr_base64(data):
     return f"data:image/png;base64,{img_base64}"
 
 
-def get_next_closest_day(st_date: date, day: int) -> date:
-    """Get the next closest day of the week from a given date.
+def get_next_closest_day(st_date: date, week_day: int) -> date:
+    """Get the next closest week day from a given date.
     Args:
         st_date (date): The starting date.
-        day (int): The target day of the week (0=Monday, 6=Sunday).
+        week_day (int): The target day of the week (0=Monday, 6=Sunday).
     Returns:
         date: The next closest date that falls on the specified day of the week.
     """
-    days_ahead = (day - st_date.weekday() + 7) % 7
-    days_ahead = days_ahead if days_ahead != day else 7
-    return day + timedelta(days=days_ahead)
+    days_ahead = (week_day - st_date.weekday() + 7) % 7
+    days_ahead = days_ahead if days_ahead != week_day else 7
+    closest_date = st_date + timedelta(days=days_ahead)
+    return closest_date

@@ -32,9 +32,6 @@ class Command(BaseCommand):
             if img_obj.image and img_obj.image.path:
                 Path(img_obj.image.path).unlink(missing_ok=True)
         KataLessonActivityImage.objects.all().delete()
-        for vid_obj in KataLessonActivityVideo.objects.all():
-            if vid_obj.image and vid_obj.image.path:
-                Path(vid_obj.image.path).unlink(missing_ok=True)
         KataLessonActivityVideo.objects.all().delete()
         Kumite.objects.all().delete()
 
@@ -48,12 +45,20 @@ class Command(BaseCommand):
             cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_katalessonactivityvideo', 'id'), 1, false);")
             cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_kataserie_katas', 'id'), 1, false);")
             cursor.execute("SELECT setval(pg_get_serial_sequence('dashboard_kumite', 'id'), 1, false);")
+
         self.stdout.write(self.style.WARNING("📂 Loading Katas data..."))
 
-        # --- KATAS ---
-        with open(KATAS_FILE, "r", encoding="utf-8") as f:
-            katas_data = yaml.safe_load(f)
+        # --- LOAD FILES INFO ---
+        with open(KATAS_FILE, "r", encoding="utf-8") as kaf, \
+            open(SERIES_FILE, "r", encoding="utf-8") as sef, \
+            open(LESSONS_FILE, "r", encoding="utf-8") as lf, \
+            open(KUMITE_FILE, "r", encoding="utf-8") as kuf:
+            katas_data = yaml.safe_load(kaf)
+            series_data = yaml.safe_load(sef)
+            lessons_data = yaml.safe_load(lf)
+            kumite_data = yaml.safe_load(kuf)
 
+        # --- KATAS ---
         katas = {}
         # TODO : load summary info
         ka_summary = katas_data['summary']
@@ -69,12 +74,9 @@ class Command(BaseCommand):
                 },
             )
             katas[item["name"]] = kata
-            self.stdout.write(self.style.SUCCESS(f"✔ Kata loaded: {kata.name}"))
+            self.stdout.write(self.style.SUCCESS(f"✅ Kata loaded: {kata.name}"))
 
         # --- SERIES ---
-        with open(SERIES_FILE, "r", encoding="utf-8") as f:
-            series_data = yaml.safe_load(f)
-
         ssdata = series_data['series']
         for serie in ssdata:
             serie_obj, _ = KataSerie.objects.get_or_create(
@@ -84,18 +86,12 @@ class Command(BaseCommand):
             for kata_name in serie.get("katas", []):
                 if kata_name in katas:
                     serie_obj.katas.add(katas[kata_name])
-            self.stdout.write(self.style.SUCCESS(f"✔ Loaded series: {serie_obj.name}"))
+            self.stdout.write(self.style.SUCCESS(f"✅ Loaded series: {serie_obj.name}"))
 
         # --- LESSONS ---
-        with open(LESSONS_FILE, "r", encoding="utf-8") as f:
-            lessons_data = yaml.safe_load(f)
-
         lsdata = lessons_data['lessons']
         for lesson in lsdata:
-            try:
-                kata_name = lesson["kata"]
-            except:
-                breakpoint()
+            kata_name = lesson["kata"]
             kata = katas.get(kata_name)
             if not kata:
                 self.stdout.write(self.style.ERROR(f"❌ Kata not found for lesson: {kata_name}"))
@@ -105,8 +101,8 @@ class Command(BaseCommand):
                 kata=kata,
                 title=lesson["title"],
                 defaults={
-                    "objectives": lesson.get("objectives", ""),
-                    "content": lesson.get("content", ""),
+                    "objectives": lesson.get("objectives", []),
+                    "content": lesson.get("content", []),
                     "order": lesson.get("order", 1),
                 },
             )
@@ -141,12 +137,13 @@ class Command(BaseCommand):
                             with open(dest_path, "rb") as f:
                                 KataLessonActivityImage.objects.get_or_create(
                                     activity=activity_obj,
+                                    title=img.get("title", ""),
                                     caption=img.get("caption", ""),
                                     defaults={"image": File(f, name=f"activities/images/{src_path.name}")},
                                 )
                             self.stdout.write(self.style.SUCCESS(f"🖼 Image loaded: {src_path.name}"))
                         else:
-                            self.stdout.write(self.style.WARNING(f"⚠ Image not found: {src_path}"))
+                            self.stdout.write(self.style.WARNING(f"⚠️ Image not found: {src_path}"))
 
                 # --- VIDEOS ---
                 videos = activity.get("videos", [])
@@ -158,12 +155,9 @@ class Command(BaseCommand):
                         defaults={"description": vid.get("description", "")},
                     )
 
-            self.stdout.write(self.style.SUCCESS(f"✔ Lesson loaded: {lesson_obj.title}"))
+            self.stdout.write(self.style.SUCCESS(f"✅ Lesson loaded: {lesson_obj.title}"))
 
         # --- KUMITES ---
-        with open(KUMITE_FILE, "r", encoding="utf-8") as f:
-            kumite_data = yaml.safe_load(f)
-
         kumites = {}
         # TODO : load summary info
         ku_summary = kumite_data['summary']
@@ -179,6 +173,6 @@ class Command(BaseCommand):
                 },
             )
             kumites[item["name"]] = kumite
-            self.stdout.write(self.style.SUCCESS(f"✔ Kumite loaded: {kumite.name}"))
+            self.stdout.write(self.style.SUCCESS(f"✅ Kumite loaded: {kumite.name}"))
 
         self.stdout.write(self.style.SUCCESS("🎉 Data loaded correctly."))

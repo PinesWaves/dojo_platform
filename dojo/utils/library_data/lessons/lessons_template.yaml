@@ -14,7 +14,14 @@ lessons:
         order: 1
         images:
           - path: http://localhost:8000/media/activities/images/jka-dojo-kun-938x704.webp
+            title: JKA Dojo Kun
             caption: JKA Dojo Kun
+          - path: http://localhost:8000/media/activities/images/jka-dojo-kun-938x704.webp
+            title: JKA Dojo Kun
+            caption:
+              - "text 1"
+              - "text 2"
+              - "text 3"
         videos:
           - description: video
             url: "https://www.example.com/xyz"

@@ -1,7 +1,8 @@
-.idea
+.claude
 .dojo
 .env
 .env_local
+.idea
 */logs
 /dojo/media/techniques/*.png
 /dojo/media/qr_codes/*.png

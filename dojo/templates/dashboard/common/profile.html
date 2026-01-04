@@ -100,7 +100,9 @@
             <ul class="nav nav-pills">
 {#              <li class="nav-item"><a class="nav-link" href="#activity" data-toggle="tab">Activity</a></li>#}
 {#              <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Timeline</a></li>#}
-              <li class="nav-item"><a class="nav-link active" href="#settings" data-toggle="tab">Settings</a></li>
+              <li class="nav-item"><a class="nav-link active" href="#info" data-toggle="tab">Info</a></li>
+              <li class="nav-item"><a class="nav-link" href="#docs" data-toggle="tab">Docs</a></li>
+              <li class="nav-item"><a class="nav-link" href="#password" data-toggle="tab">Change Password</a></li>
             </ul>
           </div><!-- /.card-header -->
           <div class="card-body">
@@ -314,14 +316,13 @@
 {#                </div>#}
 {#              </div>#}
 {#              <!-- /.tab-pane -->#}
-
-              <div class="active tab-pane" id="settings">
+              <div class="tab-pane active" id="info">
                 <form method="post" class="form-horizontal"
                     {% if 'student/profile' in request.path %}
-                      action="{% url 'profile' %}">
+                      action="{% url 'profile' %}"
                     {% elif 'manage_profile/' in request.path %}
-                      action="{% url 'manage_profile' student.id %}">
-                    {% endif %}
+                      action="{% url 'manage_profile' student.id %}"
+                    {% endif %}>
                   {% csrf_token %}
                   {% for field in form %}
                     <div class="form-group row">
@@ -347,6 +348,176 @@
                         {% endif %}
                         </div>
                       {% endif %}
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <!-- /.tab-pane -->
+              <div class="tab-pane" id="docs">
+                <!-- Upload Form Card -->
+                <div class="card card-danger card-outline">
+                  <div class="card-header">
+                    <h3 class="card-title">
+                      <i class="fas fa-cloud-upload-alt"></i> Upload Documents
+                    </h3>
+                  </div>
+                  <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="upload-docs-form">
+                      {% csrf_token %}
+                      <div class="form-group">
+                        <label for="id_document_type">
+                          <i class="fas fa-tag"></i> Document Type
+                        </label>
+                        {{ docs_form.document_type }}
+                      </div>
+
+                      <div class="form-group">
+                        <label for="id_title">
+                          <i class="fas fa-heading"></i> Title
+                        </label>
+                        {{ docs_form.title }}
+                      </div>
+
+                      <div class="form-group">
+                        <label for="id_description">
+                          <i class="fas fa-align-left"></i> Description
+                        </label>
+                        {{ docs_form.description }}
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <i class="fas fa-file"></i> Select Files
+                        </label>
+                        <div class="custom-file">
+                          <input type="file" name="files" class="custom-file-input" id="customFile" multiple>
+                          <label class="custom-file-label" for="customFile">Choose files...</label>
+                        </div>
+                        <small class="form-text text-muted">
+                          You can select multiple files. Accepted formats: PDF, DOC, DOCX, JPG, PNG
+                        </small>
+                      </div>
+
+                      <input type="hidden" name="action" value="docs">
+                      <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-upload"></i> Upload Documents
+                      </button>
+                    </form>
+                  </div>
+                </div>
+
+                <!-- Documents List -->
+                <div class="card card-danger card-outline mt-3">
+                  <div class="card-header">
+                    <h3 class="card-title">
+                      <i class="fas fa-folder-open"></i> My Documents
+                    </h3>
+                    <div class="card-tools">
+                      <span class="badge badge-danger">{{ user.documents.count }}</span>
+                    </div>
+                  </div>
+                  <div class="card-body p-0">
+                    {% if user.documents.all %}
+                      <table class="table table-striped">
+                        <thead>
+                          <tr>
+                            <th style="width: 10px">#</th>
+                            <th>Type</th>
+                            <th>Title</th>
+                            <th>Uploaded</th>
+                            <th style="width: 150px">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for doc in user.documents.all %}
+                            <tr>
+                              <td>
+                                {% if doc.document_type == 'DI' %}
+                                  <i class="fas fa-graduation-cap text-success"></i>
+                                {% elif doc.document_type == 'CE' %}
+                                  <i class="fas fa-certificate text-warning"></i>
+                                {% elif doc.document_type == 'ME' %}
+                                  <i class="fas fa-notes-medical text-info"></i>
+                                {% elif doc.document_type == 'ID' %}
+                                  <i class="fas fa-id-card text-primary"></i>
+                                {% elif doc.document_type == 'PP' %}
+                                  <i class="fas fa-receipt text-success"></i>
+                                {% else %}
+                                  <i class="fas fa-file text-secondary"></i>
+                                {% endif %}
+                              </td>
+                              <td>
+                                <span class="badge
+                                  {% if doc.document_type == 'DI' %}badge-success
+                                  {% elif doc.document_type == 'CE' %}badge-warning
+                                  {% elif doc.document_type == 'ME' %}badge-info
+                                  {% elif doc.document_type == 'ID' %}badge-primary
+                                  {% elif doc.document_type == 'PP' %}badge-success
+                                  {% else %}badge-secondary{% endif %}">
+                                  {{ doc.get_document_type_display }}
+                                </span>
+                              </td>
+                              <td>
+                                <strong>{{ doc.title }}</strong>
+                                {% if doc.description %}
+                                  <br><small class="text-muted">{{ doc.description|truncatewords:10 }}</small>
+                                {% endif %}
+                              </td>
+                              <td>
+                                <small>
+                                  <i class="far fa-calendar-alt"></i> {{ doc.uploaded_at|date:"M d, Y" }}<br>
+                                  <i class="far fa-clock"></i> {{ doc.uploaded_at|date:"g:i A" }}
+                                </small>
+                              </td>
+                              <td>
+                                <a href="{{ doc.file.url }}" target="_blank" class="btn btn-sm btn-primary" title="View">
+                                  <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ doc.file.url }}" download class="btn btn-sm btn-success" title="Download">
+                                  <i class="fas fa-download"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-danger" title="Delete" onclick="deleteDocument({{ doc.id }})">
+                                  <i class="fas fa-trash"></i>
+                                </button>
+                              </td>
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    {% else %}
+                      <div class="p-4 text-center text-muted">
+                        <i class="fas fa-folder-open fa-3x mb-3"></i>
+                        <p>No documents uploaded yet.</p>
+                        <p>Use the form above to upload your first document.</p>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <!-- /.tab-pane -->
+              <div class="tab-pane" id="password">
+                <form method="post" class="form-horizontal"
+                    {% if 'student/profile' in request.path %}
+                      action="{% url 'profile' %}"
+                    {% elif 'manage_profile/' in request.path %}
+                      action="{% url 'manage_profile' student.id %}"
+                    {% endif %}>
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="change_password">
+                  {% for field in password_form %}
+                    <div class="form-group row">
+                      <label for="{{ field.id_for_label }}" class="col-sm-3 col-form-label">{{ field.label }}</label>
+                      <div class="col-sm-9">
+                        {{ field }}
+                        {% if field.errors %}
+                          <span class="text-danger">{{ field.errors }}</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  {% endfor %}
+                  <div class="form-group row">
+                    <div class="offset-sm-3 col-sm-9">
+                      <button type="submit" class="btn btn-danger">Change Password</button>
                     </div>
                   </div>
                 </form>

@@ -1,255 +1,550 @@
 {% extends 'dashboard/sensei/base.html' %}
+{% load static %}
 {% block css %}
 <style>
 h3 a {
   color: white;
 }
+.info-box-icon {
+  border-radius: .25rem;
+  align-items: center;
+  display: flex;
+  font-size: 1.875rem;
+  justify-content: center;
+  text-align: center;
+  width: 70px;
+}
+.progress-description {
+  margin: 0;
+}
+.stat-card {
+  transition: transform 0.2s;
+}
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+.timeline {
+  position: relative;
+  margin: 0 0 30px;
+  padding: 0;
+  list-style: none;
+}
+.timeline:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #dee2e6;
+  left: 31px;
+  margin: 0;
+  border-radius: 2px;
+}
+.timeline > li {
+  position: relative;
+  margin-right: 10px;
+  margin-bottom: 15px;
+}
+.timeline > li:before,
+.timeline > li:after {
+  content: " ";
+  display: table;
+}
+.timeline > li:after {
+  clear: both;
+}
+.timeline > li > .timeline-item {
+  margin-top: 0;
+  background: #fff;
+  color: #495057;
+  margin-left: 60px;
+  margin-right: 15px;
+  padding: 10px;
+  position: relative;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  border-radius: 3px;
+}
+.timeline > li > .timeline-item > .time {
+  color: #999;
+  float: right;
+  padding: 10px;
+  font-size: .9rem;
+}
+.timeline > li > .fa,
+.timeline > li > .fas,
+.timeline > li > .far,
+.timeline > li > .fab,
+.timeline > li > .fal,
+.timeline > li > .fad,
+.timeline > li > .svg-inline--fa,
+.timeline > li > .ion {
+  width: 30px;
+  height: 30px;
+  font-size: 15px;
+  line-height: 30px;
+  position: absolute;
+  color: #666;
+  background: #d2d6de;
+  border-radius: 50%;
+  text-align: center;
+  left: 18px;
+  top: 0;
+}
 </style>
 {% endblock %}
+{% block dashboard-link-status %}active{% endblock %}
 {% block dashboard_content %}
 <!-- Content Header (Page header) -->
 <div class="content-header">
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1 class="m-0">Dashboard</h1>
-      </div><!-- /.col -->
+        <h1 class="m-0">Sensei Dashboard</h1>
+      </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item">Dashboard</li>
+          <li class="breadcrumb-item active">Dashboard</li>
         </ol>
-      </div><!-- /.col -->
-    </div><!-- /.row -->
-  </div><!-- /.container-fluid -->
+      </div>
+    </div>
+  </div>
 </div>
-<!-- /.content-header -->
 
 <!-- Main content -->
 <section class="content">
   <div class="container-fluid">
-    <!-- Small boxes (Stat box) -->
-    <div class="row">
-      <div class="col-12 col-md-6 col-lg-3">
-        <!-- small box -->
-        <div class="small-box bg-danger">
-          <div class="inner">
-            <h3><a href="{% url 'manage_trainings' %}">Trainings</a></h3>
-            <p>Manage trainings</p>
-          </div>
-          <div class="icon">
-            <i class="fas fa-running"></i>
-          </div>
-          <a href="{% url 'manage_trainings' %}" class="small-box-footer">Manage <i class="fas fa-arrow-circle-right"></i></a>
-        </div>
-      </div>
 
-      <div class="col-12 col-md-6 col-lg-3">
-        <!-- small box -->
-        <div class="small-box bg-danger">
+    <!-- Stats Row -->
+    <div class="row">
+      <div class="col-lg-3 col-6">
+        <div class="small-box bg-info stat-card">
           <div class="inner">
-            <h3><a href="{% url 'manage_students' %}">Students</a></h3>
-            <p>Manage students</p>
+            <h3>{{ total_students }}</h3>
+            <p>Total Students</p>
           </div>
           <div class="icon">
             <i class="fas fa-users"></i>
           </div>
-          <a href="{% url 'manage_students' %}" class="small-box-footer">Manage <i class="fas fa-arrow-circle-right"></i></a>
+          <a href="{% url 'manage_students' %}" class="small-box-footer">
+            View Details <i class="fas fa-arrow-circle-right"></i>
+          </a>
         </div>
       </div>
 
-      <div class="col-12 col-md-6 col-lg-3">
-        <!-- small box -->
-        <div class="small-box bg-danger">
+      <div class="col-lg-3 col-6">
+        <div class="small-box bg-success stat-card">
           <div class="inner">
-            <h3><a href="{% url 'manage_techniques' %}">Kihon</a></h3>
-            <h3></h3>
-            <p>Manage Kihon</p>
+            <h3>{{ active_students }}</h3>
+            <p>Active Students</p>
           </div>
           <div class="icon">
-            <i class="fas fa-user-ninja"></i>
+            <i class="fas fa-user-check"></i>
           </div>
-          <a href="{% url 'manage_techniques' %}" class="small-box-footer">Manage <i class="fas fa-arrow-circle-right"></i></a>
+          <a href="{% url 'manage_students' %}" class="small-box-footer">
+            More info <i class="fas fa-arrow-circle-right"></i>
+          </a>
         </div>
       </div>
-    </div><!-- /.row -->
+
+      <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning stat-card">
+          <div class="inner">
+            <h3>{{ trainings_this_week }}</h3>
+            <p>Trainings This Week</p>
+          </div>
+          <div class="icon">
+            <i class="fas fa-running"></i>
+          </div>
+          <a href="{% url 'training_calendar' %}" class="small-box-footer">
+            View Calendar <i class="fas fa-arrow-circle-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-6">
+        <div class="small-box bg-danger stat-card">
+          <div class="inner">
+            <h3>{{ attendance_rate|floatformat:0 }}<sup style="font-size: 20px">%</sup></h3>
+            <p>Attendance Rate</p>
+          </div>
+          <div class="icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <a href="{% url 'manage_trainings' %}" class="small-box-footer">
+            More info <i class="fas fa-arrow-circle-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Second Row: Charts and Info -->
+    <div class="row">
+      <!-- Belt Distribution -->
+      <div class="col-md-6">
+        <div class="card card-danger">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-certificate mr-2"></i>
+              Belt Distribution
+            </h3>
+          </div>
+          <div class="card-body">
+            <canvas id="beltChart" style="min-height: 250px; height: 250px; max-height: 250px;"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions & Alerts -->
+      <div class="col-md-6">
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-bolt mr-2"></i>
+              Quick Actions
+            </h3>
+          </div>
+          <div class="card-body">
+            <a href="{% url 'manage_trainings' %}" class="btn btn-app bg-success">
+              <i class="fas fa-plus"></i> New Training
+            </a>
+            <a href="{% url 'training_calendar' %}" class="btn btn-app bg-info">
+              <i class="fas fa-calendar"></i> Calendar
+            </a>
+            <a href="{% url 'manage_students' %}" class="btn btn-app bg-warning">
+              <i class="fas fa-user-plus"></i> Students
+            </a>
+            <a href="{% url 'library' %}" class="btn btn-app bg-danger">
+              <i class="fas fa-book"></i> Library
+            </a>
+          </div>
+        </div>
+
+        {% if low_attendance_students %}
+        <div class="card card-warning">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-exclamation-triangle mr-2"></i>
+              Low Attendance Alert
+            </h3>
+          </div>
+          <div class="card-body p-0">
+            <ul class="list-group list-group-flush">
+              {% for student in low_attendance_students %}
+              <li class="list-group-item">
+                <b>{{ student.first_name }} {{ student.last_name }}</b>
+                <span class="badge badge-warning float-right">{{ student.attendance_percentage|floatformat:0 }}%</span>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Third Row: Recent Activity & Upcoming Trainings -->
+    <div class="row">
+      <!-- Upcoming Trainings -->
+      <div class="col-md-6">
+        <div class="card card-success">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="far fa-calendar-check mr-2"></i>
+              Upcoming Trainings
+            </h3>
+          </div>
+          <div class="card-body p-0">
+            <ul class="timeline timeline-inverse">
+              {% for training in upcoming_trainings %}
+              <li>
+                {% if training.status == 'SCHEDULED' %}
+                <i class="fas fa-running bg-primary"></i>
+                {% elif training.status == 'FINISHED' %}
+                <i class="fas fa-check bg-success"></i>
+                {% else %}
+                <i class="fas fa-times bg-danger"></i>
+                {% endif %}
+                <div class="timeline-item">
+                  <span class="time"><i class="far fa-clock"></i> {{ training.date|date:"M d, g:i A" }}</span>
+                  <h3 class="timeline-header">
+                    <a href="{% url 'manage_trainings' %}">Training Session</a>
+                  </h3>
+                  <div class="timeline-body">
+                    Status: <span class="badge badge-{{ training.status|lower }}">{{ training.get_status_display }}</span><br>
+                    Attendees: <strong>{{ training.attendances.count }}</strong>
+                  </div>
+                </div>
+              </li>
+              {% empty %}
+              <li>
+                <i class="fas fa-info-circle bg-info"></i>
+                <div class="timeline-item">
+                  <div class="timeline-body">
+                    No upcoming trainings scheduled.
+                  </div>
+                </div>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Students Activity -->
+      <div class="col-md-6">
+        <div class="card card-info">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-user-graduate mr-2"></i>
+              Recent Student Activity
+            </h3>
+          </div>
+          <div class="card-body p-0">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Belt</th>
+                  <th>Last Training</th>
+                  <th>Attendance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for student in recent_students %}
+                <tr>
+                  <td>
+                    <a href="{% url 'manage_profile' student.id %}">
+                      {{ student.first_name }} {{ student.last_name }}
+                    </a>
+                  </td>
+                  <td>
+                    <span class="level-circle level-{{ student.level|lower }}"></span>
+                    {{ student.get_level_display }}
+                  </td>
+                  <td>
+                    {% if student.last_attendance %}
+                      {{ student.last_attendance|timesince }} ago
+                    {% else %}
+                      Never
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if student.attendance_percentage >= 80 %}
+                      <span class="badge badge-success">{{ student.attendance_percentage|floatformat:0 }}%</span>
+                    {% elif student.attendance_percentage >= 50 %}
+                      <span class="badge badge-warning">{{ student.attendance_percentage|floatformat:0 }}%</span>
+                    {% else %}
+                      <span class="badge badge-danger">{{ student.attendance_percentage|floatformat:0 }}%</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student Progress Widget -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card card-danger">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-trophy mr-2"></i>
+              Student Learning Progress
+            </h3>
+            <div class="card-tools">
+              <a href="{% url 'student_progress' %}" class="btn btn-tool btn-sm">
+                <i class="fas fa-expand-alt"></i> View Full Report
+              </a>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row mb-3">
+              <!-- Stats Cards -->
+              <div class="col-lg-3 col-6">
+                <div class="info-box bg-gradient-info">
+                  <span class="info-box-icon"><i class="fas fa-book-open"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Total Lessons</span>
+                    <span class="info-box-number">{{ total_lessons }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-6">
+                <div class="info-box bg-gradient-success">
+                  <span class="info-box-icon"><i class="fas fa-check-circle"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Lessons Completed</span>
+                    <span class="info-box-number">{{ total_lesson_completions }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-6">
+                <div class="info-box bg-gradient-warning">
+                  <span class="info-box-icon"><i class="fas fa-tasks"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Activities Done</span>
+                    <span class="info-box-number">{{ total_activity_completions }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-6">
+                <div class="info-box bg-gradient-danger">
+                  <span class="info-box-icon"><i class="fas fa-users"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Active Learners</span>
+                    <span class="info-box-number">{{ top_students_progress|length }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Top Students Progress -->
+            {% if top_students_progress %}
+            <h5 class="mb-3"><i class="fas fa-medal text-warning"></i> Top Performing Students</h5>
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th style="width: 10px">#</th>
+                    <th>Student</th>
+                    <th>Belt</th>
+                    <th style="width: 140px">Progress</th>
+                    <th class="text-center">Lessons</th>
+                    <th class="text-center">Activities</th>
+                    <th style="width: 100px">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in top_students_progress %}
+                  <tr>
+                    <td>
+                      {% if forloop.counter == 1 %}
+                        <i class="fas fa-trophy text-warning"></i>
+                      {% elif forloop.counter == 2 %}
+                        <i class="fas fa-medal text-secondary"></i>
+                      {% elif forloop.counter == 3 %}
+                        <i class="fas fa-medal text-bronze"></i>
+                      {% else %}
+                        {{ forloop.counter }}
+                      {% endif %}
+                    </td>
+                    <td>
+                      <a href="{% url 'manage_profile' item.student.id %}">
+                        <strong>{{ item.student.first_name }} {{ item.student.last_name }}</strong>
+                      </a>
+                    </td>
+                    <td>
+                      <span class="level-circle level-{{ item.student.level|lower }}"></span>
+                      {{ item.student.get_level_display }}
+                    </td>
+                    <td>
+                      <div class="progress progress-sm">
+                        <div class="progress-bar
+                          {% if item.progress_percentage >= 80 %}bg-success
+                          {% elif item.progress_percentage >= 50 %}bg-info
+                          {% elif item.progress_percentage >= 25 %}bg-warning
+                          {% else %}bg-danger{% endif %}"
+                          style="width: {{ item.progress_percentage }}%">
+                        </div>
+                      </div>
+                      <small class="text-muted">{{ item.progress_percentage }}%</small>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge badge-success">{{ item.completed_lessons }}</span>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge badge-info">{{ item.completed_activities }}</span>
+                    </td>
+                    <td>
+                      <a href="{% url 'student_progress_detail' item.student.id %}"
+                         class="btn btn-sm btn-primary"
+                         title="View Details">
+                        <i class="fas fa-chart-line"></i>
+                      </a>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle"></i>
+              No student progress data available yet. Students will appear here once they start completing lessons.
+            </div>
+            {% endif %}
+          </div>
+          <div class="card-footer">
+            <a href="{% url 'student_progress' %}" class="btn btn-danger">
+              <i class="fas fa-chart-bar"></i> View Complete Progress Report
+            </a>
+            <a href="{% url 'library' %}" class="btn btn-outline-danger">
+              <i class="fas fa-book"></i> Go to Library
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Training List -->
     <div class="row">
       {% include 'dashboard/common/training_list.html' %}
-    </div><!-- /.row -->
-{#    <!-- Main row -->#}
-{#    <div class="row">#}
-{#      <!-- Left col -->#}
-{#      <section class="col-lg-7 connectedSortable">#}
-{##}
-{#        <div class="card card-primary">#}
-{#          <div class="card-header">#}
-{#            <h3 class="card-title">Create training</h3>#}
-{#          </div>#}
-{#          <!-- /.card-header -->#}
-{#          <!-- form start -->#}
-{#          <form>#}
-{#            <div class="card-body">#}
-{#              <div class="form-group">#}
-{#                <label for="exampleInputEmail1">Email address</label>#}
-{#                <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">#}
-{#              </div>#}
-{#              <div class="form-group">#}
-{#                <label for="exampleInputPassword1">Password</label>#}
-{#                <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">#}
-{#              </div>#}
-{##}
-{#            </div>#}
-{#            <!-- /.card-body -->#}
-{##}
-{#            <div class="card-footer">#}
-{#              <button type="submit" class="btn btn-primary">Submit</button>#}
-{#            </div>#}
-{#          </form>#}
-{#        </div>#}
-{#      </section>#}
-{#      <!-- /.Left col -->#}
-{#      <!-- right col (We are only adding the ID to make the widgets sortable)-->#}
-{#      <section class="col-lg-5 connectedSortable">#}
-{##}
-{#        <!-- Map card -->#}
-{#        <div class="card bg-gradient-primary">#}
-{#          <div class="card-header border-0">#}
-{#            <h3 class="card-title">#}
-{#              <i class="fas fa-map-marker-alt mr-1"></i>#}
-{#              Visitors#}
-{#            </h3>#}
-{#            <!-- card tools -->#}
-{#            <div class="card-tools">#}
-{#              <button type="button" class="btn btn-primary btn-sm daterange" title="Date range">#}
-{#                <i class="far fa-calendar-alt"></i>#}
-{#              </button>#}
-{#              <button type="button" class="btn btn-primary btn-sm" data-card-widget="collapse" title="Collapse">#}
-{#                <i class="fas fa-minus"></i>#}
-{#              </button>#}
-{#            </div>#}
-{#            <!-- /.card-tools -->#}
-{#          </div>#}
-{#          <div class="card-body">#}
-{#            <div id="world-map" style="height: 250px; width: 100%;"></div>#}
-{#          </div>#}
-{#          <!-- /.card-body-->#}
-{#          <div class="card-footer bg-transparent">#}
-{#            <div class="row">#}
-{#              <div class="col-4 text-center">#}
-{#                <div id="sparkline-1"></div>#}
-{#                <div class="text-white">Visitors</div>#}
-{#              </div>#}
-{#              <!-- ./col -->#}
-{#              <div class="col-4 text-center">#}
-{#                <div id="sparkline-2"></div>#}
-{#                <div class="text-white">Online</div>#}
-{#              </div>#}
-{#              <!-- ./col -->#}
-{#              <div class="col-4 text-center">#}
-{#                <div id="sparkline-3"></div>#}
-{#                <div class="text-white">Sales</div>#}
-{#              </div>#}
-{#              <!-- ./col -->#}
-{#            </div>#}
-{#            <!-- /.row -->#}
-{#          </div>#}
-{#        </div>#}
-{#        <!-- /.card -->#}
-{##}
-{#        <!-- solid sales graph -->#}
-{#        <div class="card bg-gradient-info">#}
-{#          <div class="card-header border-0">#}
-{#            <h3 class="card-title">#}
-{#              <i class="fas fa-th mr-1"></i>#}
-{#              Sales Graph#}
-{#            </h3>#}
-{##}
-{#            <div class="card-tools">#}
-{#              <button type="button" class="btn bg-info btn-sm" data-card-widget="collapse">#}
-{#                <i class="fas fa-minus"></i>#}
-{#              </button>#}
-{#              <button type="button" class="btn bg-info btn-sm" data-card-widget="remove">#}
-{#                <i class="fas fa-times"></i>#}
-{#              </button>#}
-{#            </div>#}
-{#          </div>#}
-{#          <div class="card-body">#}
-{#            <canvas class="chart" id="line-chart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>#}
-{#          </div>#}
-{#          <!-- /.card-body -->#}
-{#          <div class="card-footer bg-transparent">#}
-{#            <div class="row">#}
-{#              <div class="col-4 text-center">#}
-{#                <input type="text" class="knob" data-readonly="true" value="20" data-width="60" data-height="60"#}
-{#                       data-fgColor="#39CCCC">#}
-{##}
-{#                <div class="text-white">Mail-Orders</div>#}
-{#              </div>#}
-{#              <!-- ./col -->#}
-{#              <div class="col-4 text-center">#}
-{#                <input type="text" class="knob" data-readonly="true" value="50" data-width="60" data-height="60"#}
-{#                       data-fgColor="#39CCCC">#}
-{##}
-{#                <div class="text-white">Online</div>#}
-{#              </div>#}
-{#              <!-- ./col -->#}
-{#              <div class="col-4 text-center">#}
-{#                <input type="text" class="knob" data-readonly="true" value="30" data-width="60" data-height="60"#}
-{#                       data-fgColor="#39CCCC">#}
-{##}
-{#                <div class="text-white">In-Store</div>#}
-{#              </div>#}
-{#              <!-- ./col -->#}
-{#            </div>#}
-{#            <!-- /.row -->#}
-{#          </div>#}
-{#          <!-- /.card-footer -->#}
-{#        </div>#}
-{#        <!-- /.card -->#}
-{##}
-{#        <!-- Calendar -->#}
-{#        <div class="card bg-gradient-success">#}
-{#          <div class="card-header border-0">#}
-{##}
-{#            <h3 class="card-title">#}
-{#              <i class="far fa-calendar-alt"></i>#}
-{#              Calendar#}
-{#            </h3>#}
-{#            <!-- tools card -->#}
-{#            <div class="card-tools">#}
-{#              <!-- button with a dropdown -->#}
-{#              <div class="btn-group">#}
-{#                <button type="button" class="btn btn-success btn-sm dropdown-toggle" data-toggle="dropdown" data-offset="-52">#}
-{#                  <i class="fas fa-bars"></i>#}
-{#                </button>#}
-{#                <div class="dropdown-menu" role="menu">#}
-{#                  <a href="#" class="dropdown-item">Add new event</a>#}
-{#                  <a href="#" class="dropdown-item">Clear events</a>#}
-{#                  <div class="dropdown-divider"></div>#}
-{#                  <a href="#" class="dropdown-item">View calendar</a>#}
-{#                </div>#}
-{#              </div>#}
-{#              <button type="button" class="btn btn-success btn-sm" data-card-widget="collapse">#}
-{#                <i class="fas fa-minus"></i>#}
-{#              </button>#}
-{#              <button type="button" class="btn btn-success btn-sm" data-card-widget="remove">#}
-{#                <i class="fas fa-times"></i>#}
-{#              </button>#}
-{#            </div>#}
-{#            <!-- /. tools -->#}
-{#          </div>#}
-{#          <!-- /.card-header -->#}
-{#          <div class="card-body pt-0">#}
-{#            <!--The calendar -->#}
-{#            <div id="calendar" style="width: 100%"></div>#}
-{#          </div>#}
-{#          <!-- /.card-body -->#}
-{#        </div>#}
-{#        <!-- /.card -->#}
-{#      </section>#}
-{#      <!-- right col -->#}
-{#    </div>#}
-    <!-- /.row (main row) -->
-  </div><!-- /.container-fluid -->
+    </div>
+
+  </div>
 </section>
-<!-- /.content -->
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'plugins/chart.js/Chart.min.js' %}"></script>
+<script>
+$(function () {
+  // Belt Distribution Chart
+  var beltCtx = document.getElementById('beltChart').getContext('2d');
+  var beltChart = new Chart(beltCtx, {
+    type: 'doughnut',
+    data: {
+      labels: {{ belt_labels|safe }},
+      datasets: [{
+        data: {{ belt_data|safe }},
+        backgroundColor: [
+          '#FFFFFF',  // White
+          '#FFFF00',  // Yellow
+          '#FFA500',  // Orange
+          '#008000',  // Green
+          '#7700FF',  // Violet
+          '#773333',  // Brown
+          '#000000',  // Black
+        ],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      responsive: true,
+      legend: {
+        position: 'bottom',
+      },
+      plugins: {
+        datalabels: {
+          formatter: (value, ctx) => {
+            let sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            let percentage = (value * 100 / sum).toFixed(0) + "%";
+            return percentage;
+          },
+          color: '#fff',
+          font: {
+            weight: 'bold',
+            size: 14
+          }
+        }
+      }
+    }
+  });
+});
+</script>
 {% endblock %}
