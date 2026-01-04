@@ -141,6 +141,62 @@ class KataLessonActivityVideo(models.Model):
         return f"Video de {self.activity.title}"
 
 
+class ActivityCompletion(models.Model):
+    """
+    Tracks student completion of individual kata lesson activities.
+    Each student can mark each activity as completed once.
+    """
+    student = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='activity_completions',
+        limit_choices_to={'category': Category.STUDENT}
+    )
+    activity = models.ForeignKey(
+        KataLessonActivity,
+        on_delete=models.CASCADE,
+        related_name='completions'
+    )
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'activity')
+        ordering = ['-completed_at']
+        verbose_name = 'Activity Completion'
+        verbose_name_plural = 'Activity Completions'
+
+    def __str__(self):
+        return f"{self.student} - {self.activity.title} - {self.completed_at.strftime('%Y-%m-%d')}"
+
+
+class LessonCompletion(models.Model):
+    """
+    Tracks student completion of entire kata lessons.
+    Auto-created when all activities in a lesson are completed.
+    """
+    student = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='lesson_completions',
+        limit_choices_to={'category': Category.STUDENT}
+    )
+    lesson = models.ForeignKey(
+        KataLesson,
+        on_delete=models.CASCADE,
+        related_name='completions'
+    )
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'lesson')
+        ordering = ['-completed_at']
+        verbose_name = 'Lesson Completion'
+        verbose_name_plural = 'Lesson Completions'
+
+    def __str__(self):
+        return f"{self.student} - {self.lesson.title} - {self.completed_at.strftime('%Y-%m-%d')}"
+
+
 class Kumite(models.Model):
     """Types of kumite (ippon, sanbon, jiyu, etc.)."""
     name = models.CharField(max_length=100, unique=True)
