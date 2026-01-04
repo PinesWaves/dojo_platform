@@ -10,5 +10,5 @@ python-decouple==3.8
 PyYAML==6.0.3
 qrcode==8.2
 sqlparse==0.5.4
-tzdata==2025.2
+tzdata==2025.3
 whitenoise==6.11.0
