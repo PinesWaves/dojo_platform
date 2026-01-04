@@ -1,0 +1,133 @@
+{% extends 'dashboard/sensei/base.html' %}
+{% load static %}
+{% block students-menu-class%}menu-open{% endblock %}
+{% block progress-link-status %}active{% endblock %}
+{% block dashboard_content %}
+<!-- Content Header -->
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>Student Progress</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="{% url 'sensei_dashboard' %}">Home</a></li>
+          <li class="breadcrumb-item active">Student Progress</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+    <!-- Summary cards -->
+    <div class="row">
+      <div class="col-lg-3 col-6">
+        <div class="small-box bg-info">
+          <div class="inner">
+            <h3>{{ student_progress_data|length }}</h3>
+            <p>Total Students</p>
+          </div>
+          <div class="icon">
+            <i class="fas fa-users"></i>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+          <div class="inner">
+            <h3>{{ total_lessons }}</h3>
+            <p>Total Lessons</p>
+          </div>
+          <div class="icon">
+            <i class="fas fa-book"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student progress table -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Student Learning Progress</h3>
+      </div>
+      <div class="card-body">
+        <table class="table table-bordered table-striped" id="progressTable">
+          <thead>
+            <tr>
+              <th>Student Name</th>
+              <th>Belt Level</th>
+              <th>Lessons Completed</th>
+              <th>Activities Completed</th>
+              <th>Overall Progress</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for data in student_progress_data %}
+            <tr>
+              <td>
+                <strong>{{ data.student.first_name }} {{ data.student.last_name }}</strong>
+              </td>
+              <td>
+                <span class="badge badge-secondary">{{ data.student.get_level_display }}</span>
+              </td>
+              <td>{{ data.total_lessons_completed }}</td>
+              <td>{{ data.total_activities_completed }}</td>
+              <td>
+                <div class="progress" style="height: 20px;">
+                  <div class="progress-bar {% if data.progress_percentage >= 75 %}bg-success{% elif data.progress_percentage >= 50 %}bg-info{% elif data.progress_percentage >= 25 %}bg-warning{% else %}bg-danger{% endif %}"
+                       role="progressbar"
+                       style="width: {{ data.progress_percentage }}%"
+                       aria-valuenow="{{ data.progress_percentage }}"
+                       aria-valuemin="0"
+                       aria-valuemax="100">
+                    {{ data.progress_percentage }}%
+                  </div>
+                </div>
+              </td>
+              <td>
+                <a href="{% url 'student_progress_detail' data.student.id %}" class="btn btn-sm btn-primary">
+                  <i class="fas fa-eye"></i> View Details
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="text-center text-muted">No students found</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block js %}
+<!-- DataTables -->
+<script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+    $('#progressTable').DataTable({
+        "paging": true,
+        "lengthChange": true,
+        "searching": true,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true,
+        "order": [[4, "desc"]]  // Sort by progress descending
+    });
+});
+</script>
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
+{% endblock %}
