@@ -1,9 +1,10 @@
 from django import forms
+from django.contrib.auth.forms import PasswordChangeForm
 from django.core.exceptions import ValidationError
 
 from utils.widgets import CustomSwitchWidget, CustomDateTimePickerWidget
 from utils.config_vars import regulations, informed_consent
-from .models import User, Category
+from .models import User, Category, DocumentType
 
 
 class UserRegisterForm(forms.ModelForm):
@@ -276,6 +277,30 @@ class UserUpdateForm(forms.ModelForm):
         return user
 
 
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
+class MultipleFileField(forms.FileField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = single_file_clean(data, initial)
+        return result
+
+
+class UploadDocumentsForm(forms.Form):
+    document_type = forms.ChoiceField(choices=DocumentType.choices)
+    title = forms.CharField(max_length=100, required=False)
+    files = MultipleFileField(label='Archivos')
+
+
 class ForgotPassForm(forms.Form):
     email = forms.EmailField(
         label="",
@@ -313,3 +338,30 @@ class RecoverPassForm(forms.Form):
         if password1 and password2 and password1 != password2:
             raise ValidationError("Passwords do not match.")
         return cleaned_data
+
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    """
+    Custom PasswordChangeForm with Bootstrap styling matching UserUpdateForm
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Apply Bootstrap form-control class to all fields
+        for field_name, field in self.fields.items():
+            class_attr = field.widget.attrs.get('class', '')
+            if 'form-control' not in class_attr:
+                class_attr = (class_attr + ' form-control').strip()
+            field.widget.attrs['class'] = class_attr
+
+            # Add placeholder text
+            if field_name == 'old_password':
+                field.widget.attrs['placeholder'] = 'Current Password'
+            elif field_name == 'new_password1':
+                field.widget.attrs['placeholder'] = 'New Password'
+            elif field_name == 'new_password2':
+                field.widget.attrs['placeholder'] = 'Confirm New Password'
+
+            # Mark fields with errors as invalid
+            if field_name in self.errors:
+                field.widget.attrs['class'] += ' is-invalid'

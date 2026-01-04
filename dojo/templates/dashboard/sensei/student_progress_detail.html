@@ -1,0 +1,114 @@
+{% extends 'dashboard/sensei/base.html' %}
+{% load static %}
+
+{% block dashboard_content %}
+<!-- Content Header -->
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>{{ student.first_name }} {{ student.last_name }} - Progress Details</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="{% url 'sensei_dashboard' %}">Home</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'student_progress' %}">Student Progress</a></li>
+          <li class="breadcrumb-item active">{{ student.first_name }}</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+    <!-- Student info card -->
+    <div class="card card-primary">
+      <div class="card-header">
+        <h3 class="card-title">Student Information</h3>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-3">
+            <strong>Name:</strong> {{ student.first_name }} {{ student.last_name }}
+          </div>
+          <div class="col-md-3">
+            <strong>Belt Level:</strong> <span class="badge badge-secondary">{{ student.get_level_display }}</span>
+          </div>
+          <div class="col-md-3">
+            <strong>Email:</strong> {{ student.email }}
+          </div>
+          <div class="col-md-3">
+            <strong>Joined:</strong> {{ student.date_joined|date:"Y-m-d" }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kata progress -->
+    {% for kata_data in kata_progress %}
+    <div class="card card-outline card-danger">
+      <div class="card-header">
+        <h3 class="card-title"><strong>{{ kata_data.kata.name }}</strong></h3>
+      </div>
+      <div class="card-body">
+        {% if kata_data.lessons %}
+          {% for lesson_data in kata_data.lessons %}
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5>
+                {{ lesson_data.lesson.title }}
+                {% if lesson_data.is_completed %}
+                  <i class="fas fa-check-circle text-success"></i>
+                {% endif %}
+              </h5>
+              <span class="badge badge-info">
+                {{ lesson_data.completed_activities }}/{{ lesson_data.total_activities }} activities
+              </span>
+            </div>
+
+            <div class="progress mb-2" style="height: 25px;">
+              <div class="progress-bar {% if lesson_data.is_completed %}bg-success{% else %}bg-info{% endif %}"
+                   role="progressbar"
+                   style="width: {{ lesson_data.progress_percentage }}%"
+                   aria-valuenow="{{ lesson_data.progress_percentage }}"
+                   aria-valuemin="0"
+                   aria-valuemax="100">
+                {{ lesson_data.progress_percentage|floatformat:0 }}%
+              </div>
+            </div>
+
+            {% if lesson_data.lesson.activities.exists %}
+            <div class="ml-3">
+              <small class="text-muted">Activities:</small>
+              <ul class="list-unstyled ml-3">
+                {% for activity in lesson_data.lesson.activities.all %}
+                <li>
+                  {% if activity.id in lesson_data.completed_activity_ids %}
+                    <i class="fas fa-check-square text-success"></i>
+                  {% else %}
+                    <i class="far fa-square text-muted"></i>
+                  {% endif %}
+                  {{ activity.title }}
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+            {% endif %}
+          </div>
+          <hr>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted">No lessons available for this kata.</p>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle"></i> No kata lessons available yet.
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

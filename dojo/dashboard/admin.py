@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Dojo, Training, KataSerie, Kata, KataLesson, KataLessonActivity, KataLessonActivityImage, \
-    KataLessonActivityVideo, Attendance
+    KataLessonActivityVideo, Attendance, ActivityCompletion, LessonCompletion
 
 
 @admin.register(Dojo)
@@ -118,3 +118,23 @@ class KataLessonActivityAdmin(admin.ModelAdmin):
             'fields': ('title', 'lesson', 'description', 'order'),
         }),
     )
+
+
+@admin.register(ActivityCompletion)
+class ActivityCompletionAdmin(admin.ModelAdmin):
+    list_display = ('student', 'activity', 'completed_at')
+    list_filter = ('completed_at', 'activity__lesson__kata')
+    search_fields = ('student__first_name', 'student__last_name', 'activity__title')
+    readonly_fields = ('completed_at',)
+    date_hierarchy = 'completed_at'
+    ordering = ('-completed_at',)
+
+
+@admin.register(LessonCompletion)
+class LessonCompletionAdmin(admin.ModelAdmin):
+    list_display = ('student', 'lesson', 'completed_at')
+    list_filter = ('completed_at', 'lesson__kata')
+    search_fields = ('student__first_name', 'student__last_name', 'lesson__title')
+    readonly_fields = ('completed_at',)
+    date_hierarchy = 'completed_at'
+    ordering = ('-completed_at',)

@@ -1,5 +1,5 @@
 services:
-  db_local:
+  kapp_db_local:
     restart: always
     image: postgres:18
     environment:
@@ -9,11 +9,16 @@ services:
     volumes:
       - pgdata_local:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5435:5432"
     env_file:
       - .env_local
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DOJO_DB_USER} -d ${DOJO_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  web_local:
+  kapp_web_local:
     restart: always
     build:
       context: .
@@ -31,6 +36,7 @@ services:
     env_file:
       - .env_local
     depends_on:
-      - db_local
+      kapp_db_local:
+        condition: service_healthy
 volumes:
   pgdata_local:

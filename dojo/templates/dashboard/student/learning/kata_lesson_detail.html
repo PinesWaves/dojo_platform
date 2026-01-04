@@ -33,19 +33,96 @@
 
 <div class="content">
   <div class="container">
+    <!-- Progress indicator card -->
+    {% if user.is_authenticated and student.category == 'ST' %}
+    <div class="card card-outline {% if lesson_completed %}card-success{% else %}card-info{% endif %} mb-3">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <h5 class="mb-2">
+              {% if lesson_completed %}
+                <i class="fas fa-check-circle text-success"></i> Lección completada!
+              {% else %}
+                <i class="fas fa-tasks"></i> Progreso de la lección
+              {% endif %}
+            </h5>
+            <p class="mb-0" id="progress-text">
+              <strong><span id="completed-count">{{ completed_activities|default:0 }}</span>/{{ total_activities|default:0 }}</strong> actividades completadas
+            </p>
+          </div>
+          <div class="col-md-4">
+            <div class="progress" style="height: 25px;">
+              <div class="progress-bar {% if lesson_completed %}bg-success{% else %}bg-info{% endif %}"
+                   role="progressbar"
+                   id="progress-bar"
+                   style="width: {% if total_activities and total_activities > 0 %}{% widthratio completed_activities total_activities 100 %}{% else %}0{% endif %}%"
+                   aria-valuenow="{{ completed_activities|default:0 }}"
+                   aria-valuemin="0"
+                   aria-valuemax="{{ total_activities|default:0 }}">
+                <span id="progress-percentage">{% if total_activities and total_activities > 0 %}{% widthratio completed_activities total_activities 100 %}{% else %}0{% endif %}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Lesson details card -->
     <div class="card card-outline card-danger">
       <div class="card-body">
-        <p><strong>Objetivos:</strong> {{ lesson.objectives }}</p>
-        <p>{{ lesson.content }}</p>
+        <p><strong>Objetivos:</strong>
+          {% if lesson.objectives %}
+            {% if lesson.objectives.0 and lesson.objectives.0|length > 1 %}
+              <ul class="mb-0">
+                {% for obj in lesson.objectives %}
+                  <li>{{ obj }}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              {{ lesson.objectives }}
+            {% endif %}
+          {% else %}
+            <span class="text-muted">No hay objetivos especificados.</span>
+          {% endif %}
+        </p>
+        <p><strong>Contenido:</strong>
+          {% if lesson.content %}
+            {% if lesson.content.0 and lesson.content.0|length > 1 %}
+              <ul class="mb-0">
+                {% for content_item in lesson.content %}
+                  <li>{{ content_item }}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              {{ lesson.content }}
+            {% endif %}
+          {% else %}
+            <span class="text-muted">No hay contenido especificado.</span>
+          {% endif %}
+        </p>
       </div>
     </div>
 
+    <!-- Activities -->
     {% if lesson.activities.exists %}
       <h5 class="mt-4">📝 Actividades</h5>
       {% for activity in lesson.activities.all %}
-      <div class="card card-outline card-secondary mb-3">
-        <div class="card-header">
+      <div class="card card-outline card-secondary mb-3 activity-card" data-activity-id="{{ activity.id }}">
+        <div class="card-header d-flex justify-content-between align-items-center">
           <strong>{{ activity.title }}</strong>
+          {% if user.is_authenticated and student.category == 'ST' %}
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox"
+                   class="custom-control-input activity-checkbox"
+                   id="activity-{{ activity.id }}"
+                   data-activity-id="{{ activity.id }}"
+                   {% if activity.id in activity_completion_map %}checked{% endif %}>
+            <label class="custom-control-label text-success" for="activity-{{ activity.id }}">
+              <strong>Completado</strong>
+            </label>
+          </div>
+          {% endif %}
         </div>
         <div class="card-body">
           <p>{{ activity.description }}</p>
@@ -53,11 +130,21 @@
           {% if activity.images.exists %}
             {% for img in activity.images.all %}
             <div class="row justify-content-center">
-              <div class="col-md-8 mb-2 d-flex flex-column">
+              <div class="col-md-10 mb-2 d-flex flex-column">
+                <p class="text-center"><strong>{{ img.title }}</strong></p>
                 {% if img.caption %}
-                  <small class="text-muted text-center">{{ img.caption }}</small>
+                  {% if img.caption.0 and img.caption.0|length > 1 %}
+                    <ol class="mb-0">
+                      {% for line in img.caption %}
+                        <li>{{ line }}</li>
+                      {% endfor %}
+                    </ol>
+                  {% else %}
+                    {{ img.caption }}
+                  {% endif %}
                 {% endif %}
-                <img src="{{ img.image.url }}" class="img-fluid mb-2" alt="{{ img.caption }}">
+                <br>
+                <img src="{{ img.image.url }}" class="img-fluid mb-2" alt="{{ img.title }}">
               </div>
             </div>
             {% endfor %}
@@ -67,7 +154,7 @@
           <div class="mt-2">
             {% for vid in activity.videos.all %}
               {% if vid.description %}
-              <small class="text-muted">{{ vid.description }}</small>
+              <p><strong>{{ vid.description }}</strong></p>
               {% endif %}
               {% if vid.embed_url %}
               <div class="embed-responsive embed-responsive-16by9 mb-2">
@@ -85,4 +172,140 @@
     {% endif %}
   </div>
 </div>
+
+<!-- Congratulations Modal -->
+<div class="modal fade" id="congratulationsModal" tabindex="-1" role="dialog" aria-labelledby="congratulationsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="congratulationsModalLabel">
+          <i class="fas fa-trophy"></i> Felicitaciones!
+        </h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body text-center">
+        <div class="mb-3">
+          <i class="fas fa-check-circle text-success" style="font-size: 64px;"></i>
+        </div>
+        <h4>Has completado la lección!</h4>
+        <p class="lead">{{ lesson.title }}</p>
+        <p>Excelente trabajo! Continúa con tu entrenamiento.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        <a href="{% url 'kata_detail' lesson.kata.id %}" class="btn btn-danger">Ver más lecciones</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+// Get CSRF token for AJAX requests
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const csrftoken = getCookie('csrftoken');
+
+// Handle activity checkbox changes
+$(document).ready(function() {
+    const totalActivities = {{ total_activities|default:0 }};
+
+    $('.activity-checkbox').on('change', function() {
+        const checkbox = $(this);
+        const activityId = checkbox.data('activity-id');
+        const isCompleted = checkbox.is(':checked');
+
+        // Disable checkbox during request
+        checkbox.prop('disabled', true);
+
+        // Make AJAX request
+        $.ajax({
+            url: '{% url "toggle_activity_completion" %}',
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json',
+            },
+            data: JSON.stringify({
+                activity_id: activityId,
+                completed: isCompleted
+            }),
+            success: function(response) {
+                if (response.success) {
+                    // Update progress bar
+                    const completedCount = response.completed_activities;
+                    const percentage = totalActivities > 0 ? Math.round((completedCount / totalActivities) * 100) : 0;
+
+                    $('#completed-count').text(completedCount);
+                    $('#progress-bar').css('width', percentage + '%').attr('aria-valuenow', completedCount);
+                    $('#progress-percentage').text(percentage + '%');
+
+                    // Change progress bar color if completed
+                    if (response.lesson_completed) {
+                        $('#progress-bar').removeClass('bg-info').addClass('bg-success');
+                        $('.card-outline').first().removeClass('card-info').addClass('card-success');
+                        $('#progress-text').html('<i class="fas fa-check-circle text-success"></i> Lección completada!');
+
+                        // Show congratulations modal
+                        $('#congratulationsModal').modal('show');
+
+                        // Optional: Trigger confetti effect if library is available
+                        if (typeof confetti !== 'undefined') {
+                            confetti({
+                                particleCount: 100,
+                                spread: 70,
+                                origin: { y: 0.6 }
+                            });
+                        }
+                    } else {
+                        // If unchecked, revert colors
+                        $('#progress-bar').removeClass('bg-success').addClass('bg-info');
+                        $('.card-outline').first().removeClass('card-success').addClass('card-info');
+                        $('#progress-text').html('<i class="fas fa-tasks"></i> Progreso de la lección');
+                    }
+
+                    // Show success toast (optional - requires toastr library)
+                    if (typeof toastr !== 'undefined') {
+                        toastr.success(response.message);
+                    }
+                } else {
+                    // Revert checkbox on error
+                    checkbox.prop('checked', !isCompleted);
+                    alert('Error: ' + (response.error || 'Unknown error'));
+                }
+            },
+            error: function(xhr) {
+                // Revert checkbox on error
+                checkbox.prop('checked', !isCompleted);
+                let errorMsg = 'Error al actualizar el estado';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMsg = xhr.responseJSON.error;
+                }
+                alert(errorMsg);
+            },
+            complete: function() {
+                // Re-enable checkbox
+                checkbox.prop('disabled', false);
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

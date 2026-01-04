@@ -73,9 +73,9 @@ class KataSerie(models.Model):
 class KataLesson(models.Model):
     kata = models.ForeignKey(Kata, on_delete=models.CASCADE, related_name='lessons')
     title = models.CharField(max_length=100)
-    objectives = models.TextField()
-    content = models.TextField(blank=True)
-    order = models.PositiveIntegerField(default=1)
+    objectives = models.JSONField(default=list, help_text="List of lesson objectives")
+    content = models.JSONField(default=list, blank=True, help_text="List of content items")
+    order = models.CharField(default='b0', max_length=10)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -101,7 +101,8 @@ class KataLessonActivity(models.Model):
 class KataLessonActivityImage(models.Model):
     activity = models.ForeignKey(KataLessonActivity, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='activities/images/')
-    caption = models.TextField(blank=True)
+    title = models.CharField(max_length=100, blank=True)
+    caption = models.JSONField(default=list, blank=True, null=True)
 
     def __str__(self):
         return f"Imagen de {self.activity.title}"
@@ -138,6 +139,62 @@ class KataLessonActivityVideo(models.Model):
 
     def __str__(self):
         return f"Video de {self.activity.title}"
+
+
+class ActivityCompletion(models.Model):
+    """
+    Tracks student completion of individual kata lesson activities.
+    Each student can mark each activity as completed once.
+    """
+    student = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='activity_completions',
+        limit_choices_to={'category': Category.STUDENT}
+    )
+    activity = models.ForeignKey(
+        KataLessonActivity,
+        on_delete=models.CASCADE,
+        related_name='completions'
+    )
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'activity')
+        ordering = ['-completed_at']
+        verbose_name = 'Activity Completion'
+        verbose_name_plural = 'Activity Completions'
+
+    def __str__(self):
+        return f"{self.student} - {self.activity.title} - {self.completed_at.strftime('%Y-%m-%d')}"
+
+
+class LessonCompletion(models.Model):
+    """
+    Tracks student completion of entire kata lessons.
+    Auto-created when all activities in a lesson are completed.
+    """
+    student = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='lesson_completions',
+        limit_choices_to={'category': Category.STUDENT}
+    )
+    lesson = models.ForeignKey(
+        KataLesson,
+        on_delete=models.CASCADE,
+        related_name='completions'
+    )
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'lesson')
+        ordering = ['-completed_at']
+        verbose_name = 'Lesson Completion'
+        verbose_name_plural = 'Lesson Completions'
+
+    def __str__(self):
+        return f"{self.student} - {self.lesson.title} - {self.completed_at.strftime('%Y-%m-%d')}"
 
 
 class Kumite(models.Model):
@@ -201,7 +258,7 @@ class Training(models.Model):
     type = models.CharField(choices=TrainingType.choices, default=TrainingType.MIXED, max_length=10)
     status = models.CharField(choices=TrainingStatus.choices, default=TrainingStatus.SCHEDULED, max_length=2)
     techniques = models.ManyToManyField('Technique', related_name='trainings', blank=True)
-    details = models.TextField(blank=True, null=True, help_text="Comentarios o detalles adicionales.")
+    details = models.TextField(blank=True, default='', help_text="Comentarios o detalles adicionales.")
     location = models.CharField(max_length=100, default='')
     katas = models.ManyToManyField(Kata, blank=True, related_name="trainings")
     kumites = models.ManyToManyField(Kumite, blank=True, related_name="trainings")

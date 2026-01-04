@@ -65,6 +65,52 @@
           });
 
           $('.countrypicker').countrypicker();
+
+          // Custom file input - show selected file names
+          $('.custom-file-input').on('change', function() {
+              let files = $(this)[0].files;
+              let fileNames = [];
+              for (let i = 0; i < files.length; i++) {
+                  fileNames.push(files[i].name);
+              }
+              let label = fileNames.length > 0 ? fileNames.join(', ') : 'Choose files...';
+              $(this).next('.custom-file-label').html(label);
+          });
       });
+
+      // Delete document function
+      function deleteDocument(docId) {
+          if (confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
+              // Create a form and submit it
+              let form = document.createElement('form');
+              form.method = 'POST';
+              form.action = window.location.pathname;
+
+              // Add CSRF token
+              let csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+              let csrfInput = document.createElement('input');
+              csrfInput.type = 'hidden';
+              csrfInput.name = 'csrfmiddlewaretoken';
+              csrfInput.value = csrfToken;
+              form.appendChild(csrfInput);
+
+              // Add action
+              let actionInput = document.createElement('input');
+              actionInput.type = 'hidden';
+              actionInput.name = 'action';
+              actionInput.value = 'delete_doc';
+              form.appendChild(actionInput);
+
+              // Add doc_id
+              let docIdInput = document.createElement('input');
+              docIdInput.type = 'hidden';
+              docIdInput.name = 'doc_id';
+              docIdInput.value = docId;
+              form.appendChild(docIdInput);
+
+              document.body.appendChild(form);
+              form.submit();
+          }
+      }
   </script>
 {% endblock %}

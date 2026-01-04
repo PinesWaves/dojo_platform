@@ -1,13 +1,106 @@
 {% extends 'base-user.html' %}
 {% load static %}
 {% block title %}Seishin Dojo JKA | Dashboard{% endblock %}
+
+{% block css %}
+<style>
+.progress-card {
+  border-left: 4px solid #dc3545;
+}
+.stat-widget {
+  transition: all 0.3s;
+}
+.stat-widget:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+.streak-badge {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 24px;
+  font-weight: bold;
+  border-radius: 50px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+.belt-progress {
+  height: 30px;
+  font-size: 14px;
+  font-weight: bold;
+}
+.achievement-badge {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin: 5px;
+  transition: transform 0.2s;
+}
+.achievement-badge:hover {
+  transform: scale(1.1);
+}
+.countdown-timer {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #dc3545;
+}
+.mini-calendar-day {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  margin: 2px;
+  font-size: 12px;
+  font-weight: bold;
+}
+.attended {
+  background-color: #28a745;
+  color: white;
+}
+.missed {
+  background-color: #dc3545;
+  color: white;
+}
+.upcoming {
+  background-color: #ffc107;
+  color: #000;
+}
+</style>
+{% endblock %}
+
 {% block main-menu %}
+<li class="nav-item">
+  <a class="nav-link active" href="{% url 'student_dashboard' %}">Dashboard</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="{% url 'student_calendar' %}">Calendar</a>
+</li>
 <!-- User Account menu -->
-  {% if user.is_authenticated %}
-  <li class="nav-item dropdown user-menu">
-    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-      <img class="user-image img-circle elevation-2"
-          {% if student.picture %}
+{% if user.is_authenticated %}
+<li class="nav-item dropdown user-menu">
+  <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
+    <img class="user-image img-circle elevation-2"
+        {% if student.picture %}
+         src="{{ student.picture.url }}"
+        {% elif student.gender == 'M' %}
+         src="{% static 'dist/img/avatar.png' %}"
+        {% elif student.gender == 'F' %}
+         src="{% static 'dist/img/avatar2.png' %}"
+        {% else %}
+         src="{% static 'dist/img/default_user.png' %}"
+        {% endif %}
+         alt="User Image">
+    <span class="d-none d-md-inline">{{ student.first_name }}</span>
+  </a>
+  <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+    <li class="user-header bg-danger">
+      <img class="img-circle elevation-2"
+         {% if student.picture %}
            src="{{ student.picture.url }}"
           {% elif student.gender == 'M' %}
            src="{% static 'dist/img/avatar.png' %}"
@@ -16,165 +109,288 @@
           {% else %}
            src="{% static 'dist/img/default_user.png' %}"
           {% endif %}
-           alt="User Image">
-      <span class="d-none d-md-inline">{{ student.first_name }}</span>
-    </a>
-    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-      <!-- User image -->
-      <li class="user-header bg-danger">
-        <img class="img-circle elevation-2"
-           {% if student.picture %}
-             src="{{ student.picture.url }}"
-            {% elif student.gender == 'M' %}
-             src="{% static 'dist/img/avatar.png' %}"
-            {% elif student.gender == 'F' %}
-             src="{% static 'dist/img/avatar2.png' %}"
-            {% else %}
-             src="{% static 'dist/img/default_user.png' %}"
-            {% endif %}
-           alt="User Image">
-        <p>
-          <span class="level-circle level-{{ student.level|lower }}"></span>
-          {{ student.get_level_display }} - {{ student.get_category_display }}
-          <small>Member since {{ student.date_joined }}</small>
-        </p>
-      </li>
-      <!-- Menu Footer-->
-      <li class="user-footer">
-        <a href="{% url 'profile' %}" class="btn btn-default btn-flat">Profile</a>
-        <form class="float-right" action="{% url 'logout' %}" method="post">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-default btn-flat">Logout</button>
-        </form>
-      </li>
-    </ul>
-  </li>
-  {% endif %}
-  <!-- Messages Dropdown Menu -->
-  <li class="nav-item dropdown">
-    <a class="nav-link" data-toggle="dropdown" href="#">
-      <i class="fas fa-comments"></i>
-      <span class="badge badge-danger navbar-badge">3</span>
-    </a>
-    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-      <a class="dropdown-item" href="#">
-        <!-- Message Start -->
-        <div class="media">
-          <img alt="User Avatar" class="img-size-50 mr-3 img-circle"
-               src="{% static 'dist/img/user1-128x128.jpg' %}">
-          <div class="media-body">
-            <h3 class="dropdown-item-title">
-              Brad Diesel
-              <span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
-            </h3>
-            <p class="text-sm">Call me whenever you can...</p>
-            <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-          </div>
-        </div>
-        <!-- Message End -->
-      </a>
-      <div class="dropdown-divider"></div>
-      <a class="dropdown-item" href="#">
-        <!-- Message Start -->
-        <div class="media">
-          <img alt="User Avatar" class="img-size-50 img-circle mr-3"
-               src="{% static 'dist/img/user8-128x128.jpg' %}">
-          <div class="media-body">
-            <h3 class="dropdown-item-title">
-              John Pierce
-              <span class="float-right text-sm text-muted"><i class="fas fa-star"></i></span>
-            </h3>
-            <p class="text-sm">I got your message bro</p>
-            <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-          </div>
-        </div>
-        <!-- Message End -->
-      </a>
-      <div class="dropdown-divider"></div>
-      <a class="dropdown-item" href="#">
-        <!-- Message Start -->
-        <div class="media">
-          <img alt="User Avatar" class="img-size-50 img-circle mr-3"
-               src="{% static 'dist/img/user3-128x128.jpg' %}">
-          <div class="media-body">
-            <h3 class="dropdown-item-title">
-              Nora Silvester
-              <span class="float-right text-sm text-warning"><i
-                  class="fas fa-star"></i></span>
-            </h3>
-            <p class="text-sm">The subject goes here</p>
-            <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-          </div>
-        </div>
-        <!-- Message End -->
-      </a>
-      <div class="dropdown-divider"></div>
-      <a class="dropdown-item dropdown-footer" href="#">See All Messages</a>
-    </div>
-  </li>
-  <!-- Notifications Dropdown Menu -->
-  <li class="nav-item dropdown">
-    <a class="nav-link" data-toggle="dropdown" href="#">
-      <i class="far fa-bell"></i>
-      <span class="badge badge-warning navbar-badge">15</span>
-    </a>
-    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-      <span class="dropdown-header">15 Notifications</span>
-      <div class="dropdown-divider"></div>
-      <a class="dropdown-item" href="#">
-        <i class="fas fa-envelope mr-2"></i> 4 new messages
-        <span class="float-right text-muted text-sm">3 mins</span>
-      </a>
-      <div class="dropdown-divider"></div>
-      <a class="dropdown-item" href="#">
-        <i class="fas fa-users mr-2"></i> 8 friend requests
-        <span class="float-right text-muted text-sm">12 hours</span>
-      </a>
-      <div class="dropdown-divider"></div>
-      <a class="dropdown-item" href="#">
-        <i class="fas fa-file mr-2"></i> 3 new reports
-        <span class="float-right text-muted text-sm">2 days</span>
-      </a>
-      <div class="dropdown-divider"></div>
-      <a class="dropdown-item dropdown-footer" href="#">See All Notifications</a>
-    </div>
-  </li>
-  <!-- Fullscreen option -->
-  <li class="nav-item">
-    <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-      <i class="fas fa-expand-arrows-alt"></i>
-    </a>
-  </li>
-  {#        <li class="nav-item">#}
-  {#          <a class="nav-link" data-slide="true" data-widget="control-sidebar" href="#" role="button">#}
-  {#            <i class="fas fa-th-large"></i>#}
-  {#          </a>#}
-  {#        </li>#}
+         alt="User Image">
+      <p>
+        <span class="level-circle level-{{ student.level|lower }}"></span>
+        {{ student.get_level_display }} - {{ student.get_category_display }}
+        <small>Member since {{ student.date_joined|date:"M Y" }}</small>
+      </p>
+    </li>
+    <li class="user-footer">
+      <a href="{% url 'profile' %}" class="btn btn-default btn-flat">Profile</a>
+      <form class="float-right" action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-default btn-flat">Logout</button>
+      </form>
+    </li>
+  </ul>
+</li>
+{% endif %}
 {% endblock %}
+
 {% block content %}
-<div class="content-header">
-  <div class="container py-3">
-    <div class="row mb-2">
-      <div class="col-sm-6">
-        <h1 class="mb-2 text-bold">Student Dashboard</h1>
-      </div><!-- /.col -->
-    </div><!-- /.row -->
-  </div><!-- /.container-fluid -->
-</div>
-<div class="content">
+<div class="content-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 0;">
   <div class="container">
     <div class="row">
-      <div class="col-lg-12">
-        <div class="card">
-          <div class="card-body">
-            <div id="calendar">
-              <!-- FullCalendar will be rendered here -->
+      <div class="col-sm-6">
+        <h1 class="mb-2 text-bold" style="color: white;">Welcome back, {{ student.first_name }}!</h1>
+        <p class="lead">Keep up the great work in your karate journey</p>
+      </div>
+      <div class="col-sm-6 text-right">
+        <div class="streak-badge">
+          <i class="fas fa-fire"></i> {{ training_streak }} Day Streak
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
+<div class="content">
+  <div class="container">
+
+    <!-- Stats Row -->
+    <div class="row mt-4">
+      <div class="col-lg-3 col-md-6">
+        <div class="card stat-widget bg-info">
+          <div class="card-body text-center text-white">
+            <h3><i class="fas fa-calendar-check"></i></h3>
+            <h2>{{ total_trainings }}</h2>
+            <p>Total Trainings Attended</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6">
+        <div class="card stat-widget bg-success">
+          <div class="card-body text-center text-white">
+            <h3><i class="fas fa-percentage"></i></h3>
+            <h2>{{ attendance_rate|floatformat:0 }}%</h2>
+            <p>Attendance Rate</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6">
+        <div class="card stat-widget bg-warning">
+          <div class="card-body text-center text-white">
+            <h3><i class="fas fa-certificate"></i></h3>
+            <h2>{{ student.get_level_display }}</h2>
+            <p>Current Belt Level</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6">
+        <div class="card stat-widget bg-danger">
+          <div class="card-body text-center text-white">
+            <h3><i class="fas fa-clock"></i></h3>
+            <h2>{{ days_in_dojo }}</h2>
+            <p>Days in Dojo</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Next Training & Belt Progress -->
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header bg-danger text-white">
+            <h3 class="card-title">
+              <i class="fas fa-bullseye mr-2"></i>
+              Next Training
+            </h3>
+          </div>
+          <div class="card-body text-center">
+            {% if next_training %}
+              <h4>{{ next_training.date|date:"l, F d, Y" }}</h4>
+              <div class="countdown-timer" id="countdown"></div>
+              <p class="mt-3">
+                <i class="far fa-clock"></i> {{ next_training.date|date:"g:i A" }}
+              </p>
+              <a href="{% url 'student_calendar' %}" class="btn btn-danger">View Calendar</a>
+            {% else %}
+              <p class="text-muted">No upcoming trainings scheduled</p>
+              <a href="{% url 'student_calendar' %}" class="btn btn-outline-danger">View Calendar</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card progress-card">
+          <div class="card-header bg-primary text-white">
+            <h3 class="card-title">
+              <i class="fas fa-chart-line mr-2"></i>
+              Belt Progress
+            </h3>
+          </div>
+          <div class="card-body">
+            <h5>Current: <span class="level-circle level-{{ student.level|lower }}"></span> {{ student.get_level_display }}</h5>
+            <div class="progress belt-progress mb-3">
+              <div class="progress-bar bg-success" role="progressbar" style="width: {{ belt_progress }}%">
+                {{ belt_progress|floatformat:0 }}%
+              </div>
+            </div>
+            <p class="text-muted">
+              <i class="fas fa-info-circle"></i>
+              Keep training to advance to the next level!
+            </p>
+            <small class="text-muted">Next belt: {{ next_belt }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Achievements & Recent Activity -->
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header bg-success text-white">
+            <h3 class="card-title">
+              <i class="fas fa-trophy mr-2"></i>
+              Achievements
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="d-flex flex-wrap justify-content-around">
+              {% if total_trainings >= 10 %}
+              <div class="achievement-badge bg-primary" title="10 Trainings">
+                <i class="fas fa-medal"></i>
+              </div>
+              {% endif %}
+              {% if total_trainings >= 50 %}
+              <div class="achievement-badge bg-success" title="50 Trainings">
+                <i class="fas fa-star"></i>
+              </div>
+              {% endif %}
+              {% if total_trainings >= 100 %}
+              <div class="achievement-badge bg-warning" title="100 Trainings">
+                <i class="fas fa-crown"></i>
+              </div>
+              {% endif %}
+              {% if attendance_rate >= 90 %}
+              <div class="achievement-badge bg-info" title="90% Attendance">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              {% endif %}
+              {% if training_streak >= 7 %}
+              <div class="achievement-badge bg-danger" title="7 Day Streak">
+                <i class="fas fa-fire"></i>
+              </div>
+              {% endif %}
+              {% if days_in_dojo >= 365 %}
+              <div class="achievement-badge bg-dark" title="1 Year Member">
+                <i class="fas fa-calendar-alt"></i>
+              </div>
+              {% endif %}
+            </div>
+            <div class="text-center mt-3">
+              <p class="text-muted">Earn badges by attending trainings and maintaining streaks!</p>
             </div>
           </div>
         </div>
       </div>
-    </div><!-- /.row -->
-  </div><!-- /.container-fluid -->
+
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header bg-info text-white">
+            <h3 class="card-title">
+              <i class="fas fa-history mr-2"></i>
+              Recent Attendance
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="d-flex flex-wrap">
+              {% for day in attendance_calendar %}
+                <div class="mini-calendar-day {{ day.status }}" title="{{ day.date|date:'M d, Y' }}">
+                  {{ day.date|date:"d" }}
+                </div>
+              {% endfor %}
+            </div>
+            <div class="mt-3">
+              <small><span class="badge badge-success">Green</span> Attended</small>
+              <small><span class="badge badge-danger ml-2">Red</span> Missed</small>
+              <small><span class="badge badge-warning ml-2">Yellow</span> Upcoming</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Learning Resources -->
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header bg-dark text-white">
+            <h3 class="card-title">
+              <i class="fas fa-book-open mr-2"></i>
+              Learning Resources
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-4">
+                <a href="{% url 'library' %}" class="btn btn-block btn-outline-primary mb-2">
+                  <i class="fas fa-book mr-2"></i> Kata Library
+                </a>
+              </div>
+              <div class="col-md-4">
+                <a href="{% url 'techniques' %}" class="btn btn-block btn-outline-info mb-2">
+                  <i class="fas fa-fist-raised mr-2"></i> Techniques
+                </a>
+              </div>
+              <div class="col-md-4">
+                <a href="{% url 'profile' %}" class="btn btn-block btn-outline-success mb-2">
+                  <i class="fas fa-user mr-2"></i> My Profile
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Motivational Quote -->
+    <div class="row mt-4 mb-4">
+      <div class="col-md-12">
+        <div class="card bg-gradient-dark">
+          <div class="card-body text-center text-white">
+            <h4><i class="fas fa-quote-left mr-2"></i>The ultimate aim of karate lies not in victory or defeat, but in the perfection of the character of its participants.<i class="fas fa-quote-right ml-2"></i></h4>
+            <p class="mb-0"><em>- Gichin Funakoshi</em></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
+{% endblock %}
+
+{% block js %}
+<script>
+$(function() {
+  {% if next_training %}
+  // Countdown Timer
+  var countDownDate = new Date("{{ next_training.date|date:'Y-m-d H:i:s' }}").getTime();
+
+  var x = setInterval(function() {
+    var now = new Date().getTime();
+    var distance = countDownDate - now;
+
+    var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    document.getElementById("countdown").innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+
+    if (distance < 0) {
+      clearInterval(x);
+      document.getElementById("countdown").innerHTML = "TRAINING NOW!";
+    }
+  }, 1000);
+  {% endif %}
+});
+</script>
 {% endblock %}

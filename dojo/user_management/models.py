@@ -9,6 +9,16 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from utils.config_vars import Ranges
 
 
+def user_document_path(instance, filename):
+    """
+    Genera la ruta para documentos del usuario.
+    """
+    if isinstance(instance, UserDocument):
+        return f'users/{instance.user.id_number}/documents/{filename}'
+
+    return f'users/{instance.id_number}/{filename}'
+
+
 class IDType(models.TextChoices):
     CITIZENSHIP_CARD = 'CC', 'Citizenship card'
     IDENTITY_CARD = 'IC', 'Identity Card'
@@ -44,6 +54,15 @@ class PhysicalConditions(models.TextChoices):
 class Genders(models.TextChoices):
     MALE = 'M', 'Male'
     FEMALE = 'F', 'Female'
+
+
+class DocumentType(models.TextChoices):
+    DIPLOMA = 'DI', 'Diploma'
+    CERTIFICATE = 'CE', 'Certificate'
+    MEDICAL = 'ME', 'Medical Document'
+    IDENTIFICATION = 'ID', 'Identification'
+    PAYMENT_PROOF = 'PP', 'Payment Proof'
+    OTHER = 'OT', 'Other'
 
 
 class UserManager(BaseUserManager):
@@ -100,7 +119,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     city = models.CharField(max_length=30, default='')
     country = models.CharField(max_length=30, default='')
     email = models.EmailField(max_length=255, null=False, blank=False)
-    picture = models.ImageField(upload_to='profile_imgs/', blank=True, null=True)
+    picture = models.ImageField(
+        upload_to=user_document_path,
+        blank=True,
+        null=True
+    )
     level = models.CharField(choices=Ranges.choices, default=Ranges.K10)
     parent = models.CharField(max_length=60, null=True, blank=True, default='')
     parent_phone_number = models.CharField(max_length=15, null=True, blank=True, default='')
@@ -136,6 +159,31 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
+
+
+class UserDocument(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='documents'
+    )
+    document_type = models.CharField(
+        max_length=2,
+        choices=DocumentType.choices,
+        default=DocumentType.OTHER
+    )
+    file = models.FileField(upload_to=user_document_path)
+    title = models.CharField(max_length=100, blank=True)  # Ej: "Cinturón Negro 1er Dan"
+    description = models.TextField(blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-uploaded_at']
+        verbose_name = 'User Document'
+        verbose_name_plural = 'User Documents'
+
+    def __str__(self):
+        return f"{self.user.id_number} - {self.get_document_type_display()} - {self.title}"
 
 
 class TokenType(models.TextChoices):

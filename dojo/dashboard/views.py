@@ -1,24 +1,28 @@
 from datetime import datetime, timedelta
 from secrets import token_urlsafe
+import json
+import logging
 
 from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from django.views.generic import TemplateView
 from django.utils import timezone
-import logging
+from django.views.decorators.http import require_POST
+from django.views.generic import TemplateView
 
 from dashboard.forms import TrainingSchedulingForm, TrainingForm
 from dashboard.models import Training, Dojo, Technique, TrainingStatus, KataSerie, Kata, KataLesson, \
-    TrainingScheduling
+    KataLessonActivity, TrainingScheduling, ActivityCompletion, LessonCompletion
 from dojo.mixins.view_mixins import AdminRequiredMixin
-from user_management.models import User, Token, Category, TokenType
-from user_management.forms import UserUpdateForm
-from utils.utils import get_qr_base64
+from user_management.models import User, Token, Category, TokenType, UserDocument
+from user_management.forms import UserUpdateForm, UploadDocumentsForm, CustomPasswordChangeForm
+from utils.utils import get_qr_base64, get_next_closest_day
 
 logger = logging.getLogger(__name__)
 
@@ -27,10 +31,18 @@ class SenseiDashboard(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
     template_name = "dashboard/sensei/dashboard.html"
 
     def get(self, request, *args, **kwargs):
+        # from django.db.models import Count, Q, Max
+        import json
+
         user_cat = request.user.category
         if not (user_cat in (Category.SENSEI, Category.SEMPAI)):
             return redirect('student_dashboard')
+
         today = timezone.now().date()
+        week_start = today - timedelta(days=today.weekday())
+        week_end = week_start + timedelta(days=6)
+
+        # Get trainings for the training list
         trainings = Training.objects.prefetch_related(
             'attendances', 'techniques'
         ).filter(
@@ -39,8 +51,106 @@ class SenseiDashboard(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
                 today + timedelta(days=6)
             )
         ).order_by('date')
+
+        # Stats calculations
+        all_students = User.objects.filter(category=Category.STUDENT)
+        total_students = all_students.count()
+        active_students = all_students.filter(is_active=True).count()
+        trainings_this_week = Training.objects.filter(
+            date__range=(week_start, week_end)
+        ).count()
+
+        # Calculate attendance rate
+        from dashboard.models import Attendance
+        total_attendances = Attendance.objects.count()
+        total_trainings_held = Training.objects.filter(status=TrainingStatus.FINISHED).count()
+        if total_students > 0 and total_trainings_held > 0:
+            attendance_rate = (total_attendances / (total_students * total_trainings_held)) * 100
+        else:
+            attendance_rate = 0
+
+        # Belt distribution
+        belt_levels = ['WHITE', 'YELLOW', 'ORANGE', 'GREEN', 'VIOLET', 'BROWN', 'BLACK']
+        belt_counts = []
+        for level in belt_levels:
+            count = all_students.filter(level=level).count()
+            belt_counts.append(count)
+
+        # Low attendance students (less than 50%)
+        low_attendance_students = []
+        for student in all_students[:10]:
+            student_attendances = Attendance.objects.filter(student=student).count()
+            if total_trainings_held > 0:
+                student.attendance_percentage = (student_attendances / total_trainings_held) * 100
+            else:
+                student.attendance_percentage = 0
+            if student.attendance_percentage < 50 and student.attendance_percentage > 0:
+                low_attendance_students.append(student)
+
+        # Upcoming trainings
+        upcoming_trainings = Training.objects.prefetch_related('attendances').filter(
+            date__gte=today
+        ).order_by('date')[:5]
+
+        # Recent students with activity
+        recent_students = []
+        for student in all_students.order_by('-date_joined')[:10]:
+            student_attendances = Attendance.objects.filter(student=student)
+            student.total_attendances = student_attendances.count()
+            if total_trainings_held > 0:
+                student.attendance_percentage = (student.total_attendances / total_trainings_held) * 100
+            else:
+                student.attendance_percentage = 0
+            last_attendance = student_attendances.order_by('-training__date').first()
+            student.last_attendance = last_attendance.training.date if last_attendance else None
+            recent_students.append(student)
+
+        # Student progress on kata lessons
+        lessons = KataLesson.objects.prefetch_related('activities').all()
+        total_lessons = lessons.count()
+        total_available_activities = sum(lesson.activities.count() for lesson in lessons)
+
+        # Calculate progress for all students
+        student_progress_list = []
+        for student in all_students:
+            completed_activities_count = ActivityCompletion.objects.filter(student=student).count()
+            completed_lessons_count = LessonCompletion.objects.filter(student=student).count()
+
+            progress_percentage = 0
+            if total_available_activities > 0:
+                progress_percentage = (completed_activities_count / total_available_activities) * 100
+
+            student_progress_list.append({
+                'student': student,
+                'completed_lessons': completed_lessons_count,
+                'completed_activities': completed_activities_count,
+                'progress_percentage': round(progress_percentage, 1),
+            })
+
+        # Sort by progress and get top 5
+        top_students = sorted(student_progress_list, key=lambda x: x['progress_percentage'], reverse=True)[:5]
+
+        # Calculate overall completion stats
+        total_lesson_completions = LessonCompletion.objects.count()
+        total_activity_completions = ActivityCompletion.objects.count()
+
         ctx = {
             "trainings": trainings,
+            "total_students": total_students,
+            "active_students": active_students,
+            "trainings_this_week": trainings_this_week,
+            "attendance_rate": attendance_rate,
+            "belt_labels": json.dumps(belt_levels),
+            "belt_data": json.dumps(belt_counts),
+            "low_attendance_students": low_attendance_students[:5],
+            "upcoming_trainings": upcoming_trainings,
+            "recent_students": recent_students,
+            "current_year": timezone.now().year,
+            # Student progress data
+            "top_students_progress": top_students,
+            "total_lessons": total_lessons,
+            "total_lesson_completions": total_lesson_completions,
+            "total_activity_completions": total_activity_completions,
         }
         return render(request, self.template_name, ctx)
 
@@ -101,6 +211,7 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
             schedules = TrainingScheduling.objects.all()
             today = timezone.now().date()
             end_of_year = today.replace(month=12, day=31)
+            created_count = 0
             for schedule in schedules:
                 try:
                     init_date = get_next_closest_day(today, schedule.day_of_week)
@@ -108,7 +219,7 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
                     while init_date <= end_of_year:
                         if init_date.weekday() == schedule.day_of_week:
                             schedule_dates.append(
-                                datetime.combine(init_date, schedule.time)
+                                timezone.make_aware(datetime.combine(init_date, schedule.time))
                             )
                         init_date += timedelta(days=7)
 
@@ -117,11 +228,14 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
                         date__in=schedule_dates
                     ).values_list('date', flat=True)
                     trainings = [Training(date=d) for d in schedule_dates if d not in existing_trainings]
+                    created_count += len(trainings)
                     Training.objects.bulk_create(trainings)
 
                 except ValidationError as e:
                     logger.error(f"Failed to create training from schedule {schedule.id}: {e}")
                     continue  # Skip invalid schedules
+                except:
+                    breakpoint()
 
             self.request.session['msg'] = f"{created_count} trainings created from schedules."
 
@@ -255,9 +369,13 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         pk = kwargs.get('pk')
         student = get_object_or_404(User, pk=pk)
         form = UserUpdateForm(instance=student, request=request)
+        docs_form = UploadDocumentsForm()
+        password_form = CustomPasswordChangeForm(user=student)
         qr_code = get_qr_base64(student.id_number)
         ctx = {
             'form': form,
+            'docs_form': docs_form,
+            'password_form': password_form,
             'student': student,
             'qr_code': qr_code,
         }
@@ -300,6 +418,62 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
                 'student': student,
             }
             return render(request, self.template_name, context=ctx)
+        elif self.request.POST.get('action') == 'docs':
+            docs_form = UploadDocumentsForm(request.POST)
+            if docs_form.is_valid() and request.FILES.getlist('files'):
+                files = request.FILES.getlist('files')
+                document_type = docs_form.cleaned_data['document_type']
+                title = docs_form.cleaned_data['title']
+                description = docs_form.cleaned_data['description']
+
+                for file in files:
+                    UserDocument.objects.create(
+                        user=student,  # Fixed: Upload for the student, not the sensei
+                        document_type=document_type,
+                        title=title or file.name,
+                        description=description,
+                        file=file
+                    )
+
+                messages.success(request, f"{len(files)} document(s) uploaded successfully!")
+                return redirect('manage_profile', pk=pk)
+            else:
+                messages.error(request, "Please select at least one file and fill in the required fields.")
+                return redirect('manage_profile', pk=pk)
+
+        elif self.request.POST.get('action') == 'delete_doc':
+            doc_id = request.POST.get('doc_id')
+            try:
+                doc = UserDocument.objects.get(id=doc_id, user=student)
+                doc.file.delete(save=False)  # Delete the file from storage
+                doc.delete()  # Delete the database record
+                messages.success(request, "Document deleted successfully!")
+            except UserDocument.DoesNotExist:
+                messages.error(request, "Document not found.")
+            return redirect('manage_profile', pk=pk)
+        elif self.request.POST.get('action') == 'change_password':
+            password_form = CustomPasswordChangeForm(user=student, data=request.POST)
+            if password_form.is_valid():
+                password_form.save()
+                # Update session auth hash to prevent logout after password change
+                if request.user.pk == student.pk:
+                    update_session_auth_hash(request, password_form.user)
+                self.request.session['msg'] = "Password changed successfully!"
+                return redirect('manage_profile', pk=pk)
+            else:
+                form = UserUpdateForm(instance=student, request=request)
+                docs_form = UploadDocumentsForm()
+                qr_code = get_qr_base64(student.id_number)
+                self.request.session['errors'] = password_form.errors
+                self.request.session['msg'] = "Failed to change password!"
+                ctx = {
+                    'form': form,
+                    'docs_form': docs_form,
+                    'password_form': password_form,
+                    'student': student,
+                    'qr_code': qr_code,
+                }
+                return render(request, self.template_name, context=ctx)
         else:
             form = UserUpdateForm(request.POST, instance=student, request=request)
 
@@ -332,13 +506,87 @@ class StudentDashboard(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/student/dashboard.html"
 
     def get(self, request, *args, **kwargs):
-        trainings = Training.objects.prefetch_related('attendances', 'techniques').order_by('-date')[:6]
+        from dashboard.models import Attendance
         pk = request.user.pk
         student = get_object_or_404(User, pk=pk)
+        today = timezone.now().date()
+
+        # Student's attendance records
+        student_attendances = Attendance.objects.filter(student=student).order_by('-training__date')
+        total_trainings = student_attendances.count()
+
+        # Calculate attendance rate
+        total_trainings_held = Training.objects.filter(status=TrainingStatus.FINISHED).count()
+        if total_trainings_held > 0:
+            attendance_rate = (total_trainings / total_trainings_held) * 100
+        else:
+            attendance_rate = 0
+
+        # Training streak calculation
+        training_streak = 0
+        if student_attendances.exists():
+            last_training_date = student_attendances.first().training.date
+            current_date = last_training_date
+            for attendance in student_attendances:
+                if (current_date - attendance.training.date).days <= 7:
+                    training_streak += 1
+                    current_date = attendance.training.date
+                else:
+                    break
+
+        # Days in dojo
+        # days_in_dojo = (today - student.date_joined.date()).days
+        joined = student.date_joined
+        joined_date = joined.date() if isinstance(joined, datetime) else joined
+        days_in_dojo = (today - joined_date).days
+
+        # Belt progress (simple calculation based on attendance)
+        belt_levels = ['WHITE', 'YELLOW', 'ORANGE', 'GREEN', 'VIOLET', 'BROWN', 'BLACK']
+        current_belt_index = belt_levels.index(student.level) if student.level in belt_levels else 0
+        if current_belt_index < len(belt_levels) - 1:
+            next_belt = belt_levels[current_belt_index + 1]
+            # Simple progress: 10 trainings per belt level
+            trainings_for_next_belt = (current_belt_index + 1) * 10
+            belt_progress = min((total_trainings / trainings_for_next_belt) * 100, 100)
+        else:
+            next_belt = "BLACK (Mastery)"
+            belt_progress = 100
+
+        # Next training
+        next_training = Training.objects.filter(date__gte=timezone.now()).order_by('date').first()
+
+        # Attendance calendar (last 30 days)
+        attendance_calendar = []
+        for i in range(30):
+            date = today - timedelta(days=(29 - i))
+            training_on_date = Training.objects.filter(date__date=date).first()
+            if training_on_date:
+                attended = Attendance.objects.filter(student=student, training=training_on_date).exists()
+                if attended:
+                    status = 'attended'
+                elif training_on_date.date < timezone.now():
+                    status = 'missed'
+                else:
+                    status = 'upcoming'
+            else:
+                status = ''
+            if status:
+                attendance_calendar.append({
+                    'date': date,
+                    'status': status
+                })
+
         ctx = {
-            "trainings": trainings,
             "student": student,
-            "techniques": Technique.objects.all(),
+            "total_trainings": total_trainings,
+            "attendance_rate": attendance_rate,
+            "training_streak": training_streak,
+            "days_in_dojo": days_in_dojo,
+            "belt_progress": belt_progress,
+            "next_belt": next_belt,
+            "next_training": next_training,
+            "attendance_calendar": attendance_calendar,
+            "current_year": timezone.now().year,
         }
         return render(request, self.template_name, ctx)
 
@@ -349,9 +597,13 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         student = request.user
         form = UserUpdateForm(instance=student, request=request)
+        docs_form = UploadDocumentsForm()
+        password_form = CustomPasswordChangeForm(user=student)
         qr_code = get_qr_base64(student.id_number)
         ctx = {
             'form': form,
+            'docs_form': docs_form,
+            'password_form': password_form,
             'student': student,
             'qr_code': qr_code,
         }
@@ -371,6 +623,62 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
             messages.success(request, "Picture updated correctly.")
             return redirect('profile')
 
+        elif request.POST.get('action') == 'change_password':
+            password_form = CustomPasswordChangeForm(user=student, data=request.POST)
+            if password_form.is_valid():
+                password_form.save()
+                # Update session auth hash to prevent logout after password change
+                update_session_auth_hash(request, password_form.user)
+                messages.success(request, "Password changed successfully!")
+                return redirect('profile')
+            else:
+                form = UserUpdateForm(instance=student, request=request)
+                docs_form = UploadDocumentsForm()
+                qr_code = get_qr_base64(student.id_number)
+                context = {
+                    'form': form,
+                    'docs_form': docs_form,
+                    'password_form': password_form,
+                    'student': student,
+                    'qr_code': qr_code,
+                }
+                messages.error(request, "There were errors changing the password.")
+                return render(request, self.template_name, context)
+
+        elif request.POST.get('action') == 'docs':
+            docs_form = UploadDocumentsForm(request.POST)
+            if docs_form.is_valid() and request.FILES.getlist('files'):
+                files = request.FILES.getlist('files')
+                document_type = docs_form.cleaned_data['document_type']
+                title = docs_form.cleaned_data['title']
+                description = docs_form.cleaned_data['description']
+
+                for file in files:
+                    UserDocument.objects.create(
+                        user=student,
+                        document_type=document_type,
+                        title=title or file.name,
+                        description=description,
+                        file=file
+                    )
+
+                messages.success(request, f"{len(files)} document(s) uploaded successfully!")
+                return redirect('profile')
+            else:
+                messages.error(request, "Please select at least one file and fill in the required fields.")
+                return redirect('profile')
+
+        elif request.POST.get('action') == 'delete_doc':
+            doc_id = request.POST.get('doc_id')
+            try:
+                doc = UserDocument.objects.get(id=doc_id, user=student)
+                doc.file.delete(save=False)  # Delete the file from storage
+                doc.delete()  # Delete the database record
+                messages.success(request, "Document deleted successfully!")
+            except UserDocument.DoesNotExist:
+                messages.error(request, "Document not found.")
+            return redirect('profile')
+
         form = UserUpdateForm(request.POST, request.FILES, instance=student, request=request)
         if form.is_valid():
             return self.form_valid(form)
@@ -384,8 +692,12 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
 
     def form_invalid(self, form):
         qr_code = get_qr_base64(self.request.user.id_number)
+        docs_form = UploadDocumentsForm()
+        password_form = CustomPasswordChangeForm(user=self.request.user)
         context = {
             'form': form,
+            'docs_form': docs_form,
+            'password_form': password_form,
             'student': self.request.user,
             'qr_code': qr_code,
         }
@@ -450,6 +762,7 @@ class KataDetail(TemplateView):
         pk = kwargs.get('pk')
         kata = get_object_or_404(Kata.objects.prefetch_related('lessons'), pk=pk)
         ctx = {
+            'current_year': timezone.now().year,
             'kata': kata,
         }
         if request.user.is_authenticated:
@@ -465,13 +778,333 @@ class KataLessonDetail(TemplateView):
 
     def get(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
-        lesson = get_object_or_404(KataLesson.objects.prefetch_related('activities'), pk=pk)
+        lesson = get_object_or_404(
+            KataLesson.objects.prefetch_related(
+                'activities__completions',
+                'activities__images',
+                'activities__videos',
+                'completions'
+            ),
+            pk=pk
+        )
+
         ctx = {
+            'current_year': timezone.now().year,
             'lesson': lesson,
         }
+
         if request.user.is_authenticated:
-            pk = request.user.pk
-            student = get_object_or_404(User, pk=pk)
+            student = get_object_or_404(User, pk=request.user.pk)
             ctx['student'] = student
 
+            # Get completion status for each activity
+            activity_completion_map = {}
+            if student.category == Category.STUDENT:
+                completed_activity_ids = ActivityCompletion.objects.filter(
+                    student=student,
+                    activity__lesson=lesson
+                ).values_list('activity_id', flat=True)
+
+                activity_completion_map = {aid: True for aid in completed_activity_ids}
+
+                # Calculate progress
+                total_activities = lesson.activities.count()
+                completed_activities = len(completed_activity_ids)
+
+                ctx['total_activities'] = total_activities
+                ctx['completed_activities'] = completed_activities
+                ctx['activity_completion_map'] = activity_completion_map
+                ctx['lesson_completed'] = LessonCompletion.objects.filter(
+                    student=student,
+                    lesson=lesson
+                ).exists()
+
         return render(request, self.template_name, context=ctx)
+
+
+class TrainingCalendar(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
+    """
+    Calendar view showing all training sessions (Sensei/Admin only)
+    """
+    template_name = "dashboard/sensei/calendar.html"
+
+    def get(self, request, *args, **kwargs):
+        ctx = {
+            'current_year': timezone.now().year,
+        }
+        return render(request, self.template_name, context=ctx)
+
+
+class StudentCalendar(LoginRequiredMixin, TemplateView):
+    """
+    Calendar view for students showing all training sessions
+    """
+    template_name = "dashboard/student/calendar.html"
+
+    def get(self, request, *args, **kwargs):
+        ctx = {
+            'current_year': timezone.now().year,
+        }
+        return render(request, self.template_name, context=ctx)
+
+
+class StudentProgressView(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
+    """
+    Sensei dashboard view for viewing all student progress on kata lessons.
+    Shows completion statistics and detailed progress per student.
+    """
+    template_name = "dashboard/sensei/student_progress.html"
+
+    def get(self, request, *args, **kwargs):
+        # Get all students
+        students = User.objects.filter(category=Category.STUDENT).order_by('first_name', 'last_name')
+
+        # Get all lessons for reference
+        lessons = KataLesson.objects.prefetch_related('kata', 'activities').order_by('kata__order', 'order')
+
+        # Build progress data structure
+        student_progress_data = []
+        for student in students:
+            # Get all completed activities by this student
+            completed_activities = ActivityCompletion.objects.filter(
+                student=student
+            ).select_related('activity__lesson__kata')
+
+            # Get all completed lessons
+            completed_lessons = LessonCompletion.objects.filter(
+                student=student
+            ).select_related('lesson__kata')
+
+            total_lessons_completed = completed_lessons.count()
+            total_activities_completed = completed_activities.count()
+
+            # Calculate total available activities across all lessons
+            total_available_activities = sum(lesson.activities.count() for lesson in lessons)
+
+            # Progress percentage
+            progress_percentage = 0
+            if total_available_activities > 0:
+                progress_percentage = (total_activities_completed / total_available_activities) * 100
+
+            student_progress_data.append({
+                'student': student,
+                'total_lessons_completed': total_lessons_completed,
+                'total_activities_completed': total_activities_completed,
+                'progress_percentage': round(progress_percentage, 1),
+                'completed_lesson_ids': [cl.lesson.id for cl in completed_lessons],
+            })
+
+        ctx = {
+            'current_year': timezone.now().year,
+            'student_progress_data': student_progress_data,
+            'lessons': lessons,
+            'total_lessons': lessons.count(),
+        }
+
+        return render(request, self.template_name, context=ctx)
+
+
+class StudentProgressDetail(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
+    """
+    Detailed view of a specific student's progress on all kata lessons.
+    """
+    template_name = "dashboard/sensei/student_progress_detail.html"
+
+    def get(self, request, *args, **kwargs):
+        student_id = kwargs.get('student_id')
+        student = get_object_or_404(User, pk=student_id, category=Category.STUDENT)
+
+        # Get all katas with their lessons
+        katas = Kata.objects.prefetch_related('lessons__activities').order_by('order')
+
+        # Build detailed progress data
+        kata_progress = []
+        for kata in katas:
+            lessons_data = []
+            for lesson in kata.lessons.all():
+                total_activities = lesson.activities.count()
+                completed_count = ActivityCompletion.objects.filter(
+                    student=student,
+                    activity__lesson=lesson
+                ).count()
+
+                is_lesson_completed = LessonCompletion.objects.filter(
+                    student=student,
+                    lesson=lesson
+                ).exists()
+
+                # Get completed activity IDs
+                completed_activity_ids = ActivityCompletion.objects.filter(
+                    student=student,
+                    activity__lesson=lesson
+                ).values_list('activity_id', flat=True)
+
+                lessons_data.append({
+                    'lesson': lesson,
+                    'total_activities': total_activities,
+                    'completed_activities': completed_count,
+                    'is_completed': is_lesson_completed,
+                    'progress_percentage': (completed_count / total_activities * 100) if total_activities > 0 else 0,
+                    'completed_activity_ids': list(completed_activity_ids),
+                })
+
+            kata_progress.append({
+                'kata': kata,
+                'lessons': lessons_data,
+            })
+
+        ctx = {
+            'current_year': timezone.now().year,
+            'student': student,
+            'kata_progress': kata_progress,
+        }
+
+        return render(request, self.template_name, context=ctx)
+
+
+def get_trainings_json(request):
+    """
+    API endpoint to return training data as JSON for the calendar
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    # Get all trainings
+    trainings = Training.objects.prefetch_related('attendances', 'techniques').all()
+
+    # Format trainings for FullCalendar
+    events = []
+    for training in trainings:
+        # Determine background color based on status
+        if training.status == TrainingStatus.SCHEDULED:
+            bg_color = '#0073b7'  # Blue for scheduled
+        elif training.status == TrainingStatus.FINISHED:
+            bg_color = '#00a65a'  # Green for finished
+        elif training.status == TrainingStatus.CANCELLED:
+            bg_color = '#dd4b39'  # Red for cancelled
+        else:
+            bg_color = '#3c8dbc'  # Default light blue
+
+        # Count attendances
+        attendance_count = training.attendances.count()
+
+        # Get techniques list
+        techniques_list = ', '.join([t.name for t in training.techniques.all()[:3]])
+        if training.techniques.count() > 3:
+            techniques_list += f' +{training.techniques.count() - 3} more'
+
+        # Build event title
+        title = f"{training.get_status_display()}"
+        if attendance_count > 0:
+            title += f" ({attendance_count} students)"
+
+        # Build description for event
+        description = f"Status: {training.get_status_display()}\n"
+        description += f"Attendees: {attendance_count}\n"
+        if techniques_list:
+            description += f"Techniques: {techniques_list}"
+
+        events.append({
+            'id': training.id,
+            'title': title,
+            'start': training.date.isoformat(),
+            'backgroundColor': bg_color,
+            'borderColor': bg_color,
+            'description': description,
+            'url': f'/dashboard/manage_trainings/?training_id={training.id}',  # Link to training detail
+        })
+
+    return JsonResponse(events, safe=False)
+
+
+@require_POST
+def toggle_activity_completion(request):
+    """
+    AJAX endpoint to mark/unmark an activity as completed.
+
+    Request (POST JSON):
+    {
+        "activity_id": 123,
+        "completed": true/false
+    }
+
+    Response:
+    {
+        "success": true,
+        "completed": true,
+        "message": "Activity marked as completed",
+        "lesson_completed": false,
+        "total_activities": 5,
+        "completed_activities": 3
+    }
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Authentication required'}, status=401)
+
+    if request.user.category != Category.STUDENT:
+        return JsonResponse({'success': False, 'error': 'Only students can mark activities'}, status=403)
+
+    try:
+        data = json.loads(request.body)
+        activity_id = data.get('activity_id')
+        should_complete = data.get('completed', True)
+
+        if not activity_id:
+            return JsonResponse({'success': False, 'error': 'activity_id required'}, status=400)
+
+        activity = get_object_or_404(KataLessonActivity, pk=activity_id)
+        student = request.user
+
+        with transaction.atomic():
+            if should_complete:
+                # Mark as completed
+                completion, created = ActivityCompletion.objects.get_or_create(
+                    student=student,
+                    activity=activity
+                )
+                message = "Activity marked as completed" if created else "Already completed"
+            else:
+                # Unmark as completed
+                deleted_count = ActivityCompletion.objects.filter(
+                    student=student,
+                    activity=activity
+                ).delete()[0]
+                message = "Activity unmarked" if deleted_count > 0 else "Was not completed"
+
+                # Remove lesson completion if it exists
+                LessonCompletion.objects.filter(
+                    student=student,
+                    lesson=activity.lesson
+                ).delete()
+
+            # Check if all activities in the lesson are now completed
+            lesson = activity.lesson
+            total_activities = lesson.activities.count()
+            completed_activities = ActivityCompletion.objects.filter(
+                student=student,
+                activity__lesson=lesson
+            ).count()
+
+            lesson_completed = False
+            if should_complete and completed_activities == total_activities and total_activities > 0:
+                # Auto-create lesson completion
+                LessonCompletion.objects.get_or_create(
+                    student=student,
+                    lesson=lesson
+                )
+                lesson_completed = True
+
+        return JsonResponse({
+            'success': True,
+            'completed': should_complete,
+            'message': message,
+            'lesson_completed': lesson_completed,
+            'total_activities': total_activities,
+            'completed_activities': completed_activities
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        logger.error(f"Error toggling activity completion: {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
