@@ -35,6 +35,7 @@ else:
         'https://127.0.0.1',
         'https://192.168.3.70',
         'https://*.ngrok-free.app',
+        'https://staging.seishinjkadojo.com.co',
     ]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
