@@ -3,6 +3,26 @@
 from django.db import migrations, models
 
 
+def clean_caption_field(apps, schema_editor):
+    """
+    Clean caption field to ensure valid JSON before type conversion.
+    Converts invalid JSON (text, empty, null) to empty list.
+    """
+    KataLessonActivityImage = apps.get_model('dashboard', 'KataLessonActivityImage')
+    db_alias = schema_editor.connection.alias
+
+    for image in KataLessonActivityImage.objects.using(db_alias).all():
+        if image.caption is not None:
+            caption_str = str(image.caption).strip()
+            # If not JSON-like (doesn't start with '['), convert to empty list
+            if not caption_str or not caption_str.startswith('['):
+                image.caption = '[]'
+                image.save()
+        else:
+            image.caption = '[]'
+            image.save()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -14,6 +34,11 @@ class Migration(migrations.Migration):
             model_name='katalessonactivityimage',
             name='title',
             field=models.CharField(blank=True, max_length=100),
+        ),
+        # Clean existing caption data before converting to JSONField
+        migrations.RunPython(
+            clean_caption_field,
+            reverse_code=migrations.RunPython.noop,
         ),
         migrations.AlterField(
             model_name='katalessonactivityimage',
