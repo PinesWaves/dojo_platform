@@ -54,6 +54,8 @@ class PhysicalConditions(models.TextChoices):
 class Genders(models.TextChoices):
     MALE = 'M', 'Male'
     FEMALE = 'F', 'Female'
+    OTHER = 'O', 'Other'
+    NA = 'NA', 'No response'
 
 
 class DocumentType(models.TextChoices):
@@ -108,7 +110,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         choices=Category.choices,
         default=Category.STUDENT
     )
-    id_number = models.CharField(max_length=30, unique=True, null=False, blank=False, default=0)
+    id_number = models.CharField(max_length=30, unique=True, null=False, blank=False)
     birth_date = models.DateField(default=datetime(2000, 1, 1), null=False, blank=False)
     birth_place = models.CharField(max_length=30, default='')
     gender = models.CharField(choices=Genders.choices, default=Genders.MALE)

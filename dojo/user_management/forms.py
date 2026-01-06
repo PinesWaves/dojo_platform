@@ -123,6 +123,9 @@ class UserRegisterForm(forms.ModelForm):
         self.request_user = kwargs.pop('request_user', None)
         super().__init__(*args, **kwargs)
 
+        # Establecer phone_number sin valor inicial para mostrar placeholder
+        self.fields['phone_number'].initial = None
+
         for field_name, field in self.fields.items():
             # Asegurar clase form-control (menos checkboxes o switches)
             class_attr = field.widget.attrs.get('class', '')
