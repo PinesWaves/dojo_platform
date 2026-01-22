@@ -3,11 +3,12 @@ from django.conf.urls.static import static
 from django.contrib.auth.views import LogoutView
 from django.urls import path, include
 
-from .views import landing_page, custom_404, custom_500
+from .views import landing_page, custom_404, custom_500, set_language
 from user_management.views import RegisterView, CustomLoginView, RecoverPass, ForgotPass, CustomLogoutView
 
 urlpatterns = [
     path('', landing_page, name='landing'),
+    path('i18n/setlang/', set_language, name='set_language'),
     path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', CustomLogoutView.as_view(next_page='landing'), name='logout'),
     path('signup/<str:token>/', RegisterView.as_view(), name='signup'),

@@ -9,6 +9,7 @@ from django.template.loader import render_to_string
 from django.templatetags.static import static
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import FormView
 from django.shortcuts import render, redirect
@@ -47,12 +48,12 @@ class CustomLoginView(View):
         user = authenticate(request, id_number=id_number, password=password)
         if user:
             if not user.is_active:
-                messages.error(request, "Your account is deactivated. Please contact support.")
+                messages.error(request, _("Your account is deactivated. Please contact support."))
                 return redirect(reverse_lazy('login'))
 
             # Si las credenciales son válidas, iniciar sesión
             login(request, user)
-            messages.success(request, "Login successful!")
+            messages.success(request, _("Login successful!"))
 
             # --- Check for the 'next' URL from the form submission ---
             next_url = request.POST.get('next')
@@ -71,7 +72,7 @@ class CustomLoginView(View):
             else:
                 return redirect(reverse_lazy('login'))
 
-        messages.error(request, "Invalid credentials.")
+        messages.error(request, _("Invalid credentials."))
         return redirect(reverse_lazy('login'))
 
 
@@ -83,7 +84,7 @@ class CustomLogoutView(LogoutView):
         response = super().dispatch(request, *args, **kwargs)
 
         # Agrega un mensaje de cierre de sesión exitoso
-        messages.success(request, "You have been logged out successfully.")
+        messages.success(request, _("You have been logged out successfully."))
 
         return response
 
@@ -151,7 +152,7 @@ class ForgotPass(FormView):
     def form_valid(self, form):
         user_email = form.cleaned_data['email']
         if not user_email:
-            messages.error(self.request, "Please enter your email.")
+            messages.error(self.request, _("Please enter your email."))
             return redirect("forgot-password")
 
         try:
@@ -194,10 +195,10 @@ class ForgotPass(FormView):
             email.attach(image)
             email.send()
 
-            messages.success(self.request, "We have sent a password reset link to your email.")
+            messages.success(self.request, _("We have sent a password reset link to your email."))
             return redirect('login')
         except User.DoesNotExist:
-            messages.error(self.request, "No user found with that email address.")
+            messages.error(self.request, _("No user found with that email address."))
             return redirect('forgot-password')
 
 
@@ -220,20 +221,20 @@ class RecoverPass(FormView):
         try:
             token = Token.objects.get(token=self.token_str, type=TokenType.PASSWORD_RESET)
             if not token.is_valid():
-                messages.error(self.request, "The reset link is invalid or expired.")
+                messages.error(self.request, _("The reset link is invalid or expired."))
                 return redirect('forgot-password')
 
             user = token.user
             user.set_password(form.cleaned_data['password1'])
             user.save()
             token.delete()
-            messages.success(self.request, "Your password has been reset successfully.")
+            messages.success(self.request, _("Your password has been reset successfully."))
             return redirect(self.success_url)
 
         except Token.DoesNotExist:
-            messages.error(self.request, "The reset link is invalid or expired.")
+            messages.error(self.request, _("The reset link is invalid or expired."))
             return redirect('forgot-password')
 
     def form_invalid(self, form):
-        messages.error(self.request, "Update failed! Please check the form.")
+        messages.error(self.request, _("Update failed! Please check the form."))
         return self.render_to_response(self.get_context_data(form=form))

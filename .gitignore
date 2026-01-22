@@ -10,5 +10,4 @@
 */staticfiles/
 __pycache__
 /dojo/test/data/*.csv
-media/
 *.cp
