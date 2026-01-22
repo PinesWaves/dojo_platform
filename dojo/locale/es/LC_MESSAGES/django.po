@@ -1,0 +1,274 @@
+# Spanish translations for Karate Dojo Management System.
+# Copyright (C) 2026 Seishin JKA Dojo
+# This file is distributed under the same license as the package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-05 23:58-0500\n"
+"PO-Revision-Date: 2026-01-06 00:00-0500\n"
+"Last-Translator: Claude Code\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: templates/base-user.html:51
+msgid "Toggle navigation"
+msgstr "Alternar navegación"
+
+#: templates/base-user.html:91
+msgid "Library"
+msgstr "Biblioteca"
+
+#: templates/base-user.html:107
+msgid "All rights reserved"
+msgstr "Todos los derechos reservados"
+
+#: templates/login_register/login.html:3
+msgid "Log in"
+msgstr "Iniciar sesión"
+
+#: templates/login_register/login.html:4
+msgid "Sign in to start your session"
+msgstr "Inicie sesión para comenzar su sesión"
+
+#: templates/login_register/login.html:9
+msgid "Close"
+msgstr "Cerrar"
+
+#: templates/login_register/login.html:19
+msgid "ID number"
+msgstr "Número de identificación"
+
+#: templates/login_register/login.html:27 user_management/forms.py:30
+msgid "Password"
+msgstr "Contraseña"
+
+#: templates/login_register/login.html:36
+msgid "Forgot password"
+msgstr "Olvidé mi contraseña"
+
+#: templates/login_register/login.html:46
+msgid "Sign In"
+msgstr "Iniciar Sesión"
+
+#: user_management/forms.py:35
+msgid "Confirm Password"
+msgstr "Confirmar Contraseña"
+
+#: user_management/forms.py:41
+msgid "Do you have any cardiovascular problems?"
+msgstr "¿Tiene algún problema cardiovascular?"
+
+#: user_management/forms.py:47
+msgid "Have you had any injuries in the last 6 months?"
+msgstr "¿Ha tenido alguna lesión en los últimos 6 meses?"
+
+#: user_management/forms.py:53
+msgid "Do you have any physical limitations?"
+msgstr "¿Tiene alguna limitación física?"
+
+#: user_management/forms.py:59
+msgid "Have you lost consciousness or lost balance after feeling dizzy?"
+msgstr "¿Ha perdido el conocimiento o el equilibrio después de sentirse mareado?"
+
+#: user_management/forms.py:65
+msgid ""
+"I will follow the instructor's recommendations and safety rules during the "
+"classes."
+msgstr ""
+"Seguiré las recomendaciones del instructor y las reglas de seguridad durante "
+"las clases."
+
+#: user_management/forms.py:71
+msgid ""
+"I have read, understand the questions, completed and answered the "
+"questionnaire with my acceptance?"
+msgstr ""
+"He leído, entiendo las preguntas, completé y respondí el cuestionario con mi "
+"aceptación?"
+
+#: user_management/forms.py:77 user_management/forms.py:84
+msgid "I accept the "
+msgstr "Acepto el "
+
+#: user_management/forms.py:78
+msgid "Regulations"
+msgstr "Reglamento"
+
+#: user_management/forms.py:85
+msgid "Informed consent"
+msgstr "Consentimiento informado"
+
+#: user_management/forms.py:177 user_management/forms.py:343
+msgid "Passwords do not match."
+msgstr "Las contraseñas no coinciden."
+
+#: user_management/forms.py:182
+msgid "Only users with category 'Sensei' can change the category."
+msgstr "Solo los usuarios con categoría 'Sensei' pueden cambiar la categoría."
+
+#: user_management/forms.py:313
+msgid "Email"
+msgstr "Correo electrónico"
+
+#: user_management/forms.py:324 user_management/forms.py:365
+msgid "New Password"
+msgstr "Nueva Contraseña"
+
+#: user_management/forms.py:332 user_management/forms.py:367
+msgid "Confirm New Password"
+msgstr "Confirmar Nueva Contraseña"
+
+#: user_management/forms.py:363
+msgid "Current Password"
+msgstr "Contraseña Actual"
+
+#: user_management/models.py:24
+msgid "Citizenship card"
+msgstr "Cédula de ciudadanía"
+
+#: user_management/models.py:25
+msgid "Identity Card"
+msgstr "Tarjeta de identidad"
+
+#: user_management/models.py:26
+msgid "Alien Registration Card"
+msgstr "Tarjeta de registro de extranjero"
+
+#: user_management/models.py:27
+msgid "Passport"
+msgstr "Pasaporte"
+
+#: user_management/models.py:28 user_management/models.py:58
+#: user_management/models.py:68
+msgid "Other"
+msgstr "Otro"
+
+#: user_management/models.py:34
+msgid "Student"
+msgstr "Estudiante"
+
+#: user_management/models.py:38
+msgid "Cardiac Diseases"
+msgstr "Enfermedades Cardíacas"
+
+#: user_management/models.py:39
+msgid "Arterial Hypertension"
+msgstr "Hipertensión Arterial"
+
+#: user_management/models.py:40
+msgid "Diabetes"
+msgstr "Diabetes"
+
+#: user_management/models.py:41
+msgid "Asthma or respiratory problems"
+msgstr "Asma o problemas respiratorios"
+
+#: user_management/models.py:42
+msgid "Epilepsy or Seizures"
+msgstr "Epilepsia o Convulsiones"
+
+#: user_management/models.py:43
+msgid "Musculoskeletal Problems (e.g. Sprains, Fractures)"
+msgstr "Problemas Musculoesqueléticos (ej. Esguinces, Fracturas)"
+
+#: user_management/models.py:44
+msgid "Others"
+msgstr "Otros"
+
+#: user_management/models.py:45
+msgid "Not applicable"
+msgstr "No aplicable"
+
+#: user_management/models.py:49
+msgid "Excellent"
+msgstr "Excelente"
+
+#: user_management/models.py:50
+msgid "Good"
+msgstr "Bueno"
+
+#: user_management/models.py:51
+msgid "Acceptable"
+msgstr "Aceptable"
+
+#: user_management/models.py:52
+msgid "Needs improvement"
+msgstr "Necesita mejorar"
+
+#: user_management/models.py:56
+msgid "Male"
+msgstr "Masculino"
+
+#: user_management/models.py:57
+msgid "Female"
+msgstr "Femenino"
+
+#: user_management/models.py:59
+msgid "No response"
+msgstr "Sin respuesta"
+
+#: user_management/models.py:63
+msgid "Diploma"
+msgstr "Diploma"
+
+#: user_management/models.py:64
+msgid "Certificate"
+msgstr "Certificado"
+
+#: user_management/models.py:65
+msgid "Medical Document"
+msgstr "Documento Médico"
+
+#: user_management/models.py:66
+msgid "Identification"
+msgstr "Identificación"
+
+#: user_management/models.py:67
+msgid "Payment Proof"
+msgstr "Comprobante de Pago"
+
+#: user_management/views.py:51
+msgid "Your account is deactivated. Please contact support."
+msgstr "Su cuenta está desactivada. Por favor contacte a soporte."
+
+#: user_management/views.py:56
+msgid "Login successful!"
+msgstr "¡Inicio de sesión exitoso!"
+
+#: user_management/views.py:75
+msgid "Invalid credentials."
+msgstr "Credenciales inválidas."
+
+#: user_management/views.py:87
+msgid "You have been logged out successfully."
+msgstr "Ha cerrado sesión exitosamente."
+
+#: user_management/views.py:155
+msgid "Please enter your email."
+msgstr "Por favor ingrese su correo electrónico."
+
+#: user_management/views.py:198
+msgid "We have sent a password reset link to your email."
+msgstr "Hemos enviado un enlace de restablecimiento de contraseña a su correo electrónico."
+
+#: user_management/views.py:201
+msgid "No user found with that email address."
+msgstr "No se encontró ningún usuario con esa dirección de correo electrónico."
+
+#: user_management/views.py:224 user_management/views.py:235
+msgid "The reset link is invalid or expired."
+msgstr "El enlace de restablecimiento es inválido o ha expirado."
+
+#: user_management/views.py:231
+msgid "Your password has been reset successfully."
+msgstr "Su contraseña ha sido restablecida exitosamente."
+
+#: user_management/views.py:239
+msgid "Update failed! Please check the form."
+msgstr "¡Actualización fallida! Por favor revise el formulario."
