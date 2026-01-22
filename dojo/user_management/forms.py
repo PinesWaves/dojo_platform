@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from utils.widgets import CustomSwitchWidget, CustomDateTimePickerWidget
 from utils.config_vars import regulations, informed_consent
@@ -26,62 +27,62 @@ class UserRegisterForm(forms.ModelForm):
         required=True
     )
     password1 = forms.CharField(
-        label="Password",
+        label=_("Password"),
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
         required=True
     )
     password2 = forms.CharField(
-        label="Confirm Password",
+        label=_("Confirm Password"),
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
         required=True
     )
     cardio_prob = forms.BooleanField(
         widget=CustomSwitchWidget(
-            label_text="Do you have any cardiovascular problems?",
+            label_text=_("Do you have any cardiovascular problems?"),
         ),
         required=False
     )
     injuries = forms.BooleanField(
         widget=CustomSwitchWidget(
-            label_text="Have you had any injuries in the last 6 months?",
+            label_text=_("Have you had any injuries in the last 6 months?"),
         ),
         required=False
     )
     physical_limit = forms.BooleanField(
         widget=CustomSwitchWidget(
-            label_text="Do you have any physical limitations?",
+            label_text=_("Do you have any physical limitations?"),
         ),
         required=False
     )
     lost_cons = forms.BooleanField(
         widget=CustomSwitchWidget(
-            label_text="Have you lost consciousness or lost balance after feeling dizzy?",
+            label_text=_("Have you lost consciousness or lost balance after feeling dizzy?"),
         ),
         required=False
     )
     sec_recom = forms.BooleanField(
         widget=CustomSwitchWidget(
-            label_text="I will follow the instructor's recommendations and safety rules during the classes.",
+            label_text=_("I will follow the instructor's recommendations and safety rules during the classes."),
         ),
         required=True
     )
     agreement = forms.BooleanField(
         widget=CustomSwitchWidget(
-            label_text="I have read, understand the questions, completed and answered the questionnaire with my acceptance?",
+            label_text=_("I have read, understand the questions, completed and answered the questionnaire with my acceptance?"),
         ),
         required=True
     )
     accept_regulations = forms.BooleanField(
         widget=CustomSwitchWidget(
-            label_text="I accept the ",
-            a_tag=('Regulations', regulations)
+            label_text=_("I accept the "),
+            a_tag=(_('Regulations'), regulations)
         ),
         required=True
     )
     accept_inf_cons = forms.BooleanField(
         widget=CustomSwitchWidget(
-            label_text="I accept the ",
-            a_tag=('Informed consent', informed_consent)
+            label_text=_("I accept the "),
+            a_tag=(_('Informed consent'), informed_consent)
         ),
         required=True
     )
@@ -173,12 +174,12 @@ class UserRegisterForm(forms.ModelForm):
         password1 = cleaned_data.get("password1")
         password2 = cleaned_data.get("password2")
         if password1 and password2 and password1 != password2:
-            self.add_error("password2", "Passwords do not match.")
+            self.add_error("password2", _("Passwords do not match."))
 
         # Validación del campo category si cambia
         category = cleaned_data.get("category")
         if category and 'category' in self.changed_data and self.request_user and not self.request_user.is_sensei:
-            self.add_error("category", "Only users with category 'Sensei' can change the category.")
+            self.add_error("category", _("Only users with category 'Sensei' can change the category."))
 
         return cleaned_data
 
@@ -309,7 +310,7 @@ class ForgotPassForm(forms.Form):
         label="",
         widget=forms.EmailInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Email'
+            'placeholder': _('Email')
         }),
         required=True
     )
@@ -320,7 +321,7 @@ class RecoverPassForm(forms.Form):
         label="",
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
-            'placeholder': 'New Password'
+            'placeholder': _('New Password')
         }),
         required=True
     )
@@ -328,7 +329,7 @@ class RecoverPassForm(forms.Form):
         label="",
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Confirm New Password'
+            'placeholder': _('Confirm New Password')
         }),
         required=True
     )
@@ -339,7 +340,7 @@ class RecoverPassForm(forms.Form):
         password2 = cleaned_data.get("password2")
 
         if password1 and password2 and password1 != password2:
-            raise ValidationError("Passwords do not match.")
+            raise ValidationError(_("Passwords do not match."))
         return cleaned_data
 
 
@@ -359,11 +360,11 @@ class CustomPasswordChangeForm(PasswordChangeForm):
 
             # Add placeholder text
             if field_name == 'old_password':
-                field.widget.attrs['placeholder'] = 'Current Password'
+                field.widget.attrs['placeholder'] = _('Current Password')
             elif field_name == 'new_password1':
-                field.widget.attrs['placeholder'] = 'New Password'
+                field.widget.attrs['placeholder'] = _('New Password')
             elif field_name == 'new_password2':
-                field.widget.attrs['placeholder'] = 'Confirm New Password'
+                field.widget.attrs['placeholder'] = _('Confirm New Password')
 
             # Mark fields with errors as invalid
             if field_name in self.errors:

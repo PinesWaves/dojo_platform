@@ -71,6 +71,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',  # Language detection middleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -143,13 +144,32 @@ AUTH_USER_MODEL = 'user_management.User'
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en'  # Cambiar de 'en-us' a 'en' para consistencia
+
+# Supported languages
+LANGUAGES = [
+    ('en', 'English'),
+    ('es', 'Español'),
+    ('ja', '日本語'),
+]
+
+# Directory for translation files
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 
 TIME_ZONE = 'America/Bogota'
 
 USE_I18N = True
-
+USE_L10N = True  # Enable localized formatting
 USE_TZ = True
+
+# Language cookie settings
+LANGUAGE_COOKIE_NAME = 'django_language'
+LANGUAGE_COOKIE_AGE = 31536000  # 1 year (in seconds)
+LANGUAGE_COOKIE_PATH = '/'
+LANGUAGE_COOKIE_HTTPONLY = False  # Allow JS access for language switcher
+LANGUAGE_COOKIE_SAMESITE = 'Lax'
 
 
 # Email settings for Gmail

@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
@@ -20,51 +21,51 @@ def user_document_path(instance, filename):
 
 
 class IDType(models.TextChoices):
-    CITIZENSHIP_CARD = 'CC', 'Citizenship card'
-    IDENTITY_CARD = 'IC', 'Identity Card'
-    ALIEN_CARD = 'AR', 'Alien Registration Card'
-    PASSPORT = 'PA', 'Passport'
-    OTHER = 'OT', 'Other'
+    CITIZENSHIP_CARD = 'CC', _('Citizenship card')
+    IDENTITY_CARD = 'IC', _('Identity Card')
+    ALIEN_CARD = 'AR', _('Alien Registration Card')
+    PASSPORT = 'PA', _('Passport')
+    OTHER = 'OT', _('Other')
 
 
 class Category(models.TextChoices):
-    SENSEI = 'SE', 'Sensei'
-    SEMPAI = 'SP', 'Sempai'
-    STUDENT = 'ST', 'Student'
+    SENSEI = 'SE', 'Sensei'  # Keep in Japanese
+    SEMPAI = 'SP', 'Sempai'  # Keep in Japanese
+    STUDENT = 'ST', _('Student')
 
 
 class MedicalConditions(models.TextChoices):
-    CARDIAC_DISEASES = 'CD', 'Cardiac Diseases'
-    ARTERIAL_HYPERTENSION = 'AH', 'Arterial Hypertension'
-    DIABETES = 'D', 'Diabetes'
-    ASTHMA_OR_RESPIRATORY_PROBLEMS = 'AR', 'Asthma or respiratory problems'
-    EPILEPSY_OR_SEIZURES = 'ES', 'Epilepsy or Seizures'
-    MUSCULOSKELETAL_PROBLEMS = 'MP', 'Musculoskeletal Problems (e.g. Sprains, Fractures)'
-    OTHERS = 'OT', 'Others'
-    NA = 'NA', 'No aplicable'
+    CARDIAC_DISEASES = 'CD', _('Cardiac Diseases')
+    ARTERIAL_HYPERTENSION = 'AH', _('Arterial Hypertension')
+    DIABETES = 'D', _('Diabetes')
+    ASTHMA_OR_RESPIRATORY_PROBLEMS = 'AR', _('Asthma or respiratory problems')
+    EPILEPSY_OR_SEIZURES = 'ES', _('Epilepsy or Seizures')
+    MUSCULOSKELETAL_PROBLEMS = 'MP', _('Musculoskeletal Problems (e.g. Sprains, Fractures)')
+    OTHERS = 'OT', _('Others')
+    NA = 'NA', _('Not applicable')
 
 
 class PhysicalConditions(models.TextChoices):
-    EXCELLENT = 'E', 'Excellent'
-    GOOD = 'G', 'Good'
-    ACCEPTABLE = 'A', 'Acceptable'
-    NEEDS_IMPROVEMENT = 'I', 'Needs improvement'
+    EXCELLENT = 'E', _('Excellent')
+    GOOD = 'G', _('Good')
+    ACCEPTABLE = 'A', _('Acceptable')
+    NEEDS_IMPROVEMENT = 'I', _('Needs improvement')
 
 
 class Genders(models.TextChoices):
-    MALE = 'M', 'Male'
-    FEMALE = 'F', 'Female'
-    OTHER = 'O', 'Other'
-    NA = 'NA', 'No response'
+    MALE = 'M', _('Male')
+    FEMALE = 'F', _('Female')
+    OTHER = 'O', _('Other')
+    NA = 'NA', _('No response')
 
 
 class DocumentType(models.TextChoices):
-    DIPLOMA = 'DI', 'Diploma'
-    CERTIFICATE = 'CE', 'Certificate'
-    MEDICAL = 'ME', 'Medical Document'
-    IDENTIFICATION = 'ID', 'Identification'
-    PAYMENT_PROOF = 'PP', 'Payment Proof'
-    OTHER = 'OT', 'Other'
+    DIPLOMA = 'DI', _('Diploma')
+    CERTIFICATE = 'CE', _('Certificate')
+    MEDICAL = 'ME', _('Medical Document')
+    IDENTIFICATION = 'ID', _('Identification')
+    PAYMENT_PROOF = 'PP', _('Payment Proof')
+    OTHER = 'OT', _('Other')
 
 
 class UserManager(BaseUserManager):
