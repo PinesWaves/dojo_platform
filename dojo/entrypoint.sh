@@ -15,6 +15,7 @@ chmod -R 777 /app/dojo/logs
 
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
+python manage.py load_library_data
 
 # Iniciar Gunicorn en modo producción
 gunicorn dojo.wsgi:application \
