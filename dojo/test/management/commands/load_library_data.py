@@ -127,19 +127,15 @@ class Command(BaseCommand):
                     if img_path:
                         src_path = BASE_PATH / img_path
                         if src_path.exists():
-                            # Copiar la imagen a MEDIA_ROOT/activities/images/
-                            dest_dir = Path(settings.MEDIA_ROOT) / "activities" / "images"
-                            dest_dir.mkdir(parents=True, exist_ok=True)
 
-                            dest_path = dest_dir / src_path.name
-                            shutil.copy(src_path, dest_path)
-
-                            with open(dest_path, "rb") as f:
+                            with open(src_path, "rb") as f:
                                 KataLessonActivityImage.objects.get_or_create(
                                     activity=activity_obj,
                                     title=img.get("title", ""),
-                                    caption=img.get("caption", ""),
-                                    defaults={"image": File(f, name=f"activities/images/{src_path.name}")},
+                                    defaults={
+                                        "caption": img.get("caption", ""),
+                                        "image": File(f, name=src_path.name),
+                                    }
                                 )
                             self.stdout.write(self.style.SUCCESS(f"🖼 Image loaded: {src_path.name}"))
                         else:

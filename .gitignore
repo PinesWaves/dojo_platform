@@ -4,9 +4,7 @@
 .env_local
 .idea
 */logs
-/dojo/media/techniques/*.png
-/dojo/media/qr_codes/*.png
-/dojo/media/profile_imgs/*.png
+/dojo/media/
 */staticfiles/
 __pycache__
 /dojo/test/data/*.csv
