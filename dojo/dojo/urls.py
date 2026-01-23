@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth.views import LogoutView
-from django.urls import path, include
+from django.urls import path, include, re_path
+from django.views.static import serve
 
 from .views import landing_page, custom_404, custom_500, set_language
 from user_management.views import RegisterView, CustomLoginView, RecoverPass, ForgotPass, CustomLogoutView
@@ -41,6 +42,11 @@ if settings.DEBUG:
         path('test-500/', test_500, name='test_500'),
     ]
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if not settings.DEBUG:
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    ]
 
 handler404 = 'dojo.views.custom_404'
 handler500 = 'dojo.views.custom_500'
