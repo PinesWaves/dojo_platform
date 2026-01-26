@@ -708,6 +708,8 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
 
 
 class Library(TemplateView):
+    # TODO: colocar info basica de karate
+    # TODO: Agregar glosarios
     template_name = "dashboard/student/learning/library.html"
 
     def get(self, request, *args, **kwargs):
