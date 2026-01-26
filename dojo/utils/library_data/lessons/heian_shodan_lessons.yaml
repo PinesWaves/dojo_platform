@@ -25,7 +25,7 @@ lessons:
         description: "Conoce los fundamentos del Karate-Do Shotokan JKA, incluyendo el Dojo Kun y Niju Kun."
         order: 2
         images:
-          - path: images/jka-dojo-kun.webp
+          - path: images/jka-dojo-kun.png
             title: "JKA Dojo Kun"
             caption:
               - "Buscar la perfección del carácter * HITOTSU! JIN KAKU KANSEI NI TSUTOMURU KOTO * 一丶人格完成に努むること。"
