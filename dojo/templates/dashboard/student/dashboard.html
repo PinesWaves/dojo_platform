@@ -4,8 +4,15 @@
 
 {% block css %}
 <style>
-.progress-card {
-  border-left: 4px solid #dc3545;
+.content-header {
+  background: linear-gradient(135deg, #83889e 0%, #3a373e 100%);
+  color: white;
+  padding: 40px 0;
+  margin-bottom: 30px;
+}
+.content-header h1 {
+  color: white;
+  font-weight: bold;
 }
 .stat-widget {
   transition: all 0.3s;
@@ -45,7 +52,6 @@
 .countdown-timer {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #dc3545;
 }
 .mini-calendar-day {
   width: 40px;
@@ -73,67 +79,12 @@
 </style>
 {% endblock %}
 
-{% block main_menu %}
-<li class="nav-item">
-  <a class="nav-link active" href="{% url 'student_dashboard' %}">Dashboard</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="{% url 'student_calendar' %}">Calendar</a>
-</li>
-<!-- User Account menu -->
-{% if user.is_authenticated %}
-<li class="nav-item dropdown user-menu">
-  <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-    <img class="user-image img-circle elevation-2"
-        {% if student.picture %}
-         src="{{ student.picture.url }}"
-        {% elif student.gender == 'M' %}
-         src="{% static 'dist/img/avatar.png' %}"
-        {% elif student.gender == 'F' %}
-         src="{% static 'dist/img/avatar2.png' %}"
-        {% else %}
-         src="{% static 'dist/img/default_user.png' %}"
-        {% endif %}
-         alt="User Image">
-    <span class="d-none d-md-inline">{{ student.first_name }}</span>
-  </a>
-  <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-    <li class="user-header bg-danger">
-      <img class="img-circle elevation-2"
-         {% if student.picture %}
-           src="{{ student.picture.url }}"
-          {% elif student.gender == 'M' %}
-           src="{% static 'dist/img/avatar.png' %}"
-          {% elif student.gender == 'F' %}
-           src="{% static 'dist/img/avatar2.png' %}"
-          {% else %}
-           src="{% static 'dist/img/default_user.png' %}"
-          {% endif %}
-         alt="User Image">
-      <p>
-        <span class="level-circle level-{{ student.level|lower }}"></span>
-        {{ student.get_level_display }} - {{ student.get_category_display }}
-        <small>Member since {{ student.date_joined|date:"M Y" }}</small>
-      </p>
-    </li>
-    <li class="user-footer">
-      <a href="{% url 'profile' %}" class="btn btn-default btn-flat">Profile</a>
-      <form class="float-right" action="{% url 'logout' %}" method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-default btn-flat">Logout</button>
-      </form>
-    </li>
-  </ul>
-</li>
-{% endif %}
-{% endblock %}
-
 {% block content %}
-<div class="content-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 0;">
+<div class="content-header">
   <div class="container">
     <div class="row">
       <div class="col-sm-6">
-        <h1 class="mb-2 text-bold" style="color: white;">Welcome back, {{ student.first_name }}!</h1>
+        <h1 class="mb-2 text-bold">Welcome back, {{ student.first_name }}!</h1>
         <p class="lead">Keep up the great work in your karate journey</p>
       </div>
       <div class="col-sm-6 text-right">
@@ -151,8 +102,8 @@
     <!-- Stats Row -->
     <div class="row mt-4">
       <div class="col-lg-3 col-md-6">
-        <div class="card stat-widget bg-info">
-          <div class="card-body text-center text-white">
+        <div class="card stat-widget bg-danger">
+          <div class="card-body text-center">
             <h3><i class="fas fa-calendar-check"></i></h3>
             <h2>{{ total_trainings }}</h2>
             <p>Total Trainings Attended</p>
@@ -161,8 +112,8 @@
       </div>
 
       <div class="col-lg-3 col-md-6">
-        <div class="card stat-widget bg-success">
-          <div class="card-body text-center text-white">
+        <div class="card stat-widget bg-danger">
+          <div class="card-body text-center">
             <h3><i class="fas fa-percentage"></i></h3>
             <h2>{{ attendance_rate|floatformat:0 }}%</h2>
             <p>Attendance Rate</p>
@@ -171,8 +122,8 @@
       </div>
 
       <div class="col-lg-3 col-md-6">
-        <div class="card stat-widget bg-warning">
-          <div class="card-body text-center text-white">
+        <div class="card stat-widget bg-danger">
+          <div class="card-body text-center">
             <h3><i class="fas fa-certificate"></i></h3>
             <h2>{{ student.get_level_display }}</h2>
             <p>Current Belt Level</p>
@@ -182,10 +133,58 @@
 
       <div class="col-lg-3 col-md-6">
         <div class="card stat-widget bg-danger">
-          <div class="card-body text-center text-white">
+          <div class="card-body text-center">
             <h3><i class="fas fa-clock"></i></h3>
             <h2>{{ days_in_dojo }}</h2>
             <p>Days in Dojo</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- News Section -->
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header bg-danger">
+            <h3 class="card-title">
+              <i class="fas fa-newspaper mr-2"></i>
+              Dojo News & Announcements
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-4">
+                <div class="info-box bg-light">
+                  <span class="info-box-icon bg-danger"><i class="fas fa-bullhorn"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Upcoming Event</span>
+                    <span class="info-box-number">Tournament Registration Open</span>
+                    <small class="text-muted">Register before the deadline!</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="info-box bg-light">
+                  <span class="info-box-icon bg-danger"><i class="fas fa-calendar-alt"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Schedule Update</span>
+                    <span class="info-box-number">New Saturday Classes</span>
+                    <small class="text-muted">Check the calendar for details</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="info-box bg-light">
+                  <span class="info-box-icon bg-danger"><i class="fas fa-award"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Congratulations!</span>
+                    <span class="info-box-number">Belt Exams Coming Soon</span>
+                    <small class="text-muted">Prepare for your next level</small>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -195,7 +194,7 @@
     <div class="row mt-4">
       <div class="col-md-6">
         <div class="card">
-          <div class="card-header bg-danger text-white">
+          <div class="card-header bg-danger">
             <h3 class="card-title">
               <i class="fas fa-bullseye mr-2"></i>
               Next Training
@@ -218,8 +217,8 @@
       </div>
 
       <div class="col-md-6">
-        <div class="card progress-card">
-          <div class="card-header bg-primary text-white">
+        <div class="card">
+          <div class="card-header bg-danger">
             <h3 class="card-title">
               <i class="fas fa-chart-line mr-2"></i>
               Belt Progress
@@ -228,7 +227,7 @@
           <div class="card-body">
             <h5>Current: <span class="level-circle level-{{ student.level|lower }}"></span> {{ student.get_level_display }}</h5>
             <div class="progress belt-progress mb-3">
-              <div class="progress-bar bg-success" role="progressbar" style="width: {{ belt_progress }}%">
+              <div class="progress-bar bg-danger" role="progressbar" style="width: {{ belt_progress }}%">
                 {{ belt_progress|floatformat:0 }}%
               </div>
             </div>
@@ -246,7 +245,7 @@
     <div class="row mt-4">
       <div class="col-md-6">
         <div class="card">
-          <div class="card-header bg-success text-white">
+          <div class="card-header bg-danger">
             <h3 class="card-title">
               <i class="fas fa-trophy mr-2"></i>
               Achievements
@@ -255,22 +254,22 @@
           <div class="card-body">
             <div class="d-flex flex-wrap justify-content-around">
               {% if total_trainings >= 10 %}
-              <div class="achievement-badge bg-primary" title="10 Trainings">
+              <div class="achievement-badge bg-danger" title="10 Trainings">
                 <i class="fas fa-medal"></i>
               </div>
               {% endif %}
               {% if total_trainings >= 50 %}
-              <div class="achievement-badge bg-success" title="50 Trainings">
+              <div class="achievement-badge bg-danger" title="50 Trainings">
                 <i class="fas fa-star"></i>
               </div>
               {% endif %}
               {% if total_trainings >= 100 %}
-              <div class="achievement-badge bg-warning" title="100 Trainings">
+              <div class="achievement-badge bg-danger" title="100 Trainings">
                 <i class="fas fa-crown"></i>
               </div>
               {% endif %}
               {% if attendance_rate >= 90 %}
-              <div class="achievement-badge bg-info" title="90% Attendance">
+              <div class="achievement-badge bg-danger" title="90% Attendance">
                 <i class="fas fa-check-circle"></i>
               </div>
               {% endif %}
@@ -280,7 +279,7 @@
               </div>
               {% endif %}
               {% if days_in_dojo >= 365 %}
-              <div class="achievement-badge bg-dark" title="1 Year Member">
+              <div class="achievement-badge bg-danger" title="1 Year Member">
                 <i class="fas fa-calendar-alt"></i>
               </div>
               {% endif %}
@@ -294,7 +293,7 @@
 
       <div class="col-md-6">
         <div class="card">
-          <div class="card-header bg-info text-white">
+          <div class="card-header bg-danger">
             <h3 class="card-title">
               <i class="fas fa-history mr-2"></i>
               Recent Attendance
@@ -322,7 +321,7 @@
     <div class="row mt-4">
       <div class="col-md-12">
         <div class="card">
-          <div class="card-header bg-dark text-white">
+          <div class="card-header bg-danger">
             <h3 class="card-title">
               <i class="fas fa-book-open mr-2"></i>
               Learning Resources
@@ -331,17 +330,17 @@
           <div class="card-body">
             <div class="row">
               <div class="col-md-4">
-                <a href="{% url 'library' %}" class="btn btn-block btn-outline-primary mb-2">
+                <a href="{% url 'library' %}" class="btn btn-block btn-outline-danger mb-2">
                   <i class="fas fa-book mr-2"></i> Kata Library
                 </a>
               </div>
               <div class="col-md-4">
-                <a href="{% url 'techniques' %}" class="btn btn-block btn-outline-info mb-2">
+                <a href="{% url 'techniques' %}" class="btn btn-block btn-outline-danger mb-2">
                   <i class="fas fa-fist-raised mr-2"></i> Techniques
                 </a>
               </div>
               <div class="col-md-4">
-                <a href="{% url 'profile' %}" class="btn btn-block btn-outline-success mb-2">
+                <a href="{% url 'profile' %}" class="btn btn-block btn-outline-danger mb-2">
                   <i class="fas fa-user mr-2"></i> My Profile
                 </a>
               </div>
@@ -351,11 +350,25 @@
       </div>
     </div>
 
-    <!-- Motivational Quote -->
+    <!-- QR Code & Motivational Quote -->
     <div class="row mt-4 mb-4">
-      <div class="col-md-12">
-        <div class="card bg-gradient-dark">
-          <div class="card-body text-center text-white">
+      <div class="col-md-3">
+        <div class="card">
+          <div class="card-header bg-danger">
+            <h3 class="card-title">
+              <i class="fas fa-qrcode mr-2"></i>
+              My QR Code
+            </h3>
+          </div>
+          <div class="card-body text-center">
+            <img src="{{ qr_code }}" alt="QR Code" class="img-fluid" style="max-width: 100%">
+            <p class="text-muted mt-2 mb-0"><small>Show this code for attendance</small></p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-9">
+        <div class="card bg-gradient-dark h-100">
+          <div class="card-body text-center d-flex flex-column justify-content-center">
             <h4><i class="fas fa-quote-left mr-2"></i>The ultimate aim of karate lies not in victory or defeat, but in the perfection of the character of its participants.<i class="fas fa-quote-right ml-2"></i></h4>
             <p class="mb-0"><em>- Gichin Funakoshi</em></p>
           </div>
