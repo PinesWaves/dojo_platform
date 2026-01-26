@@ -15,6 +15,7 @@ from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+DJANGO_ENV = config("DOJO_ENV", default="", cast=str)
 
 
 # Quick-start development settings - unsuitable for production
@@ -264,5 +265,60 @@ LOGGING = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/login/'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+
+# -----------------------------------------------------------------------------
+# CONFIGURACIÓN DE ALMACENAMIENTO (Storage)
+# -----------------------------------------------------------------------------
+
+# Variables de Railway Storage Buckets
+RAILWAY_ACCESS_KEY = config("AWS_ACCESS_KEY_ID", default="", cast=str)
+RAILWAY_REGION = config("AWS_DEFAULT_REGION", default="auto", cast=str)
+RAILWAY_ENDPOINT = config("AWS_ENDPOINT_URL", default="https://storage.railway.app", cast=str)
+RAILWAY_BUCKET = config("AWS_S3_BUCKET_NAME", default="", cast=str)
+RAILWAY_SECRET_KEY = config("AWS_SECRET_ACCESS_KEY", default="", cast=str)
+
+# Determinar si usar S3
+USE_S3_STORAGE = all([
+    RAILWAY_BUCKET,
+    RAILWAY_ACCESS_KEY,
+    RAILWAY_SECRET_KEY,
+    DJANGO_ENV.lower() in ('staging', 'production')
+])
+
+if USE_S3_STORAGE:
+    # ---- RAILWAY / PRODUCCIÓN ----
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "bucket_name": RAILWAY_BUCKET,
+                "access_key": RAILWAY_ACCESS_KEY,
+                "secret_key": RAILWAY_SECRET_KEY,
+                "endpoint_url": RAILWAY_ENDPOINT,
+                "region_name": RAILWAY_REGION,
+                "file_overwrite": False,
+                "default_acl": None,
+                "querystring_auth": True,
+                "querystring_expire": 3600,
+                "location": "media",
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    MEDIA_URL = f"{RAILWAY_ENDPOINT}/{RAILWAY_BUCKET}/media/"
+    MEDIA_ROOT = ""
+else:
+    # ---- LOCAL ----
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
+# ------------------------------------- FIN STORAGE RAILWAY / LOCAL ---------------------------------------
