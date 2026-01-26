@@ -54,6 +54,7 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav ml-auto">
+        {% block main_menu %}
           <!-- Language Dropdown Menu -->
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#">
@@ -90,7 +91,78 @@
           <li class="nav-item">
             <a class="nav-link" href="{% url 'library' %}">{% trans "Library" %}</a>
           </li>
-          {% block main_menu %}{% endblock %}
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'student_dashboard' %}">{% trans "Dashboard" %}</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'student_calendar' %}">Calendar</a>
+          </li>
+          <!-- User Account menu -->
+          <li class="nav-item dropdown user-menu">
+            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
+              <img class="user-image img-circle elevation-2"
+                  {% if student.picture %}
+                   src="{{ student.picture.url }}"
+                  {% elif student.gender == 'M' %}
+                   src="{% static 'dist/img/avatar.png' %}"
+                  {% elif student.gender == 'F' %}
+                   src="{% static 'dist/img/avatar2.png' %}"
+                  {% else %}
+                   src="{% static 'dist/img/default_user.png' %}"
+                  {% endif %}
+                   alt="User Image">
+              <span class="d-none d-md-inline">{{ student.first_name }}</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+              <li class="user-header bg-danger">
+                <img class="img-circle elevation-2"
+                   {% if student.picture %}
+                     src="{{ student.picture.url }}"
+                    {% elif student.gender == 'M' %}
+                     src="{% static 'dist/img/avatar.png' %}"
+                    {% elif student.gender == 'F' %}
+                     src="{% static 'dist/img/avatar2.png' %}"
+                    {% else %}
+                     src="{% static 'dist/img/default_user.png' %}"
+                    {% endif %}
+                   alt="User Image">
+                <p>
+                  <span class="level-circle level-{{ student.level|lower }}"></span>
+                  {{ student.get_level_display }} - {{ student.get_category_display }}
+                  <small>Member since {{ student.date_joined|date:"M Y" }}</small>
+                </p>
+              </li>
+              <li class="user-footer">
+                <a href="{% url 'profile' %}" class="btn btn-default btn-flat">Profile</a>
+                <form class="float-right" action="{% url 'logout' %}" method="post">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-default btn-flat">Logout</button>
+                </form>
+              </li>
+            </ul>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="/#inicio">Inicio</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/#conocenos">Conócenos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/#galeria">Galería</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/#horarios">Horarios</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/#contacto">Contacto</a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'login' %}" class="btn btn-danger">Login</a>
+          </li>
+          {% endif %}
+        {% endblock %}
         </ul>
       </div>
     </div>

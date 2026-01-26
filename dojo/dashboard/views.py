@@ -576,6 +576,7 @@ class StudentDashboard(LoginRequiredMixin, TemplateView):
                     'status': status
                 })
 
+        qr_code = get_qr_base64(student.id_number)
         ctx = {
             "student": student,
             "total_trainings": total_trainings,
@@ -587,6 +588,7 @@ class StudentDashboard(LoginRequiredMixin, TemplateView):
             "next_training": next_training,
             "attendance_calendar": attendance_calendar,
             "current_year": timezone.now().year,
+            "qr_code": qr_code,
         }
         return render(request, self.template_name, ctx)
 
@@ -706,6 +708,8 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
 
 
 class Library(TemplateView):
+    # TODO: colocar info basica de karate
+    # TODO: Agregar glosarios
     template_name = "dashboard/student/learning/library.html"
 
     def get(self, request, *args, **kwargs):
@@ -842,7 +846,10 @@ class StudentCalendar(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/student/calendar.html"
 
     def get(self, request, *args, **kwargs):
+        pk = request.user.pk
+        student = get_object_or_404(User, pk=pk)
         ctx = {
+            'student': student,
             'current_year': timezone.now().year,
         }
         return render(request, self.template_name, context=ctx)
