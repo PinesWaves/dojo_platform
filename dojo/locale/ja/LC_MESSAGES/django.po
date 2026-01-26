@@ -33,7 +33,7 @@ msgid "Log in"
 msgstr "ログイン"
 
 #: templates/login_register/login.html:4
-msgid "Sign in to start your session"
+msgid "Start your session"
 msgstr "サインインしてセッションを開始"
 
 #: templates/login_register/login.html:9

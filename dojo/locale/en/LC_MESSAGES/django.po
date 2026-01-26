@@ -34,7 +34,7 @@ msgid "Log in"
 msgstr ""
 
 #: templates/login_register/login.html:4
-msgid "Sign in to start your session"
+msgid "Start your session"
 msgstr ""
 
 #: templates/login_register/login.html:9
