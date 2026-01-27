@@ -15,6 +15,7 @@ from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+DJANGO_ENV = config("DOJO_ENV", default="", cast=str)
 
 
 # Quick-start development settings - unsuitable for production
@@ -35,6 +36,7 @@ else:
         'https://127.0.0.1',
         'https://192.168.3.70',
         'https://*.ngrok-free.app',
+        'https://staging.seishinjkadojo.com.co',
     ]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
@@ -70,6 +72,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',  # Language detection middleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -142,13 +145,32 @@ AUTH_USER_MODEL = 'user_management.User'
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en'  # Cambiar de 'en-us' a 'en' para consistencia
+
+# Supported languages
+LANGUAGES = [
+    ('en', 'English'),
+    ('es', 'Español'),
+    ('ja', '日本語'),
+]
+
+# Directory for translation files
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 
 TIME_ZONE = 'America/Bogota'
 
 USE_I18N = True
-
+USE_L10N = True  # Enable localized formatting
 USE_TZ = True
+
+# Language cookie settings
+LANGUAGE_COOKIE_NAME = 'django_language'
+LANGUAGE_COOKIE_AGE = 31536000  # 1 year (in seconds)
+LANGUAGE_COOKIE_PATH = '/'
+LANGUAGE_COOKIE_HTTPONLY = False  # Allow JS access for language switcher
+LANGUAGE_COOKIE_SAMESITE = 'Lax'
 
 
 # Email settings for Gmail
@@ -243,5 +265,60 @@ LOGGING = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/login/'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+
+# -----------------------------------------------------------------------------
+# CONFIGURACIÓN DE ALMACENAMIENTO (Storage)
+# -----------------------------------------------------------------------------
+
+# Variables de Railway Storage Buckets
+RAILWAY_ACCESS_KEY = config("AWS_ACCESS_KEY_ID", default="", cast=str)
+RAILWAY_REGION = config("AWS_DEFAULT_REGION", default="auto", cast=str)
+RAILWAY_ENDPOINT = config("AWS_ENDPOINT_URL", default="https://storage.railway.app", cast=str)
+RAILWAY_BUCKET = config("AWS_S3_BUCKET_NAME", default="", cast=str)
+RAILWAY_SECRET_KEY = config("AWS_SECRET_ACCESS_KEY", default="", cast=str)
+
+# Determinar si usar S3
+USE_S3_STORAGE = all([
+    RAILWAY_BUCKET,
+    RAILWAY_ACCESS_KEY,
+    RAILWAY_SECRET_KEY,
+    DJANGO_ENV.lower() in ('staging', 'production')
+])
+
+if USE_S3_STORAGE:
+    # ---- RAILWAY / PRODUCCIÓN ----
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "bucket_name": RAILWAY_BUCKET,
+                "access_key": RAILWAY_ACCESS_KEY,
+                "secret_key": RAILWAY_SECRET_KEY,
+                "endpoint_url": RAILWAY_ENDPOINT,
+                "region_name": RAILWAY_REGION,
+                "file_overwrite": False,
+                "default_acl": None,
+                "querystring_auth": True,
+                "querystring_expire": 3600,
+                "location": "media",
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    MEDIA_URL = f"{RAILWAY_ENDPOINT}/{RAILWAY_BUCKET}/media/"
+    MEDIA_ROOT = ""
+else:
+    # ---- LOCAL ----
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
+# ------------------------------------- FIN STORAGE RAILWAY / LOCAL ---------------------------------------

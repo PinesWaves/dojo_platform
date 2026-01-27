@@ -1,4 +1,5 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -48,35 +49,120 @@
           {% endif %}">
         <img src="{% static 'img/logo-1.png' %}" alt="Seishin JKA Dojo Logo" height="40">
       </a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="true" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="true" aria-label="{% trans 'Toggle navigation' %}">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav ml-auto">
+        {% block main_menu %}
           <!-- Language Dropdown Menu -->
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#">
-              <i class="flag-icon flag-icon-us"></i>
+              {% get_current_language as LANGUAGE_CODE %}
+              {% if LANGUAGE_CODE == 'en' %}
+                <i class="flag-icon flag-icon-us"></i>
+              {% elif LANGUAGE_CODE == 'es' %}
+                <i class="flag-icon flag-icon-es"></i>
+              {% elif LANGUAGE_CODE == 'ja' %}
+                <i class="flag-icon flag-icon-jp"></i>
+              {% endif %}
             </a>
             <div class="dropdown-menu dropdown-menu-right p-0">
-              <a href="#" class="dropdown-item active">
-                <i class="flag-icon flag-icon-us mr-2"></i> English
-              </a>
-              <a href="#" class="dropdown-item">
-                <i class="flag-icon flag-icon-de mr-2"></i> German
-              </a>
-              <a href="#" class="dropdown-item">
-                <i class="flag-icon flag-icon-fr mr-2"></i> French
-              </a>
-              <a href="#" class="dropdown-item">
-                <i class="flag-icon flag-icon-es mr-2"></i> Spanish
-              </a>
+              {% get_current_language as CURRENT_LANG %}
+              <form id="language-form" method="post" action="{% url 'set_language' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <input type="hidden" name="language" id="language-input">
+                <a href="#" class="dropdown-item {% if CURRENT_LANG == 'en' %}active{% endif %}"
+                   onclick="document.getElementById('language-input').value='en'; document.getElementById('language-form').submit(); return false;">
+                  <i class="flag-icon flag-icon-us mr-2"></i> English
+                </a>
+                <a href="#" class="dropdown-item {% if CURRENT_LANG == 'es' %}active{% endif %}"
+                   onclick="document.getElementById('language-input').value='es'; document.getElementById('language-form').submit(); return false;">
+                  <i class="flag-icon flag-icon-es mr-2"></i> Español
+                </a>
+                <a href="#" class="dropdown-item {% if CURRENT_LANG == 'ja' %}active{% endif %}"
+                   onclick="document.getElementById('language-input').value='ja'; document.getElementById('language-form').submit(); return false;">
+                  <i class="flag-icon flag-icon-jp mr-2"></i> 日本語
+                </a>
+              </form>
             </div>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'library' %}">Library</a>
+            <a class="nav-link" href="{% url 'library' %}">{% trans "Library" %}</a>
           </li>
-          {% block main-menu %}{% endblock %}
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'student_dashboard' %}">{% trans "Dashboard" %}</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'student_calendar' %}">Calendar</a>
+          </li>
+          <!-- User Account menu -->
+          <li class="nav-item dropdown user-menu">
+            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
+              <img class="user-image img-circle elevation-2"
+                  {% if student.picture %}
+                   src="{{ student.picture.url }}"
+                  {% elif student.gender == 'M' %}
+                   src="{% static 'dist/img/avatar.png' %}"
+                  {% elif student.gender == 'F' %}
+                   src="{% static 'dist/img/avatar2.png' %}"
+                  {% else %}
+                   src="{% static 'dist/img/default_user.png' %}"
+                  {% endif %}
+                   alt="User Image">
+              <span class="d-none d-md-inline">{{ student.first_name }}</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+              <li class="user-header bg-danger">
+                <img class="img-circle elevation-2"
+                   {% if student.picture %}
+                     src="{{ student.picture.url }}"
+                    {% elif student.gender == 'M' %}
+                     src="{% static 'dist/img/avatar.png' %}"
+                    {% elif student.gender == 'F' %}
+                     src="{% static 'dist/img/avatar2.png' %}"
+                    {% else %}
+                     src="{% static 'dist/img/default_user.png' %}"
+                    {% endif %}
+                   alt="User Image">
+                <p>
+                  <span class="level-circle level-{{ student.level|lower }}"></span>
+                  {{ student.get_level_display }} - {{ student.get_category_display }}
+                  <small>Member since {{ student.date_joined|date:"M Y" }}</small>
+                </p>
+              </li>
+              <li class="user-footer">
+                <a href="{% url 'profile' %}" class="btn btn-default btn-flat">Profile</a>
+                <form class="float-right" action="{% url 'logout' %}" method="post">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-default btn-flat">Logout</button>
+                </form>
+              </li>
+            </ul>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="/#inicio">Inicio</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/#conocenos">Conócenos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/#galeria">Galería</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/#horarios">Horarios</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/#contacto">Contacto</a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'login' %}" class="btn btn-danger">Login</a>
+          </li>
+          {% endif %}
+        {% endblock %}
         </ul>
       </div>
     </div>
@@ -90,7 +176,7 @@
 <footer >
   <!-- Información de pie de página -->
   <div class="container text-center">
-    <p>&copy; {{ current_year }} Seishin JKA Dojo Bogotá. All rights reserved.</p>
+    <p>&copy; {{ current_year }} Seishin JKA Dojo Bogotá. {% trans "All rights reserved" %}.</p>
   </div>
 </footer>
 

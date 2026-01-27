@@ -81,7 +81,8 @@ class Command(BaseCommand):
                 'payment_status': self.fake.boolean(),
                 'is_active': True if i < 80 else False,  # Last 10 users are inactive
                 'is_staff': False,  # Only the first student is staff (Sempai)
-                'is_superuser': False
+                'is_superuser': False,
+                'password': 'rosales3'
             })
 
         # Create users in the database

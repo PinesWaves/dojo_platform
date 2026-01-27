@@ -1,18 +1,18 @@
 lessons:
   - title: "Unidad 1: Introducción a la Kata y al Karate-Do Shotokan JKA"
     kata: Heian Shodan (平安初段)
-    order: 1
-    objectives: |
-      - Comprender la importancia y el propósito de las katas en el Karate-Do.
-      - Conocer los principios básicos del Karate-Do Shotokan JKA (Dojo Kun, Niju Kun).
-      - Familiarizarse con el concepto de Heian y su relevancia en la serie de katas.
-      - Entender la estructura general del curso y el modelo de aprendizaje.
-    content: |
-      - Introducción a las katas y su papel en el Karate-Do.
-      - Historia y evolución del Karate-Do Shotokan JKA.
-      - Principios fundamentales del Karate-Do (Dojo Kun, Niju Kun).
-      - Explicación del concepto de Heian y su importancia en la serie de katas.
-      - Descripción general del curso y el modelo de aprendizaje.
+    order: b1.1
+    objectives:
+      - "Comprender la importancia y el propósito de las katas en el Karate-Do."
+      - "Conocer los principios básicos del Karate-Do Shotokan JKA (Dojo Kun, Niju Kun)."
+      - "Familiarizarse con el concepto de Heian y su relevancia en la serie de katas."
+      - "Entender la estructura general del curso y el modelo de aprendizaje."
+    content:
+      - "Introducción a las katas y su papel en el Karate-Do."
+      - "Historia y evolución del Karate-Do Shotokan JKA."
+      - "Principios fundamentales del Karate-Do (Dojo Kun, Niju Kun)."
+      - "Explicación del concepto de Heian y su importancia en la serie de katas."
+      - "Descripción general del curso y el modelo de aprendizaje."
     activities:
       - title: "¿Qué es una Kata y por qué es fundamental en el Karate-Do?"
         description: "Explora la historia y el propósito de las katas en el Karate-Do."
@@ -25,35 +25,37 @@ lessons:
         description: "Conoce los fundamentos del Karate-Do Shotokan JKA, incluyendo el Dojo Kun y Niju Kun."
         order: 2
         images:
-          - path: images/jka-dojo-kun.webp
-            caption: "JKA Dojo Kun
-            1. Buscar la perfección del carácter * HITOTSU! JIN KAKU KANSEI NI TSUTOMURU KOTO * 一丶人格完成に努むること。
-            2. Ser correcto, leal y puntual * HITOTSU! MAKOTO NO MICHI O MAMORU KOTO * 一丶誠の道を守ること。
-            3. Siempre superarse * HITOTSU! DORYOKU NO SEISHIN O YASHINAU KOTO * 一丶努力の精神を養うこと。
-            4. Respeto y cortesía hacia los demás * HITOTSU! REIGI O OMONZORU KOTO * 一丶礼儀を重んずること。
-            5. Abstenerse de comportamientos violentos * HITOTSU! KEKKI NO YU O IMASHIMURU KOTO * 一丶血気の勇を戒むること。"
+          - path: images/jka-dojo-kun.png
+            title: "JKA Dojo Kun"
+            caption:
+              - "Buscar la perfección del carácter * HITOTSU! JIN KAKU KANSEI NI TSUTOMURU KOTO * 一丶人格完成に努むること。"
+              - "Ser correcto, leal y puntual * HITOTSU! MAKOTO NO MICHI O MAMORU KOTO * 一丶誠の道を守ること。"
+              - "Siempre superarse * HITOTSU! DORYOKU NO SEISHIN O YASHINAU KOTO * 一丶努力の精神を養うこと。"
+              - "Respeto y cortesía hacia los demás * HITOTSU! REIGI O OMONZORU KOTO * 一丶礼儀を重んずること。"
+              - "Abstenerse de comportamientos violentos * HITOTSU! KEKKI NO YU O IMASHIMURU KOTO * 一丶血気の勇を戒むること"
           - path: images/jka-niju-kun.png
-            caption: "JKA Niju Kun
-            1. Karate wa rei ni hajimari, rei ni owaru koto wo wasuruna: El Karate empieza y termina con «Rei» (Cortesía).
-            2. Karate ni sente nashi: En Karate no existe el primer ataque.
-            3. Karate wa gi no tasuke: El Karate ayuda a la justicia.
-            4. Mazu jiko wo shire, shikoshite tao wo shire: Antes de intentar conocer a los demás, conócete a ti mismo.
-            5. Gijutsu yori shinjutsu: El espíritu es más importante que la técnica.
-            6. Kokoro wa hanatan koto wo yosu: Es necesario liberar la mente.
-            7. Wazawai wa getai ni shozu: Los accidentes nacen de la falta de atención.
-            8. Dojo no mino karate to omou na: El Karate no es sólo para dentro del Dojo.
-            9. Karate no shugyo wa issho de aru: El aprendizaje de Karate requiere toda una vida.
-            10. Ara-yuru mono o karate-ka seyo, se soko ni myo-mi ari: Al incluir el Karate en la vida diaria, es posible descubrir sus aspectos más sutiles y profundos, llamados «Myo».
-            11. Karate wa yu no goto shi taezu netsudo wo ataezareba moto no mizu ni kaeru: El Karate es como el agua hirviendo; si no la mantienes al fuego, el agua se enfría.
-            12. Katsu kangae wa motsu na makenu kangae wa hitsuyo: No pienses que tienes que ganar. Piensa que no tienes que perder.
-            13. Tekki ni yotte tenka seyo: La victoria depende de la habilidad de distinguir cuales son los puntos vulnerables y cuales los invulnerables (de sí mismo y del oponente).
-            14. Tatta kai wa kyo-jitsu no soju ikan ni ari: Adapta tu actitud en función de tu adversario.
-            15. Hito no te ashi wo ken to omoe: Piensa en las manos y los pies como si fuesen espadas.
-            16. Danshi mon wo izureba hyakuman no tekki ari: Al salir de casa piensa que un millón de enemigos te esperan.
-            17. Kamae wa shoshinsha ni ato wa shizentai: Las posiciones son para los principiantes, después posturas naturales.
-            18. Kata wa tadashiku jissen wa bettsu mono: El kata es una forma de entrenamiento; un combate real es una circunstancia totalmente diferente.
-            19. Chikara no kyojaku, karada no shinshuku, waza no kankyu wo wasuruna: Nunca olvides: la correcta aplicación de la fuerza; la contracción y relajación del cuerpo; la velocidad en las técnicas.
-            20. Tsune ni shinen kufu seyo: Intenta siempre aplicar correctamente todo lo que has aprendido."
+            title: "JKA Niju Kun"
+            caption:
+              - "Karate wa rei ni hajimari, rei ni owaru koto wo wasuruna: El Karate empieza y termina con «Rei» (Cortesía)."
+              - "Karate ni sente nashi: En Karate no existe el primer ataque."
+              - "Karate wa gi no tasuke: El Karate ayuda a la justicia."
+              - "Mazu jiko wo shire, shikoshite tao wo shire: Antes de intentar conocer a los demás, conócete a ti mismo."
+              - "Gijutsu yori shinjutsu: El espíritu es más importante que la técnica."
+              - "Kokoro wa hanatan koto wo yosu: Es necesario liberar la mente."
+              - "Wazawai wa getai ni shozu: Los accidentes nacen de la falta de atención."
+              - "Dojo no mino karate to omou na: El Karate no es sólo para dentro del Dojo."
+              - "Karate no shugyo wa issho de aru: El aprendizaje de Karate requiere toda una vida."
+              - "Ara-yuru mono o karate-ka seyo, se soko ni myo-mi ari: Al incluir el Karate en la vida diaria, es posible descubrir sus aspectos más sutiles y profundos, llamados «Myo»."
+              - "Karate wa yu no goto shi taezu netsudo wo ataezareba moto no mizu ni kaeru: El Karate es como el agua hirviendo; si no la mantienes al fuego, el agua se enfría."
+              - "Katsu kangae wa motsu na makenu kangae wa hitsuyo: No pienses que tienes que ganar. Piensa que no tienes que perder."
+              - "Tekki ni yotte tenka seyo: La victoria depende de la habilidad de distinguir cuales son los puntos vulnerables y cuales los invulnerables (de sí mismo y del oponente)."
+              - "Tatta kai wa kyo-jitsu no soju ikan ni ari: Adapta tu actitud en función de tu adversario."
+              - "Hito no te ashi wo ken to omoe: Piensa en las manos y los pies como si fuesen espadas."
+              - "Danshi mon wo izureba hyakuman no tekki ari: Al salir de casa piensa que un millón de enemigos te esperan."
+              - "Kamae wa shoshinsha ni ato wa shizentai: Las posiciones son para los principiantes, después posturas naturales."
+              - "Kata wa tadashiku jissen wa bettsu mono: El kata es una forma de entrenamiento; un combate real es una circunstancia totalmente diferente."
+              - "Chikara no kyojaku, karada no shinshuku, waza no kankyu wo wasuruna: Nunca olvides: la correcta aplicación de la fuerza; la contracción y relajación del cuerpo; la velocidad en las técnicas."
+              - "Tsune ni shinen kufu seyo: Intenta siempre aplicar correctamente todo lo que has aprendido."
         videos:
           - description: El Karate Do y su historia
             url: "https://www.youtube.com/watch?v=kxvDPwS6Yh4"
@@ -69,23 +71,24 @@ lessons:
           - description: KATA HEIAN Y PINNAN, HISTORIA, SIGNIFICADO, CREACIÓN y EVOLUCIÓN, Kata chanan?
             url: "https://www.youtube.com/watch?v=zNwxDuazJHo"
       - title: "Material complementario"
-        description: "Filosofía del Karate Do Shotokan JKA: https://www.jka.or.jp/en/about-jka/philosophy/
-        Características del Karate Do Shotokan JKA: https://www.jka.or.jp/en/about-jka/features/
-        Rangos: https://www.jka.or.jp/en/about-jka/dan-ranking/
-        Historia de la JKA: https://www.jka.or.jp/en/about-jka/history/"
+        description:
+          - "Filosofía del Karate Do Shotokan JKA: https://www.jka.or.jp/en/about-jka/philosophy/"
+          - "Características del Karate Do Shotokan JKA: https://www.jka.or.jp/en/about-jka/features/"
+          - "Rangos: https://www.jka.or.jp/en/about-jka/dan-ranking/"
+          - "Historia de la JKA: https://www.jka.or.jp/en/about-jka/history/"
         order: 4
         images: null
         videos: null
 
   - title: "Unidad 2: Fundamentos Básicos (Kihon) para Heian Shodan"
     kata: Heian Shodan (平安初段)
-    order: 2
-    objectives: |
+    order: b1.2
+    objectives:
       - Dominar las posturas fundamentales de Heian Shodan (Zenkutsu Dachi, Kokutsu Dachi).
       - Ejecutar correctamente las técnicas de bloqueo (Gedan Barai, Age Uke, Shuto Uke).
       - Ejecutar correctamente las técnicas de golpeo (Oi Tsuki, Tettsui Uchi).
       - Comprender y aplicar el concepto de kime (enfoque de energía).
-    content: |
+    content:
       - Práctica de posturas básicas utilizadas en Heian Shodan.
       - Ejercicios de técnicas de bloqueo y golpeo específicas de la kata.
       - Drills para mejorar la coordinación, el equilibrio y la fuerza.
@@ -180,12 +183,12 @@ lessons:
 
   - title: "Unidad 3: Desglose de Heian Shodan - Primera Sección"
     kata: Heian Shodan (平安初段)
-    order: 3
-    objectives: |
+    order: b1.3
+    objectives:
       - Aprender los primeros movimientos de Heian Shodan, paso a paso.
       - Integrar las posturas y técnicas aprendidas en la secuencia correcta.
       - Entender los puntos clave de cada movimiento (dirección, rotación de cadera, etc.).
-    content: |
+    content:
       - Desglose detallado de los primeros movimientos de Heian Shodan.
       - Práctica guiada para asegurar la correcta ejecución de cada técnica.
       - Análisis de los puntos clave y correcciones comunes.
@@ -237,12 +240,12 @@ lessons:
 
   - title: "Unidad 4: Desglose de Heian Shodan - Segunda Sección y Kiai"
     kata: Heian Shodan (平安初段)
-    order: 4
-    objectives: |
+    order: b1.4
+    objectives:
       - Aprender los movimientos restantes de Heian Shodan.
       - Ejecutar correctamente la secuencia completa de la kata.
       - Comprender el significado y la correcta aplicación del Kiai.
-    content: |
+    content:
       - Desglose detallado de los movimientos restantes de Heian Shodan.
       - Práctica guiada para la ejecución completa de la kata.
       - Introducción al Kiai: cuándo y cómo aplicarlo efectivamente.
@@ -298,12 +301,12 @@ lessons:
 
   - title: "Unidad 5: Refinamiento, Aplicación (Bunkai) y Evaluación"
     kata: Heian Shodan (平安初段)
-    order: 5
-    objectives: |
+    order: b1.5
+    objectives:
       - Refinar la ejecución de Heian Shodan, prestando atención a los detalles y la fluidez.
       - Comprender y visualizar posibles aplicaciones (Bunkai) de los movimientos de la kata.
       - Realizar una autoevaluación y planificar la mejora continua.
-    content: |
+    content:
       - Práctica avanzada de Heian Shodan, enfocándose en la precisión y el ritmo.
       - Introducción al Bunkai: análisis y demostración de aplicaciones prácticas.
       - Técnicas de autoevaluación y establecimiento de metas para el progreso futuro.

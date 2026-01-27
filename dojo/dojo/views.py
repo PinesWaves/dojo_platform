@@ -1,5 +1,8 @@
 from django.shortcuts import render
 from django.templatetags.static import static
+from django.utils import translation
+from django.http import HttpResponseRedirect
+from django.views.decorators.http import require_POST
 
 from pathlib import Path
 from django.conf import settings
@@ -35,3 +38,31 @@ def custom_404(request, exception):
 
 def custom_500(request):
     return render(request, "errors/500.html", status=500)
+
+
+@require_POST
+def set_language(request):
+    """
+    Set user's preferred language using Django's i18n framework.
+    Activates the language and sets it in session and cookie.
+    """
+    lang_code = request.POST.get('language')
+    if lang_code and lang_code in ['en', 'es', 'ja']:
+        # Set language in session
+        request.session['django_language'] = lang_code
+        # Activate it immediately
+        translation.activate(lang_code)
+        # Create response with redirect
+        response = HttpResponseRedirect(request.POST.get('next', '/'))
+        # Set cookie on response
+        response.set_cookie(
+            settings.LANGUAGE_COOKIE_NAME,
+            lang_code,
+            max_age=settings.LANGUAGE_COOKIE_AGE,
+            path=settings.LANGUAGE_COOKIE_PATH,
+            samesite=settings.LANGUAGE_COOKIE_SAMESITE,
+            httponly=settings.LANGUAGE_COOKIE_HTTPONLY,
+        )
+        return response
+    # If invalid language code, redirect to referer or home
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))

@@ -1,13 +1,15 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth.views import LogoutView
-from django.urls import path, include
+from django.urls import path, include, re_path
+from django.views.static import serve
 
-from .views import landing_page, custom_404, custom_500
+from .views import landing_page, custom_404, custom_500, set_language
 from user_management.views import RegisterView, CustomLoginView, RecoverPass, ForgotPass, CustomLogoutView
 
 urlpatterns = [
     path('', landing_page, name='landing'),
+    path('i18n/setlang/', set_language, name='set_language'),
     path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', CustomLogoutView.as_view(next_page='landing'), name='logout'),
     path('signup/<str:token>/', RegisterView.as_view(), name='signup'),
@@ -40,6 +42,11 @@ if settings.DEBUG:
         path('test-500/', test_500, name='test_500'),
     ]
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Always serve media files (Railway doesn't use nginx)
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]
 
 handler404 = 'dojo.views.custom_404'
 handler500 = 'dojo.views.custom_500'

@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
@@ -9,41 +10,62 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from utils.config_vars import Ranges
 
 
+def user_document_path(instance, filename):
+    """
+    Genera la ruta para documentos del usuario.
+    """
+    if isinstance(instance, UserDocument):
+        return f'users/{instance.user.id_number}/documents/{filename}'
+
+    return f'users/{instance.id_number}/{filename}'
+
+
 class IDType(models.TextChoices):
-    CITIZENSHIP_CARD = 'CC', 'Citizenship card'
-    IDENTITY_CARD = 'IC', 'Identity Card'
-    ALIEN_CARD = 'AR', 'Alien Registration Card'
-    PASSPORT = 'PA', 'Passport'
-    OTHER = 'OT', 'Other'
+    CITIZENSHIP_CARD = 'CC', _('Citizenship card')
+    IDENTITY_CARD = 'IC', _('Identity Card')
+    ALIEN_CARD = 'AR', _('Alien Registration Card')
+    PASSPORT = 'PA', _('Passport')
+    OTHER = 'OT', _('Other')
 
 
 class Category(models.TextChoices):
-    SENSEI = 'SE', 'Sensei'
-    SEMPAI = 'SP', 'Sempai'
-    STUDENT = 'ST', 'Student'
+    SENSEI = 'SE', 'Sensei'  # Keep in Japanese
+    SEMPAI = 'SP', 'Sempai'  # Keep in Japanese
+    STUDENT = 'ST', _('Student')
 
 
 class MedicalConditions(models.TextChoices):
-    CARDIAC_DISEASES = 'CD', 'Cardiac Diseases'
-    ARTERIAL_HYPERTENSION = 'AH', 'Arterial Hypertension'
-    DIABETES = 'D', 'Diabetes'
-    ASTHMA_OR_RESPIRATORY_PROBLEMS = 'AR', 'Asthma or respiratory problems'
-    EPILEPSY_OR_SEIZURES = 'ES', 'Epilepsy or Seizures'
-    MUSCULOSKELETAL_PROBLEMS = 'MP', 'Musculoskeletal Problems (e.g. Sprains, Fractures)'
-    OTHERS = 'OT', 'Others'
-    NA = 'NA', 'No aplicable'
+    CARDIAC_DISEASES = 'CD', _('Cardiac Diseases')
+    ARTERIAL_HYPERTENSION = 'AH', _('Arterial Hypertension')
+    DIABETES = 'D', _('Diabetes')
+    ASTHMA_OR_RESPIRATORY_PROBLEMS = 'AR', _('Asthma or respiratory problems')
+    EPILEPSY_OR_SEIZURES = 'ES', _('Epilepsy or Seizures')
+    MUSCULOSKELETAL_PROBLEMS = 'MP', _('Musculoskeletal Problems (e.g. Sprains, Fractures)')
+    OTHERS = 'OT', _('Others')
+    NA = 'NA', _('Not applicable')
 
 
 class PhysicalConditions(models.TextChoices):
-    EXCELLENT = 'E', 'Excellent'
-    GOOD = 'G', 'Good'
-    ACCEPTABLE = 'A', 'Acceptable'
-    NEEDS_IMPROVEMENT = 'I', 'Needs improvement'
+    EXCELLENT = 'E', _('Excellent')
+    GOOD = 'G', _('Good')
+    ACCEPTABLE = 'A', _('Acceptable')
+    NEEDS_IMPROVEMENT = 'I', _('Needs improvement')
 
 
 class Genders(models.TextChoices):
-    MALE = 'M', 'Male'
-    FEMALE = 'F', 'Female'
+    MALE = 'M', _('Male')
+    FEMALE = 'F', _('Female')
+    OTHER = 'O', _('Other')
+    NA = 'NA', _('No response')
+
+
+class DocumentType(models.TextChoices):
+    DIPLOMA = 'DI', _('Diploma')
+    CERTIFICATE = 'CE', _('Certificate')
+    MEDICAL = 'ME', _('Medical Document')
+    IDENTIFICATION = 'ID', _('Identification')
+    PAYMENT_PROOF = 'PP', _('Payment Proof')
+    OTHER = 'OT', _('Other')
 
 
 class UserManager(BaseUserManager):
@@ -89,7 +111,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         choices=Category.choices,
         default=Category.STUDENT
     )
-    id_number = models.CharField(max_length=30, unique=True, null=False, blank=False, default=0)
+    id_number = models.CharField(max_length=30, unique=True, null=False, blank=False)
     birth_date = models.DateField(default=datetime(2000, 1, 1), null=False, blank=False)
     birth_place = models.CharField(max_length=30, default='')
     gender = models.CharField(choices=Genders.choices, default=Genders.MALE)
@@ -100,7 +122,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     city = models.CharField(max_length=30, default='')
     country = models.CharField(max_length=30, default='')
     email = models.EmailField(max_length=255, null=False, blank=False)
-    picture = models.ImageField(upload_to='profile_imgs/', blank=True, null=True)
+    picture = models.ImageField(
+        upload_to=user_document_path,
+        blank=True,
+        null=True
+    )
     level = models.CharField(choices=Ranges.choices, default=Ranges.K10)
     parent = models.CharField(max_length=60, null=True, blank=True, default='')
     parent_phone_number = models.CharField(max_length=15, null=True, blank=True, default='')
@@ -136,6 +162,31 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
+
+
+class UserDocument(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='documents'
+    )
+    document_type = models.CharField(
+        max_length=2,
+        choices=DocumentType.choices,
+        default=DocumentType.OTHER
+    )
+    file = models.FileField(upload_to=user_document_path)
+    title = models.CharField(max_length=100, blank=True)  # Ej: "Cinturón Negro 1er Dan"
+    description = models.TextField(blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-uploaded_at']
+        verbose_name = 'User Document'
+        verbose_name_plural = 'User Documents'
+
+    def __str__(self):
+        return f"{self.user.id_number} - {self.get_document_type_display()} - {self.title}"
 
 
 class TokenType(models.TextChoices):

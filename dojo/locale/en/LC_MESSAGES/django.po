@@ -1,0 +1,271 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-05 23:58-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: templates/base-user.html:51
+msgid "Toggle navigation"
+msgstr ""
+
+#: templates/base-user.html:91
+msgid "Library"
+msgstr ""
+
+#: templates/base-user.html:107
+msgid "All rights reserved"
+msgstr ""
+
+#: templates/login_register/login.html:3
+msgid "Log in"
+msgstr ""
+
+#: templates/login_register/login.html:4
+msgid "Start your session"
+msgstr ""
+
+#: templates/login_register/login.html:9
+msgid "Close"
+msgstr ""
+
+#: templates/login_register/login.html:19
+msgid "ID number"
+msgstr ""
+
+#: templates/login_register/login.html:27 user_management/forms.py:30
+msgid "Password"
+msgstr ""
+
+#: templates/login_register/login.html:36
+msgid "Forgot password"
+msgstr ""
+
+#: templates/login_register/login.html:46
+msgid "Sign In"
+msgstr ""
+
+#: user_management/forms.py:35
+msgid "Confirm Password"
+msgstr ""
+
+#: user_management/forms.py:41
+msgid "Do you have any cardiovascular problems?"
+msgstr ""
+
+#: user_management/forms.py:47
+msgid "Have you had any injuries in the last 6 months?"
+msgstr ""
+
+#: user_management/forms.py:53
+msgid "Do you have any physical limitations?"
+msgstr ""
+
+#: user_management/forms.py:59
+msgid "Have you lost consciousness or lost balance after feeling dizzy?"
+msgstr ""
+
+#: user_management/forms.py:65
+msgid ""
+"I will follow the instructor's recommendations and safety rules during the "
+"classes."
+msgstr ""
+
+#: user_management/forms.py:71
+msgid ""
+"I have read, understand the questions, completed and answered the "
+"questionnaire with my acceptance?"
+msgstr ""
+
+#: user_management/forms.py:77 user_management/forms.py:84
+msgid "I accept the "
+msgstr ""
+
+#: user_management/forms.py:78
+msgid "Regulations"
+msgstr ""
+
+#: user_management/forms.py:85
+msgid "Informed consent"
+msgstr ""
+
+#: user_management/forms.py:177 user_management/forms.py:343
+msgid "Passwords do not match."
+msgstr ""
+
+#: user_management/forms.py:182
+msgid "Only users with category 'Sensei' can change the category."
+msgstr ""
+
+#: user_management/forms.py:313
+msgid "Email"
+msgstr ""
+
+#: user_management/forms.py:324 user_management/forms.py:365
+msgid "New Password"
+msgstr ""
+
+#: user_management/forms.py:332 user_management/forms.py:367
+msgid "Confirm New Password"
+msgstr ""
+
+#: user_management/forms.py:363
+msgid "Current Password"
+msgstr ""
+
+#: user_management/models.py:24
+msgid "Citizenship card"
+msgstr ""
+
+#: user_management/models.py:25
+msgid "Identity Card"
+msgstr ""
+
+#: user_management/models.py:26
+msgid "Alien Registration Card"
+msgstr ""
+
+#: user_management/models.py:27
+msgid "Passport"
+msgstr ""
+
+#: user_management/models.py:28 user_management/models.py:58
+#: user_management/models.py:68
+msgid "Other"
+msgstr ""
+
+#: user_management/models.py:34
+msgid "Student"
+msgstr ""
+
+#: user_management/models.py:38
+msgid "Cardiac Diseases"
+msgstr ""
+
+#: user_management/models.py:39
+msgid "Arterial Hypertension"
+msgstr ""
+
+#: user_management/models.py:40
+msgid "Diabetes"
+msgstr ""
+
+#: user_management/models.py:41
+msgid "Asthma or respiratory problems"
+msgstr ""
+
+#: user_management/models.py:42
+msgid "Epilepsy or Seizures"
+msgstr ""
+
+#: user_management/models.py:43
+msgid "Musculoskeletal Problems (e.g. Sprains, Fractures)"
+msgstr ""
+
+#: user_management/models.py:44
+msgid "Others"
+msgstr ""
+
+#: user_management/models.py:45
+msgid "Not applicable"
+msgstr ""
+
+#: user_management/models.py:49
+msgid "Excellent"
+msgstr ""
+
+#: user_management/models.py:50
+msgid "Good"
+msgstr ""
+
+#: user_management/models.py:51
+msgid "Acceptable"
+msgstr ""
+
+#: user_management/models.py:52
+msgid "Needs improvement"
+msgstr ""
+
+#: user_management/models.py:56
+msgid "Male"
+msgstr ""
+
+#: user_management/models.py:57
+msgid "Female"
+msgstr ""
+
+#: user_management/models.py:59
+msgid "No response"
+msgstr ""
+
+#: user_management/models.py:63
+msgid "Diploma"
+msgstr ""
+
+#: user_management/models.py:64
+msgid "Certificate"
+msgstr ""
+
+#: user_management/models.py:65
+msgid "Medical Document"
+msgstr ""
+
+#: user_management/models.py:66
+msgid "Identification"
+msgstr ""
+
+#: user_management/models.py:67
+msgid "Payment Proof"
+msgstr ""
+
+#: user_management/views.py:51
+msgid "Your account is deactivated. Please contact support."
+msgstr ""
+
+#: user_management/views.py:56
+msgid "Login successful!"
+msgstr ""
+
+#: user_management/views.py:75
+msgid "Invalid credentials."
+msgstr ""
+
+#: user_management/views.py:87
+msgid "You have been logged out successfully."
+msgstr ""
+
+#: user_management/views.py:155
+msgid "Please enter your email."
+msgstr ""
+
+#: user_management/views.py:198
+msgid "We have sent a password reset link to your email."
+msgstr ""
+
+#: user_management/views.py:201
+msgid "No user found with that email address."
+msgstr ""
+
+#: user_management/views.py:224 user_management/views.py:235
+msgid "The reset link is invalid or expired."
+msgstr ""
+
+#: user_management/views.py:231
+msgid "Your password has been reset successfully."
+msgstr ""
+
+#: user_management/views.py:239
+msgid "Update failed! Please check the form."
+msgstr ""

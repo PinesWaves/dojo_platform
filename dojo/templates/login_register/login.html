@@ -1,11 +1,12 @@
 {% extends 'base-login.html' %}
-{% block title %} Seishin JKA Dojo | Log in {% endblock %}
-{% block login_box_msg %}Sign in to start your session{% endblock %}
+{% load i18n %}
+{% block title %} Seishin JKA Dojo | {% trans "Log in" %} {% endblock %}
+{% block login_box_msg %}{% trans "Start your session" %}{% endblock %}
 {% block login-box-content %}
 {% if messages %}
   {% for message in messages %}
     <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show" role="alert">
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">&times;</button>
+      <button type="button" class="close" data-dismiss="alert" aria-label="{% trans 'Close' %}">&times;</button>
       <i class="icon fas {% if message.tags == 'error' %}fa-ban{% else %}fa-check{% endif %}"></i> {{ message }}
     </div>
   {% endfor %}
@@ -15,7 +16,7 @@
     <input type="hidden" name="next" value="{{ request.GET.next }}">
   {% endif %}
   <div class="input-group mb-3">
-    <input type="number" class="form-control" placeholder="ID number" id="id_number" name="id_number" required>
+    <input type="number" class="form-control" placeholder="{% trans 'ID number' %}" id="id_number" name="id_number" required>
     <div class="input-group-append">
       <div class="input-group-text">
         <span class="fas fa-envelope"></span>
@@ -23,7 +24,7 @@
     </div>
   </div>
   <div class="input-group mb-3">
-    <input type="password" class="form-control" placeholder="Password" id="password" name="password" required>
+    <input type="password" class="form-control" placeholder="{% trans 'Password' %}" id="password" name="password" required>
     <div class="input-group-append">
       <div class="input-group-text">
         <span class="fas fa-lock"></span>
@@ -32,7 +33,7 @@
   </div>
   <div class="row">
     <div class="col-8">
-      <a href="{% url 'forgot-password' %}">Forgot password</a>
+      <a href="{% url 'forgot-password' %}">{% trans "Forgot password" %}</a>
 {#      <div class="icheck-primary">#}
 {#        <input type="checkbox" id="remember">#}
 {#        <label for="remember">#}
@@ -42,7 +43,7 @@
     </div>
     <!-- /.col -->
     <div class="col-12">
-      <button type="submit" class="btn btn-primary btn-block col-4 float-right">Sign In</button>
+      <button type="submit" class="btn btn-primary btn-block col-4 float-right">{% trans "Sign In" %}</button>
     </div>
     <!-- /.col -->
   </div>
