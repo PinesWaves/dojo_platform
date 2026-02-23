@@ -1,7 +1,7 @@
 services:
   kapp_db_local:
     restart: always
-    image: postgres:18
+    image: postgres:17-alpine
     environment:
       POSTGRES_DB: ${DOJO_DB_NAME}
       POSTGRES_USER: ${DOJO_DB_USER}
