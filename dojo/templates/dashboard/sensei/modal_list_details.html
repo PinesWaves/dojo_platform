@@ -1,0 +1,42 @@
+{% load static %}
+<div class="modal fade" id="modal-list-details-{{ t.id }}" tabindex="-1" aria-labelledby="modalListDetailsLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Training Details</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body text-center">
+        <label for="modal-list-details-{{ t.id }}">Details:</label>
+        <p id="modal-list-details-{{ t.id }}">{{ t.details }}</p>
+        <hr>
+        <label for="modal-katas-list-{{ t.id }}">Katas:</label>
+        <div id="modal-katas-list-{{ t.id }}">
+          {% for k in t.katas.all %}
+          {{ k.name }}<br>
+          {% empty %}
+          No Katas registered
+          {% endfor %}
+        </div>
+        <hr>
+        <label for="modal-list-techniques-{{ t.id }}" class="techniques all">Techniques:</label>
+        <div id="modal-list-techniques-{{ t.id }}">
+          {% for tc in t.techniques.all %}
+          {{ tc.name }}<br>
+          {% empty %}
+          No lessons assigned
+          {% endfor %}
+        </div>
+        <hr>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->

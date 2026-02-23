@@ -128,8 +128,8 @@
                 <tr>
                   <th>Date</th>
                   <th>Status</th>
-                  <th>Techniques</th>
                   <th>Details</th>
+                  <th>Attendance</th>
                 </tr>
               </thead>
               <tbody>
@@ -141,12 +141,17 @@
                     {{ t.get_status_display }}
                   </td>
                   <td>
-                    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-list-techniques-{{ t.id }}">
+                    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-list-details-{{ t.id }}">
                       List
                     </button>
-                    {% include 'dashboard/sensei/modal_list_techniques.html' with training=t %}
+                    {% include 'dashboard/sensei/modal_list_details.html' with training=t %}
                   </td>
-                  <td>{{ t.details }}</td>
+                  <td>
+                    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-list-students-{{ t.id }}">
+                      List
+                    </button>
+                    {% include 'dashboard/sensei/modal_list_students.html' with training=t %}
+                  </td>
                 </tr>
               {% endfor %}
               </tbody>

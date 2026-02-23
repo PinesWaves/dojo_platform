@@ -10,7 +10,7 @@ from faker import Faker
 
 from user_management.models import User, Category
 from utils.config_vars import Ranges
-from dashboard.models import Dojo, Training, Technique, TrainingStatus, TrainingType, Attendance
+from dashboard.models import Dojo, Training, Technique, TrainingStatus, TrainingType, Attendance, TrainingScheduling
 from django.utils import timezone
 
 
@@ -37,6 +37,7 @@ class Command(BaseCommand):
         self.load_users()
         self.load_techniques()
         self.load_dojos()
+        self.load_schedules()
         self.load_trainings()
         self.load_attendances()
         self.stdout.write(self.style.SUCCESS(f'✅  Testing dataset loaded successfully'))
@@ -194,6 +195,23 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f"✅  Dojos loaded successfully."))
 
 
+    def load_schedules(self):
+        """
+        Creates TrainingScheduling entries from TEST_SCHEDULES, mirroring the
+        recurring schedule used by get_test_training_dates.
+        """
+        self.stdout.write("Loading training schedules...")
+        from datetime import time as dt_time
+        schedules = []
+        for day_of_week, slots in TEST_SCHEDULES.items():
+            for hour, minute in slots:
+                schedules.append(TrainingScheduling(
+                    day_of_week=day_of_week,
+                    time=dt_time(hour, minute),
+                ))
+        TrainingScheduling.objects.bulk_create(schedules)
+        self.stdout.write(self.style.SUCCESS(f"✅  Training schedules loaded successfully."))
+
     def load_trainings(self):
         """
         Create test trainings with different statuses based on the date:
@@ -283,18 +301,21 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f"✅  All tables have been truncated and sequences reset."))
 
 
+TEST_SCHEDULES = {
+    0: [(17, 0), (19, 0)],  # lunes
+    1: [(19, 0)],            # martes
+    2: [(17, 0), (19, 0)],  # miércoles
+    3: [(19, 0)],            # jueves
+    4: [(17, 0), (19, 0)],  # viernes
+    5: [(8, 0), (10, 0)],   # sábado
+}
+
+
 def get_test_training_dates():
     """
     Returns a list of datetime objects representing test training dates and times 2 weeks before and after today's date.
     """
-    schedules = {
-        0: [(17, 0), (19, 0)],  # lunes
-        1: [(19, 0)],  # martes
-        2: [(17, 0), (19, 0)],  # miércoles
-        3: [(19, 0)],  # jueves
-        4: [(17, 0), (19, 0)],  # viernes
-        5: [(8, 0), (10, 0)],  # sábado
-    }
+    schedules = TEST_SCHEDULES
 
     today = timezone.now()
     days_before = 14
