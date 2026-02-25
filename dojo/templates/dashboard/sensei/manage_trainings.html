@@ -63,7 +63,7 @@
               <tbody>
                 {% for t in schedules %}
                 <tr>
-                  <td>{{ t.get_day_of_week_display }}</td>
+                  <td data-order="{{ t.day_of_week }}">{{ t.get_day_of_week_display }}</td>
                   <td>{{ t.time }}</td>
                   <td>{{ t.details }}</td>
                         <td>
@@ -195,6 +195,7 @@
     $(function () {
       $("#scheduling_table").DataTable({
         "responsive": true, "lengthChange": false, "autoWidth": false,
+        "order": [[0, "asc"]],
       }).buttons().container().appendTo('#scheduling_table_wrapper .col-md-6:eq(0)');
 
       $("#trainings_table").DataTable({
