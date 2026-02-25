@@ -231,11 +231,15 @@ class Command(BaseCommand):
             elif d <= now <= end_time:
                 status = TrainingStatus.ONGOING
             else:
-                status = TrainingStatus.FINISHED
+                status = random.choices(
+                    [TrainingStatus.FINISHED, TrainingStatus.CANCELED, TrainingStatus.ONGOING],
+                    weights=[20,5,1],
+                    k=1
+                )[0]
 
             Training.objects.create(
                 date=d,
-                type=random.choice(list(TrainingType.values)),
+                type=random.choice(TrainingType.values),
                 status=status,
                 details=f"Training {calendar.day_name[d.weekday()]} {d.hour:02d}:{d.minute:02d}",
                 location="Main Dojo",
@@ -253,7 +257,7 @@ class Command(BaseCommand):
         self.stdout.write("Loading attendances...")
 
         # Filtrar entrenamientos válidos
-        trainings = Training.objects.exclude(status=TrainingStatus.CANCELED)
+        trainings = Training.objects.exclude(status__in=[TrainingStatus.CANCELED, TrainingStatus.SCHEDULED])
 
         # Tomar todos los estudiantes registrados
         students = User.objects.filter(category=Category.STUDENT)
@@ -265,7 +269,7 @@ class Command(BaseCommand):
         for training in trainings:
             # Seleccionar aleatoriamente quién asistió
             attending_students = random.sample(
-                list(students), k=random.randint(0, students.count())
+                list(students), k=random.randint(5, 30)
             )
 
             for student in students:
