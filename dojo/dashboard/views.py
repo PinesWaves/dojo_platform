@@ -160,7 +160,7 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        trainings = Training.objects.prefetch_related('attendances', 'techniques').all()
+        trainings = Training.objects.prefetch_related('attendances', 'techniques').filter(date__lte=timezone.now()).order_by('-date')
         training_form = TrainingForm()
         scheduling_form = TrainingSchedulingForm()
         schedules = TrainingScheduling.objects.all()
@@ -984,16 +984,18 @@ def get_trainings_json(request):
     for training in trainings:
         # Determine background color based on status
         if training.status == TrainingStatus.SCHEDULED:
-            bg_color = '#0073b7'  # Blue for scheduled
+            bg_color = '#ffc800'  # Yellow for scheduled
+        elif training.status == TrainingStatus.ONGOING:
+            bg_color = '#3c8dbc'  # Yellow for scheduled
         elif training.status == TrainingStatus.FINISHED:
             bg_color = '#00a65a'  # Green for finished
-        elif training.status == TrainingStatus.CANCELLED:
+        elif training.status == TrainingStatus.CANCELED:
             bg_color = '#dd4b39'  # Red for cancelled
         else:
             bg_color = '#3c8dbc'  # Default light blue
 
         # Count attendances
-        attendance_count = training.attendances.count()
+        attendance_count = training.attendances.filter(status="P").count()
 
         # Get techniques list
         techniques_list = ', '.join([t.name for t in training.techniques.all()[:3]])
@@ -1001,9 +1003,7 @@ def get_trainings_json(request):
             techniques_list += f' +{training.techniques.count() - 3} more'
 
         # Build event title
-        title = f"{training.get_status_display()}"
-        if attendance_count > 0:
-            title += f" ({attendance_count} students)"
+        title = f"({attendance_count} std)"
 
         # Build description for event
         description = f"Status: {training.get_status_display()}\n"
@@ -1018,6 +1018,7 @@ def get_trainings_json(request):
             'backgroundColor': bg_color,
             'borderColor': bg_color,
             'description': description,
+            'status': training.status,
             'url': f'/dashboard/manage_trainings/?training_id={training.id}',  # Link to training detail
         })
 
