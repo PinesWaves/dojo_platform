@@ -265,6 +265,26 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
                 self.request.session['errors'] = form.errors
                 self.request.session['msg'] = "Failed to update training!"
 
+        elif training_id := request.POST.get('finish_training'):
+            try:
+                training = Training.objects.get(id=training_id)
+                training.status = TrainingStatus.FINISHED
+                training.save(update_fields=['status'])
+                self.request.session['msg'] = "Training marked as finished!"
+            except Training.DoesNotExist:
+                self.request.session['errors'] = "Training not found."
+                self.request.session['msg'] = "Failed to finish training!"
+
+        elif training_id := request.POST.get('cancel_training'):
+            try:
+                training = Training.objects.get(id=training_id)
+                training.status = TrainingStatus.CANCELED
+                training.save(update_fields=['status'])
+                self.request.session['msg'] = "Training canceled!"
+            except Training.DoesNotExist:
+                self.request.session['errors'] = "Training not found."
+                self.request.session['msg'] = "Failed to cancel training!"
+
         elif training_id := request.POST.get('delete_training'):
             try:
                 training = Training.objects.get(id=training_id)
