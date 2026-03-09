@@ -204,6 +204,9 @@ h3 a {
             </h3>
           </div>
           <div class="card-body">
+            <a href="{% url 'training_attendance' %}" class="btn btn-app bg-warning">
+              <i class="fas fa-qrcode"></i> Attendance
+            </a>
             <a href="{% url 'manage_trainings' %}" class="btn btn-app bg-success">
               <i class="fas fa-plus"></i> New Training
             </a>
@@ -490,10 +493,10 @@ h3 a {
       </div>
     </div>
 
-    <!-- Training List -->
-    <div class="row">
-      {% include 'dashboard/common/training_list.html' %}
-    </div>
+{#    <!-- Training List -->#}
+{#    <div class="row">#}
+{#      {% include 'dashboard/common/training_list.html' %}#}
+{#    </div>#}
 
   </div>
 </section>
@@ -506,21 +509,14 @@ $(function () {
   // Belt Distribution Chart
   var beltCtx = document.getElementById('beltChart').getContext('2d');
   var beltChart = new Chart(beltCtx, {
-    type: 'doughnut',
+    type: 'bar',
     data: {
       labels: {{ belt_labels|safe }},
       datasets: [{
         data: {{ belt_data|safe }},
-        backgroundColor: [
-          '#FFFFFF',  // White
-          '#FFFF00',  // Yellow
-          '#FFA500',  // Orange
-          '#008000',  // Green
-          '#7700FF',  // Violet
-          '#773333',  // Brown
-          '#000000',  // Black
-        ],
-        borderWidth: 2
+        backgroundColor:  {{ belt_colors|safe }},
+        borderWidth: 2,
+        borderColor:  'gray',
       }]
     },
     options: {
