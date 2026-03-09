@@ -174,7 +174,6 @@ class ForgotPass(FormView):
                 {
                     'dojo_logo_url': dojo_logo_url,
                     'reset_link': reset_link,
-                    'current_year': timezone.now().year,
                 }
             )
 

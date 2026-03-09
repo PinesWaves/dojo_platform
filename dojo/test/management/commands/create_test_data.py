@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from decouple import config
 
 from django.apps import apps
+from django.contrib.auth.hashers import make_password
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 from faker import Faker
@@ -83,7 +84,7 @@ class Command(BaseCommand):
                 'is_active': True if i < 80 else False,  # Last 10 users are inactive
                 'is_staff': False,  # Only the first student is staff (Sempai)
                 'is_superuser': False,
-                'password': 'rosales3'
+                'password': make_password('rosales3')
             })
 
         # Create users in the database
@@ -231,11 +232,15 @@ class Command(BaseCommand):
             elif d <= now <= end_time:
                 status = TrainingStatus.ONGOING
             else:
-                status = TrainingStatus.FINISHED
+                status = random.choices(
+                    [TrainingStatus.FINISHED, TrainingStatus.CANCELED, TrainingStatus.ONGOING],
+                    weights=[20,5,1],
+                    k=1
+                )[0]
 
             Training.objects.create(
                 date=d,
-                type=random.choice(list(TrainingType.values)),
+                type=random.choice(TrainingType.values),
                 status=status,
                 details=f"Training {calendar.day_name[d.weekday()]} {d.hour:02d}:{d.minute:02d}",
                 location="Main Dojo",
@@ -253,10 +258,10 @@ class Command(BaseCommand):
         self.stdout.write("Loading attendances...")
 
         # Filtrar entrenamientos válidos
-        trainings = Training.objects.exclude(status=TrainingStatus.CANCELED)
+        trainings = Training.objects.exclude(status__in=[TrainingStatus.CANCELED, TrainingStatus.SCHEDULED])
 
         # Tomar todos los estudiantes registrados
-        students = User.objects.filter(category=Category.STUDENT)
+        students = User.objects.filter(category=Category.STUDENT, is_active=True)
 
         if not students.exists():
             self.stdout.write(self.style.WARNING("No students to register attendance."))
@@ -265,7 +270,7 @@ class Command(BaseCommand):
         for training in trainings:
             # Seleccionar aleatoriamente quién asistió
             attending_students = random.sample(
-                list(students), k=random.randint(0, students.count())
+                list(students), k=random.randint(5, 30)
             )
 
             for student in students:
