@@ -208,6 +208,10 @@
   <script src="{% static 'plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js' %}"></script>
   <script>
     $(function () {
+      //Timepicker
+      $('#duration_timepicker').datetimepicker({
+        format: 'HH:mm'
+      })
       $("#scheduling_table").DataTable({
         "responsive": true, "lengthChange": false, "autoWidth": false,
         "order": [[0, "asc"]],
