@@ -262,6 +262,7 @@ class Training(models.Model):
     location = models.CharField(max_length=100, default='')
     katas = models.ManyToManyField(Kata, blank=True, related_name="trainings")
     kumites = models.ManyToManyField(Kumite, blank=True, related_name="trainings")
+    sempai = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="sempai_trainings")
 
     def __str__(self):
         return f"Training on {self.date.strftime('%Y-%m-%d %H:%M')} - {self.get_status_display()}"
