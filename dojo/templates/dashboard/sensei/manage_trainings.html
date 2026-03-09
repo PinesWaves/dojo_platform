@@ -63,7 +63,7 @@
               <tbody>
                 {% for t in schedules %}
                 <tr>
-                  <td>{{ t.get_day_of_week_display }}</td>
+                  <td data-order="{{ t.day_of_week }}">{{ t.get_day_of_week_display }}</td>
                   <td>{{ t.time }}</td>
                   <td>{{ t.details }}</td>
                         <td>
@@ -130,6 +130,7 @@
                   <th>Status</th>
                   <th>Details</th>
                   <th>Attendance</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -152,6 +153,19 @@
                     </button>
                     {% include 'dashboard/sensei/modal_list_students.html' with training=t %}
                   </td>
+                  <td>
+                    <form action="{% url 'manage_trainings' %}" method="post">
+                      {% csrf_token %}
+                      <div class="form-group mb-0">
+                        <input type="hidden" name="delete_training" value="{{ t.id }}">
+                        <div class="d-flex">
+                          <button type="submit" class="btn btn-danger btn-block btn-xs col-sm-10">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  </td>
                 </tr>
               {% endfor %}
               </tbody>
@@ -161,6 +175,7 @@
                 <th>Status</th>
                 <th>Techniques</th>
                 <th>Details</th>
+                <th></th>
               </tr>
               </tfoot>
             </table>
@@ -195,11 +210,13 @@
     $(function () {
       $("#scheduling_table").DataTable({
         "responsive": true, "lengthChange": false, "autoWidth": false,
+        "order": [[0, "asc"]],
       }).buttons().container().appendTo('#scheduling_table_wrapper .col-md-6:eq(0)');
 
       $("#trainings_table").DataTable({
         "responsive": true, "lengthChange": false, "autoWidth": false,
-        "buttons": ["copy", "csv", "excel", "pdf", "print"]
+        "buttons": ["copy", "csv", "excel", "pdf", "print"],
+        "order": [[0, "desc"]],
       }).buttons().container().appendTo('#trainings_table_wrapper .col-md-6:eq(0)');
 
       $('#time_timepicker').datetimepicker({

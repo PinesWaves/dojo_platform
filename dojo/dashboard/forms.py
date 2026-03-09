@@ -73,12 +73,13 @@ class TrainingForm(forms.ModelForm):
 
     class Meta:
         model = Training
-        fields = ["date", "type", "status", "techniques", "details", "katas", "kumites"]
+        fields = ["date", "type", "status", "sempai", "techniques", "details", "katas", "kumites"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['type'].widget.attrs['class'] = 'form-control select2'
         self.fields['status'].widget.attrs['class'] = 'form-control select2'
+        self.fields['sempai'].widget.attrs['class'] = 'form-control select2'
 
     # def is_valid(self):
     #     # change date to timezone aware

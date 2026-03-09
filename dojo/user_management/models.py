@@ -1,7 +1,6 @@
 import uuid
 from datetime import datetime, timedelta
 from django.utils import timezone
-from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 from django.db import models
@@ -221,7 +220,7 @@ class Token(models.Model):
 
     def is_valid(self):
         """Check if the token is still valid."""
-        return now() <= self.expires_at
+        return timezone.now() <= self.expires_at
 
     def __str__(self):
         return f"{self.type} - {self.token}"

@@ -9,6 +9,9 @@
         </button>
       </div>
       <div class="modal-body text-center">
+        <label for="modal-sempai-{{ t.id }}">Sempai:</label>
+        <p id="modal-sempai-{{ t.id }}">{{ t.sempai }}</p>
+        <hr>
         <label for="modal-list-details-{{ t.id }}">Details:</label>
         <p id="modal-list-details-{{ t.id }}">{{ t.details }}</p>
         <hr>
@@ -26,7 +29,7 @@
           {% for tc in t.techniques.all %}
           {{ tc.name }}<br>
           {% empty %}
-          No lessons assigned
+          No Techniques registered
           {% endfor %}
         </div>
         <hr>

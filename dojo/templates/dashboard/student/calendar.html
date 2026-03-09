@@ -45,15 +45,19 @@
           </div>
           <div class="card-body">
             <div class="mb-3">
-              <span class="badge" style="background-color: #0073b7; padding: 5px 10px;">Scheduled</span>
+              <span class="badge" style="background-color: #0073b7; padding: 5px 10px;"><i class="fas fa-hourglass-half"></i></span>
               <span class="ml-2">Upcoming training</span>
             </div>
             <div class="mb-3">
-              <span class="badge" style="background-color: #00a65a; padding: 5px 10px;">Finished</span>
+              <span class="badge" style="background-color: #3c8dbc; padding: 5px 10px;"><i class="fas fa-sync-alt"></i></span>
+              <span class="ml-2">On going</span>
+            </div>
+            <div class="mb-3">
+              <span class="badge" style="background-color: #00a65a; padding: 5px 10px;"><i class="fas fa-check-circle"></i></span>
               <span class="ml-2">Completed</span>
             </div>
             <div class="mb-3">
-              <span class="badge" style="background-color: #dd4b39; padding: 5px 10px;">Cancelled</span>
+              <span class="badge" style="background-color: #dd4b39; padding: 5px 10px;"><i class="fas fa-ban"></i></span>
               <span class="ml-2">Cancelled</span>
             </div>
           </div>
@@ -114,7 +118,27 @@
           alert('There was an error while fetching training events!');
         }
       },
+      eventContent: function(arg) {
+        var iconMap = {
+          'S': 'fas fa-hourglass-half',
+          'O': 'fas fa-sync-alt',
+          'F': 'fas fa-check-circle',
+          'C': 'fas fa-ban'
+        };
+        var icon = iconMap[arg.event.extendedProps.status] || 'fas fa-circle';
+        var title = arg.event.title ? ' ' + arg.event.title : '';
+        return { html: '<i class="' + icon + '" style="color: black;"></i>' + title };
+      },
       eventDidMount: function(info) {
+        var colorMap = {
+          'S': '#ffc800',
+          'O': '#3c8dbc',
+          'F': '#00a65a',
+          'C': '#dd4b39'
+        };
+        var color = colorMap[info.event.extendedProps.status] || '#3c8dbc';
+        info.el.style.backgroundColor = color;
+        info.el.style.borderColor = color;
         // Add tooltip with description
         if (info.event.extendedProps.description) {
           $(info.el).tooltip({
