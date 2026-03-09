@@ -1,0 +1,358 @@
+{% extends 'dashboard/sensei/base.html' %}
+{% load static %}
+{% block training-menu-class%}menu-open{% endblock %}
+{% block attendance-link-status %}active{% endblock %}
+{% block css %}
+<style>
+  .table-responsive {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 70vh;
+  }
+
+  th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #001f3f;
+    color: #fff;
+    padding: 0.5em 0.75em;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  td {
+    border-top: 1px solid #eee;
+    padding: 0.4em 0.75em;
+    text-align: center;
+  }
+
+  td.name-col {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: #fff;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  th.name-col {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    text-align: left;
+  }
+
+  td input[type="checkbox"] {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+  }
+
+  td input[type="checkbox"]:disabled {
+    cursor: wait;
+    opacity: 0.5;
+  }
+
+  th.attend-col {
+    background-color: #28a745;
+  }
+
+  td.attend-col {
+    background-color: #ffecec;
+    color: #28a745;
+    font-weight: bold;
+  }
+
+  th.missed-col {
+    background-color: #c0392b;
+  }
+
+  td.missed-col {
+    background-color: #ffecec;
+    color: #c0392b;
+    font-weight: bold;
+  }
+
+  /* Pagination month style */
+  .pagination-month .page-link {
+    padding: 0.3rem 0.6rem;
+    text-align: center;
+    min-width: 52px;
+  }
+
+  .pagination-month .page-link p {
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .pagination-month .page-link .page-month {
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .pagination-month .page-link .page-year {
+    font-size: 0.7rem;
+    color: #888;
+  }
+
+  .pagination-month .page-item.active .page-link .page-year {
+    color: #fff;
+  }
+
+  .no-trainings {
+    text-align: center;
+    padding: 2rem;
+    color: #888;
+  }
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>Attendance</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="{% url 'sensei_dashboard' %}">Home</a></li>
+          <li class="breadcrumb-item active">Attendance</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <div class="mb-2">
+              <button class="btn btn-success" id="qr_reader" name="qr_reader">
+                <i class="fas fa-qrcode mr-1"></i> QR Reader
+              </button>
+            </div>
+
+            <!-- Month pagination -->
+            <div class="mb-3">
+              <ul class="pagination pagination-month justify-content-center flex-wrap">
+                <li class="page-item">
+                  <a class="page-link" href="?month={{ prev_year }}-01" title="Previous year">«</a>
+                </li>
+                {% for pm in pagination_months %}
+                <li class="page-item {% if pm.active %}active{% endif %}">
+                  <a class="page-link" href="?month={{ pm.year }}-{% if pm.num < 10 %}0{% endif %}{{ pm.num }}">
+                    <p class="page-month">{{ pm.name }}</p>
+                    <p class="page-year">{{ pm.year }}</p>
+                  </a>
+                </li>
+                {% endfor %}
+                <li class="page-item">
+                  <a class="page-link" href="?month={{ next_year }}-01" title="Next year">»</a>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Attendance table -->
+            <div class="table-responsive">
+              {% if trainings %}
+              <table class="table table-sm table-bordered" id="attendance-table">
+                <thead>
+                  <tr>
+                    <th class="name-col">Student</th>
+                    {% for training in trainings %}
+                    <th title="{{ training.date|date:'Y-m-d H:i' }}">
+                      {{ training.date|date:"j" }}<br>
+                      <small>{{ training.date|date:"D" }}</small>
+                    </th>
+                    {% endfor %}
+                    <th class="attend-col">
+                      <i class="nav-icon fas fa-check"></i>
+                    </th>
+                    <th class="missed-col">
+                      <i class="nav-icon fas fa-times"></i>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in student_rows %}
+                  <tr>
+                    <td class="name-col">{{ row.student.last_name }} {{ row.student.first_name }}</td>
+                    {% for training in trainings %}
+                    <td class="attend-col">
+                      <input
+                        type="checkbox"
+                        class="attendance-checkbox"
+                        data-training-id="{{ training.id }}"
+                        data-student-id="{{ row.student.id }}"
+                        {% if training.id in row.attended_ids %}checked{% endif %}
+                      >
+                    </td>
+                    {% endfor %}
+                    <td class="attend-col" id="missed-{{ row.student.id }}">{{ row.t_attend }}</td>
+                    <td class="missed-col" id="missed-{{ row.student.id }}">{{ row.t_missed }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+              {% else %}
+              <div class="no-trainings">
+                <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                <p>No trainings found for this month.</p>
+              </div>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% include 'dashboard/sensei/modal_qr_scaner.html' %}
+{% endblock %}
+
+{% block js %}
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+  const TOGGLE_URL = "{% url 'toggle_attendance' %}";
+  const QR_ATTENDANCE_URL = "{% url 'register_qr_attendance' %}";
+  const CSRF_TOKEN = "{{ csrf_token }}";
+
+  document.querySelectorAll('.attendance-checkbox').forEach(function (checkbox) {
+    checkbox.addEventListener('change', function () {
+      const trainingId = this.dataset.trainingId;
+      const studentId = this.dataset.studentId;
+      const isChecked = this.checked;
+      const missedCell = document.getElementById('missed-' + studentId);
+
+      // Disable while saving
+      this.disabled = true;
+
+      fetch(TOGGLE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': CSRF_TOKEN,
+        },
+        body: JSON.stringify({
+          training_id: parseInt(trainingId),
+          student_id: parseInt(studentId),
+        }),
+      })
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error('Server error: ' + response.status);
+          }
+          return response.json();
+        })
+        .then(function (data) {
+          if (missedCell) {
+            const current = parseInt(missedCell.textContent) || 0;
+            missedCell.textContent = data.status === 'created' ? current - 1 : current + 1;
+          }
+        })
+        .catch(function (err) {
+          console.error('Attendance toggle failed:', err);
+          // Revert checkbox on error
+          checkbox.checked = !isChecked;
+        })
+        .finally(function () {
+          checkbox.disabled = false;
+        });
+    });
+  });
+
+  // ── QR Scanner ──────────────────────────────────────────────────────────
+  let html5QrCode = null;
+  let scanCooldown = false;
+
+  document.getElementById('qr_reader').addEventListener('click', function () {
+    $('#qrScannerModal').modal('show');
+  });
+
+  $('#qrScannerModal').on('shown.bs.modal', function () {
+    document.getElementById('qr-scan-result').innerHTML = '';
+    html5QrCode = new Html5Qrcode('qr-reader-view');
+    html5QrCode.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 260, height: 260 } },
+      onQrSuccess,
+      null
+    ).catch(function (err) {
+      document.getElementById('qr-scan-result').innerHTML =
+        '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle mr-1"></i>Camera error: ' + err + '</div>';
+    });
+  });
+
+  $('#qrScannerModal').on('hide.bs.modal', function () {
+    if (html5QrCode) {
+      html5QrCode.stop().then(function () {
+        html5QrCode.clear();
+        html5QrCode = null;
+      }).catch(function () {});
+    }
+  });
+
+  function onQrSuccess(qrData) {
+    if (scanCooldown) return;
+    scanCooldown = true;
+
+    fetch(QR_ATTENDANCE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+      body: JSON.stringify({ qr_data: qrData }),
+    })
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        var resultDiv = document.getElementById('qr-scan-result');
+        if (data.error) {
+          resultDiv.innerHTML =
+            '<div class="alert alert-danger"><i class="fas fa-times-circle mr-1"></i>' + data.error + '</div>';
+        } else if (data.status === 'already') {
+          resultDiv.innerHTML =
+            '<div class="alert alert-warning"><i class="fas fa-info-circle mr-1"></i>' +
+            data.student_name + ' already registered.</div>';
+        } else {
+          resultDiv.innerHTML =
+            '<div class="alert alert-success"><i class="fas fa-check-circle mr-1"></i>' +
+            data.student_name + ' registered successfully.</div>';
+          updateTableRow(data.student_id, data.training_id);
+        }
+      })
+      .catch(function (err) {
+        document.getElementById('qr-scan-result').innerHTML =
+          '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle mr-1"></i>Request failed.</div>';
+        console.error('QR attendance error:', err);
+      })
+      .finally(function () {
+        setTimeout(function () { scanCooldown = false; }, 2500);
+      });
+  }
+
+  function updateTableRow(studentId, trainingId) {
+    var checkbox = document.querySelector(
+      '.attendance-checkbox[data-student-id="' + studentId + '"][data-training-id="' + trainingId + '"]'
+    );
+    if (!checkbox || checkbox.checked) return;
+
+    checkbox.checked = true;
+    // Find the row and update attend/missed cells
+    var row = checkbox.closest('tr');
+    if (!row) return;
+    var attendCell = row.querySelector('td.attend-col:last-of-type');
+    var missedCell = row.querySelector('td.missed-col');
+    if (attendCell) attendCell.textContent = (parseInt(attendCell.textContent) || 0) + 1;
+    if (missedCell) {
+      var m = parseInt(missedCell.textContent) || 0;
+      if (m > 0) missedCell.textContent = m - 1;
+    }
+  }
+</script>
+{% endblock %}
