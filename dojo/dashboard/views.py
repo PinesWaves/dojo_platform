@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+import calendar
+from datetime import date, datetime, timedelta
 from secrets import token_urlsafe
 import json
 import logging
@@ -18,10 +19,11 @@ from django.views.generic import TemplateView
 
 from dashboard.forms import TrainingSchedulingForm, TrainingForm
 from dashboard.models import Training, Dojo, Technique, TrainingStatus, KataSerie, Kata, KataLesson, \
-    KataLessonActivity, TrainingScheduling, ActivityCompletion, LessonCompletion
+    KataLessonActivity, TrainingScheduling, ActivityCompletion, LessonCompletion, Attendance, AttendanceStatus
 from dojo.mixins.view_mixins import AdminRequiredMixin
 from user_management.models import User, Token, Category, TokenType, UserDocument
 from user_management.forms import UserUpdateForm, UploadDocumentsForm, CustomPasswordChangeForm
+from utils.config_vars import Ranges
 from utils.utils import get_qr_base64, get_next_closest_day
 
 logger = logging.getLogger(__name__)
@@ -53,9 +55,8 @@ class SenseiDashboard(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         ).order_by('date')
 
         # Stats calculations
-        all_students = User.objects.filter(category=Category.STUDENT)
-        total_students = all_students.count()
-        active_students = all_students.filter(is_active=True).count()
+        total_students = User.objects.filter(category=Category.STUDENT).count()
+        active_students = User.objects.filter(category=Category.STUDENT, is_active=True)
         trainings_this_week = Training.objects.filter(
             date__range=(week_start, week_end)
         ).count()
@@ -70,15 +71,17 @@ class SenseiDashboard(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
             attendance_rate = 0
 
         # Belt distribution
-        belt_levels = ['WHITE', 'YELLOW', 'ORANGE', 'GREEN', 'VIOLET', 'BROWN', 'BLACK']
-        belt_counts = []
-        for level in belt_levels:
-            count = all_students.filter(level=level).count()
-            belt_counts.append(count)
+        belt_labels, belt_colors, belt_counts = [], [], []
+        for i, r in enumerate(Ranges):
+            count = active_students.filter(level=r.value).count()
+            if count > 0:
+                belt_labels.append(r.label)
+                belt_colors.append(r.belt_color)
+                belt_counts.append(count)
 
         # Low attendance students (less than 50%)
         low_attendance_students = []
-        for student in all_students[:10]:
+        for student in active_students[:10]:
             student_attendances = Attendance.objects.filter(student=student).count()
             if total_trainings_held > 0:
                 student.attendance_percentage = (student_attendances / total_trainings_held) * 100
@@ -94,7 +97,7 @@ class SenseiDashboard(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
 
         # Recent students with activity
         recent_students = []
-        for student in all_students.order_by('-date_joined')[:10]:
+        for student in active_students.order_by('-date_joined')[:10]:
             student_attendances = Attendance.objects.filter(student=student)
             student.total_attendances = student_attendances.count()
             if total_trainings_held > 0:
@@ -112,7 +115,7 @@ class SenseiDashboard(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
 
         # Calculate progress for all students
         student_progress_list = []
-        for student in all_students:
+        for student in active_students:
             completed_activities_count = ActivityCompletion.objects.filter(student=student).count()
             completed_lessons_count = LessonCompletion.objects.filter(student=student).count()
 
@@ -137,15 +140,15 @@ class SenseiDashboard(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         ctx = {
             "trainings": trainings,
             "total_students": total_students,
-            "active_students": active_students,
+            "active_students": active_students.count(),
             "trainings_this_week": trainings_this_week,
             "attendance_rate": attendance_rate,
-            "belt_labels": json.dumps(belt_levels),
+            "belt_labels": json.dumps(belt_labels),
+            "belt_colors": json.dumps(belt_colors),
             "belt_data": json.dumps(belt_counts),
             "low_attendance_students": low_attendance_students[:5],
             "upcoming_trainings": upcoming_trainings,
             "recent_students": recent_students,
-            "current_year": timezone.now().year,
             # Student progress data
             "top_students_progress": top_students,
             "total_lessons": total_lessons,
@@ -160,7 +163,7 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        trainings = Training.objects.prefetch_related('attendances', 'techniques').filter(date__lte=timezone.now()).order_by('-date')
+        trainings = Training.objects.prefetch_related('attendances', 'techniques').filter(date__lte=timezone.now() + timedelta(days=1)).order_by('-date')
         training_form = TrainingForm()
         scheduling_form = TrainingSchedulingForm()
         schedules = TrainingScheduling.objects.all()
@@ -541,7 +544,7 @@ class StudentDashboard(LoginRequiredMixin, TemplateView):
         days_in_dojo = (today - joined_date).days
 
         # Belt progress (simple calculation based on attendance)
-        belt_levels = ['WHITE', 'YELLOW', 'ORANGE', 'GREEN', 'VIOLET', 'BROWN', 'BLACK']
+        belt_levels = [x.value for x in Ranges]
         current_belt_index = belt_levels.index(student.level) if student.level in belt_levels else 0
         if current_belt_index < len(belt_levels) - 1:
             next_belt = belt_levels[current_belt_index + 1]
@@ -587,7 +590,6 @@ class StudentDashboard(LoginRequiredMixin, TemplateView):
             "next_belt": next_belt,
             "next_training": next_training,
             "attendance_calendar": attendance_calendar,
-            "current_year": timezone.now().year,
             "qr_code": qr_code,
         }
         return render(request, self.template_name, ctx)
@@ -766,7 +768,6 @@ class KataDetail(TemplateView):
         pk = kwargs.get('pk')
         kata = get_object_or_404(Kata.objects.prefetch_related('lessons'), pk=pk)
         ctx = {
-            'current_year': timezone.now().year,
             'kata': kata,
         }
         if request.user.is_authenticated:
@@ -793,7 +794,6 @@ class KataLessonDetail(TemplateView):
         )
 
         ctx = {
-            'current_year': timezone.now().year,
             'lesson': lesson,
         }
 
@@ -834,9 +834,201 @@ class TrainingCalendar(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         ctx = {
-            'current_year': timezone.now().year,
         }
         return render(request, self.template_name, context=ctx)
+
+
+class TrainingAttendance(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
+    """
+    Calendar view showing all training sessions (Sensei/Admin only)
+    """
+    template_name = "dashboard/sensei/attendance.html"
+
+    @staticmethod
+    def month_days(year, month) -> list[tuple[int, str]]:
+        _, day_num = calendar.monthrange(year, month)
+
+        # Nombres de los días en español
+        # day_name = ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su']
+        day_name = ['l', 'm', 'x', 'j', 'v', 's', 'd']
+
+        # Generar lista de tuplas (día, nombre_día)
+        days = [
+            (day, day_name[date(year, month, day).weekday()])
+            for day in range(1, day_num + 1)
+        ]
+
+        return days
+
+    def get(self, request, *args, **kwargs):
+        students = User.objects.filter(category=Category.STUDENT, is_active=True).order_by('last_name', 'first_name')
+        month_queried = request.GET.get('month')
+        if month_queried:
+            try:
+                month_date = datetime.strptime(month_queried, '%Y-%m')
+                year = month_date.year
+                month = month_date.month
+            except ValueError:
+                now = timezone.now()
+                year, month = now.year, now.month
+        else:
+            now = timezone.now()
+            year, month = now.year, now.month
+
+        # Trainings in the selected month (filter using local timezone so late-night
+        # trainings in Bogota that cross into the next UTC day are counted correctly)
+        import calendar as _cal
+        local_start = timezone.make_aware(datetime(year, month, 1))
+        last_day = _cal.monthrange(year, month)[1]
+        local_end = timezone.make_aware(datetime(year, month, last_day, 23, 59, 59))
+        trainings = Training.objects.filter(date__range=(local_start, local_end)).order_by('date')
+        training_ids = list(trainings.values_list('id', flat=True))
+
+        # Attendance map: {student_id: set(training_id)} — only PRESENT records
+        attendance_qs = Attendance.objects.filter(
+            training_id__in=training_ids, status__in=(AttendanceStatus.PRESENT, AttendanceStatus.LATE)
+        )
+        attendance_map = {}
+        for att in attendance_qs:
+            attendance_map.setdefault(att.student_id, set()).add(att.training_id)
+
+        # Build student rows
+        student_rows = []
+        for student in students:
+            attended_ids = attendance_map.get(student.id, set())
+            missed = len(training_ids) - len(attended_ids)
+            student_rows.append({
+                'student': student,
+                'attended_ids': list(attended_ids),
+                't_attend': len(attended_ids),
+                't_missed': missed,
+            })
+
+        # Pagination: all 12 months of the selected year
+        month_abbrs = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        pagination_months = [
+            {
+                'num': m,
+                'name': month_abbrs[m - 1],
+                'year': year,
+                'active': m == month,
+            }
+            for m in range(1, 13)
+        ]
+
+        ctx = {
+            "year": year,
+            "month": month,
+            "trainings": trainings,
+            "student_rows": student_rows,
+            "pagination_months": pagination_months,
+            "prev_year": year - 1,
+            "next_year": year + 1,
+        }
+        return render(request, self.template_name, context=ctx)
+
+
+@require_POST
+def toggle_attendance(request):
+    """
+    AJAX endpoint to toggle a student's attendance for a training session.
+
+    Request (POST JSON):
+    {
+        "training_id": 1,
+        "student_id": 2
+    }
+
+    Response:
+    {
+        "status": "created" | "deleted",
+        "attendance_id": 5  (only when created)
+    }
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    try:
+        data = json.loads(request.body)
+        training_id = data.get('training_id')
+        student_id = data.get('student_id')
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    if not training_id or not student_id:
+        return JsonResponse({'error': 'training_id and student_id are required'}, status=400)
+
+    training = get_object_or_404(Training, pk=training_id)
+    student = get_object_or_404(User, pk=student_id, category=Category.STUDENT)
+
+    attendance = Attendance.objects.filter(training=training, student=student).first()
+    if attendance:
+        if attendance.status == AttendanceStatus.PRESENT:
+            attendance.delete()
+            return JsonResponse({'status': 'deleted'})
+        else:
+            attendance.status = AttendanceStatus.PRESENT
+            attendance.save()
+            return JsonResponse({'status': 'created', 'attendance_id': attendance.id})
+
+    attendance = Attendance.objects.create(
+        training=training,
+        student=student,
+        status=AttendanceStatus.PRESENT,
+    )
+    return JsonResponse({'status': 'created', 'attendance_id': attendance.id})
+
+
+@require_POST
+def register_qr_attendance(request):
+    """
+    Register attendance via QR code scan.
+    The QR code must encode the student's id_number.
+    Finds today's training that is ongoing or starting within 30 minutes.
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    try:
+        data = json.loads(request.body)
+        qr_data = str(data.get('qr_data', '')).strip()
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    if not qr_data:
+        return JsonResponse({'error': 'QR data is required'}, status=400)
+
+    student = User.objects.filter(
+        id_number=qr_data, category=Category.STUDENT, is_active=True
+    ).first()
+    if not student:
+        return JsonResponse({'error': 'Student not found'}, status=404)
+
+    now = timezone.now()
+    training = Training.objects.filter(
+        date__range=(now - timedelta(minutes=90), now + timedelta(minutes=30)),
+    ).exclude(status=TrainingStatus.CANCELED).order_by('-date').first()
+
+    if not training:
+        return JsonResponse({'error': f'Hi {student}.<br>No active or upcoming training found for today'}, status=404)
+
+    attendance, created = Attendance.objects.get_or_create(
+        training=training,
+        student=student,
+        defaults={'status': AttendanceStatus.PRESENT},
+    )
+    if not created and attendance.status != AttendanceStatus.PRESENT:
+        attendance.status = AttendanceStatus.PRESENT
+        attendance.save()
+        created = True
+
+    return JsonResponse({
+        'status': 'created' if created else 'already',
+        'student_name': f'{student.first_name} {student.last_name}',
+        'training_id': training.id,
+        'student_id': student.id,
+    })
 
 
 class StudentCalendar(LoginRequiredMixin, TemplateView):
@@ -850,7 +1042,6 @@ class StudentCalendar(LoginRequiredMixin, TemplateView):
         student = get_object_or_404(User, pk=pk)
         ctx = {
             'student': student,
-            'current_year': timezone.now().year,
         }
         return render(request, self.template_name, context=ctx)
 
@@ -902,7 +1093,6 @@ class StudentProgressView(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
             })
 
         ctx = {
-            'current_year': timezone.now().year,
             'student_progress_data': student_progress_data,
             'lessons': lessons,
             'total_lessons': lessons.count(),
@@ -961,7 +1151,6 @@ class StudentProgressDetail(LoginRequiredMixin, AdminRequiredMixin, TemplateView
             })
 
         ctx = {
-            'current_year': timezone.now().year,
             'student': student,
             'kata_progress': kata_progress,
         }
