@@ -1,4 +1,5 @@
 import re
+from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -255,6 +256,7 @@ class TrainingType(models.TextChoices):
 
 class Training(models.Model):
     date = models.DateTimeField(auto_now=False, unique=True)
+    duration = models.DurationField(default=timedelta(hours=1), help_text="Duration of the training session.")
     type = models.CharField(choices=TrainingType.choices, default=TrainingType.MIXED, max_length=10)
     status = models.CharField(choices=TrainingStatus.choices, default=TrainingStatus.SCHEDULED, max_length=2)
     techniques = models.ManyToManyField('Technique', related_name='trainings', blank=True)
