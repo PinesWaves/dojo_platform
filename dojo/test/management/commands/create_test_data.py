@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from decouple import config
 
 from django.apps import apps
+from django.contrib.auth.hashers import make_password
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 from faker import Faker
@@ -83,7 +84,7 @@ class Command(BaseCommand):
                 'is_active': True if i < 80 else False,  # Last 10 users are inactive
                 'is_staff': False,  # Only the first student is staff (Sempai)
                 'is_superuser': False,
-                'password': 'rosales3'
+                'password': make_password('rosales3')
             })
 
         # Create users in the database
@@ -260,7 +261,7 @@ class Command(BaseCommand):
         trainings = Training.objects.exclude(status__in=[TrainingStatus.CANCELED, TrainingStatus.SCHEDULED])
 
         # Tomar todos los estudiantes registrados
-        students = User.objects.filter(category=Category.STUDENT)
+        students = User.objects.filter(category=Category.STUDENT, is_active=True)
 
         if not students.exists():
             self.stdout.write(self.style.WARNING("No students to register attendance."))
