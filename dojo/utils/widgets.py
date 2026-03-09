@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.safestring import mark_safe
 from django.utils.dateformat import format as django_date_format
-from datetime import date, time, datetime
+from datetime import date, time, datetime, timedelta
 
 
 class CustomSwitchWidget(forms.CheckboxInput):
@@ -61,11 +61,53 @@ class CustomDateTimePickerWidget(forms.DateTimeInput):
         attrs["data-toggle"] = "datetimepicker"
 
         input_html = super().render(name, value, attrs, renderer)
+        icon = "calendar" if "_date" in self.suffix else "clock"
         html = f"""
             <div class="input-group datetime" id="{picker_id}" data-target-input="nearest">
                 {input_html}
                 <div class="input-group-append" data-target="#{picker_id}" data-toggle="datetimepicker">
-                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                    <div class="input-group-text"><i class="fa fa-{icon}"></i></div>
+                </div>
+            </div>
+        """
+        return mark_safe(html)
+
+
+class DurationTimeWidget(forms.TextInput):
+    """
+    Widget for DurationField that renders a timepicker (HH:MM).
+    Inherits from TextInput to avoid any datetime conversion by Django internals.
+    """
+
+    def __init__(self, label_text=None, attrs=None):
+        self.label_text = label_text or ""
+        final_attrs = {'required': 'required'}
+        if attrs:
+            final_attrs.update(attrs)
+        super().__init__(attrs=final_attrs)
+
+    def format_value(self, value):
+        if isinstance(value, timedelta):
+            total_seconds = int(value.total_seconds())
+            hours = total_seconds // 3600
+            minutes = (total_seconds % 3600) // 60
+            return f"{hours:02d}:{minutes:02d}"
+        return value
+
+    def render(self, name, value, attrs=None, renderer=None):
+        attrs = attrs or {}
+        picker_id = f"{name}_timepicker"
+        value = self.format_value(value)
+        existing_class = attrs.get("class", "")
+        attrs["class"] = f"{existing_class} form-control datetimepicker-input".strip()
+        attrs["data-target"] = f"#{picker_id}"
+        attrs["data-toggle"] = "datetimepicker"
+        input_html = super().render(name, value, attrs, renderer)
+        html = f"""
+            <div class="input-group datetime" id="{picker_id}" data-target-input="nearest">
+                {input_html}
+                <div class="input-group-append" data-target="#{picker_id}" data-toggle="datetimepicker">
+                    <div class="input-group-text"><i class="far fa-clock"></i></div>
                 </div>
             </div>
         """

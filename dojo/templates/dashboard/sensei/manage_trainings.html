@@ -63,7 +63,7 @@
               <tbody>
                 {% for t in schedules %}
                 <tr>
-                  <td>{{ t.get_day_of_week_display }}</td>
+                  <td data-order="{{ t.day_of_week }}">{{ t.get_day_of_week_display }}</td>
                   <td>{{ t.time }}</td>
                   <td>{{ t.details }}</td>
                         <td>
@@ -128,8 +128,9 @@
                 <tr>
                   <th>Date</th>
                   <th>Status</th>
-                  <th>Techniques</th>
                   <th>Details</th>
+                  <th>Attendance</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -141,12 +142,42 @@
                     {{ t.get_status_display }}
                   </td>
                   <td>
-                    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-list-techniques-{{ t.id }}">
+                    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-list-details-{{ t.id }}">
                       List
                     </button>
-                    {% include 'dashboard/sensei/modal_list_techniques.html' with training=t %}
+                    {% include 'dashboard/sensei/modal_list_details.html' with training=t %}
                   </td>
-                  <td>{{ t.details }}</td>
+                  <td>
+                    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-list-students-{{ t.id }}">
+                      List
+                    </button>
+                    {% include 'dashboard/sensei/modal_list_students.html' with training=t %}
+                  </td>
+                  <td>
+                    <div class="d-flex">
+                      <form action="{% url 'manage_trainings' %}" method="post" class="mr-1">
+                        {% csrf_token %}
+                        <input type="hidden" name="finish_training" value="{{ t.id }}">
+                        <button type="submit" class="btn btn-success btn-xs" title="Finish">
+                          <i class="fas fa-check-circle"></i>
+                        </button>
+                      </form>
+                      <form action="{% url 'manage_trainings' %}" method="post" class="mr-1">
+                        {% csrf_token %}
+                        <input type="hidden" name="cancel_training" value="{{ t.id }}">
+                        <button type="submit" class="btn btn-warning btn-xs" title="Cancel">
+                          <i class="fas fa-ban"></i>
+                        </button>
+                      </form>
+                      <form action="{% url 'manage_trainings' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="delete_training" value="{{ t.id }}">
+                        <button type="submit" class="btn btn-danger btn-xs" title="Delete">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
                 </tr>
               {% endfor %}
               </tbody>
@@ -156,6 +187,7 @@
                 <th>Status</th>
                 <th>Techniques</th>
                 <th>Details</th>
+                <th></th>
               </tr>
               </tfoot>
             </table>
@@ -188,13 +220,19 @@
   <script src="{% static 'plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js' %}"></script>
   <script>
     $(function () {
+      //Timepicker
+      $('#duration_timepicker').datetimepicker({
+        format: 'HH:mm'
+      })
       $("#scheduling_table").DataTable({
         "responsive": true, "lengthChange": false, "autoWidth": false,
+        "order": [[0, "asc"]],
       }).buttons().container().appendTo('#scheduling_table_wrapper .col-md-6:eq(0)');
 
       $("#trainings_table").DataTable({
         "responsive": true, "lengthChange": false, "autoWidth": false,
-        "buttons": ["copy", "csv", "excel", "pdf", "print"]
+        "buttons": ["copy", "csv", "excel", "pdf", "print"],
+        "order": [[0, "desc"]],
       }).buttons().container().appendTo('#trainings_table_wrapper .col-md-6:eq(0)');
 
       $('#time_timepicker').datetimepicker({

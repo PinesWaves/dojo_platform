@@ -31,8 +31,11 @@ from dashboard.views import (
     KataDetail,
     KataLessonDetail,
     TrainingCalendar,
+    TrainingAttendance,
     get_trainings_json,
     toggle_activity_completion,
+    toggle_attendance,
+    register_qr_attendance,
     StudentProgressView,
     StudentProgressDetail,
 )
@@ -44,6 +47,7 @@ urlpatterns = [
     path('manage_students/', ManageStudents.as_view(), name='manage_students'),
     path('manage_profile/<int:pk>/', ManageProfile.as_view(), name='manage_profile'),
     path('calendar/', TrainingCalendar.as_view(), name='training_calendar'),
+    path('attendance/', TrainingAttendance.as_view(), name='training_attendance'),
     path('api/trainings/', get_trainings_json, name='api_trainings'),
     path('student/', StudentDashboard.as_view(), name='student_dashboard'),
     path('student/profile/', StudentProfile.as_view(), name='profile'),
@@ -55,6 +59,10 @@ urlpatterns = [
     path('library/kata/lesson/<int:pk>/', KataLessonDetail.as_view(), name='kata_lesson_detail'),
     # Activity completion API
     path('api/activity-completion/', toggle_activity_completion, name='toggle_activity_completion'),
+    # Attendance toggle API
+    path('api/attendance/toggle/', toggle_attendance, name='toggle_attendance'),
+    # QR attendance registration
+    path('api/attendance/qr/', register_qr_attendance, name='register_qr_attendance'),
     # Student progress views (Sensei only)
     path('student-progress/', StudentProgressView.as_view(), name='student_progress'),
     path('student-progress/<int:student_id>/', StudentProgressDetail.as_view(), name='student_progress_detail'),
