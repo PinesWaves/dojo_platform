@@ -245,6 +245,7 @@ class UserUpdateForm(forms.ModelForm):
             user_category = getattr(self.request.user, 'category', None)
             if user_category != Category.SENSEI:
                 self.fields.pop('level', None)
+                self.fields.pop('category', None)
 
         if self.instance and self.instance.pk:
             country_code = self.instance.country
@@ -263,6 +264,11 @@ class UserUpdateForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         instance = self.instance
+
+        if self.request and self.request.user.is_authenticated:
+            if getattr(self.request.user, 'category', None) != Category.SENSEI:
+                if instance and instance.pk:
+                    cleaned_data['category'] = instance.category
 
         for field_name in self.fields:
             value = cleaned_data.get(field_name)
@@ -349,7 +355,11 @@ class CustomPasswordChangeForm(PasswordChangeForm):
     Custom PasswordChangeForm with Bootstrap styling matching UserUpdateForm
     """
     def __init__(self, *args, **kwargs):
+        self.request_user = kwargs.pop('request_user', None)
         super().__init__(*args, **kwargs)
+
+        if self.request_user and getattr(self.request_user, 'category', None) == Category.SENSEI:
+            self.fields.pop('old_password', None)
 
         # Apply Bootstrap form-control class to all fields
         for field_name, field in self.fields.items():
@@ -369,3 +379,8 @@ class CustomPasswordChangeForm(PasswordChangeForm):
             # Mark fields with errors as invalid
             if field_name in self.errors:
                 field.widget.attrs['class'] += ' is-invalid'
+
+    def clean_old_password(self):
+        if self.request_user and getattr(self.request_user, 'category', None) == Category.SENSEI:
+            return ''
+        return super().clean_old_password()
