@@ -393,7 +393,7 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         student = get_object_or_404(User, pk=pk)
         form = UserUpdateForm(instance=student, request=request)
         docs_form = UploadDocumentsForm()
-        password_form = CustomPasswordChangeForm(user=student)
+        password_form = CustomPasswordChangeForm(user=student, request_user=request.user)
         qr_code = get_qr_base64(student.id_number)
         ctx = {
             'form': form,
@@ -475,7 +475,7 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
                 messages.error(request, "Document not found.")
             return redirect('manage_profile', pk=pk)
         elif self.request.POST.get('action') == 'change_password':
-            password_form = CustomPasswordChangeForm(user=student, data=request.POST)
+            password_form = CustomPasswordChangeForm(user=student, data=request.POST, request_user=request.user)
             if password_form.is_valid():
                 password_form.save()
                 # Update session auth hash to prevent logout after password change
@@ -622,7 +622,7 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
         student = request.user
         form = UserUpdateForm(instance=student, request=request)
         docs_form = UploadDocumentsForm()
-        password_form = CustomPasswordChangeForm(user=student)
+        password_form = CustomPasswordChangeForm(user=student, request_user=request.user)
         qr_code = get_qr_base64(student.id_number)
         ctx = {
             'form': form,
@@ -648,7 +648,7 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
             return redirect('profile')
 
         elif request.POST.get('action') == 'change_password':
-            password_form = CustomPasswordChangeForm(user=student, data=request.POST)
+            password_form = CustomPasswordChangeForm(user=student, data=request.POST, request_user=request.user)
             if password_form.is_valid():
                 password_form.save()
                 # Update session auth hash to prevent logout after password change
@@ -717,7 +717,7 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
     def form_invalid(self, form):
         qr_code = get_qr_base64(self.request.user.id_number)
         docs_form = UploadDocumentsForm()
-        password_form = CustomPasswordChangeForm(user=self.request.user)
+        password_form = CustomPasswordChangeForm(user=self.request.user, request_user=self.request.user)
         context = {
             'form': form,
             'docs_form': docs_form,
