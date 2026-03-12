@@ -49,6 +49,16 @@ class CustomDateTimePickerWidget(forms.DateTimeInput):
             final_attrs.update(attrs)
         super().__init__(attrs=final_attrs, format=picker_format)
 
+    def value_from_datadict(self, data, files, name):
+        value = super().value_from_datadict(data, files, name)
+        # Normaliza a formato que Django entiende por defecto
+        if value:
+            try:
+                return datetime.strptime(value, '%m/%d/%Y').strftime('%Y-%m-%d')
+            except (ValueError, TypeError):
+                return value
+        return value
+
     def render(self, name, value, attrs=None, renderer=None):
         attrs = attrs or {}
         picker_id = f"{name}{self.suffix}"
