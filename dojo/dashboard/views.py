@@ -513,16 +513,18 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         return redirect('manage_profile', pk=updated_user.pk)
 
     def form_invalid(self, form, student, request):
-        request.session['errors'] = form.errors
         request.session['msg'] = "Update failed!"
+        docs_form = UploadDocumentsForm()
+        password_form = CustomPasswordChangeForm(user=student, request_user=request.user)
+        qr_code = get_qr_base64(student.id_number)
         ctx = {
             'form': form,
+            'docs_form': docs_form,
+            'password_form': password_form,
             'student': student,
+            'qr_code': qr_code,
         }
-        return self.render_to_response(self.get_context_data(form=form))
-
-
-######################################### STUDENT VIEWS #########################################
+        return render(request, self.template_name, context=ctx)
 
 
 class StudentDashboard(LoginRequiredMixin, TemplateView):

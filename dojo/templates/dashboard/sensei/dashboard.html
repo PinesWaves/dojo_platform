@@ -525,6 +525,14 @@ $(function () {
       legend: {
         position: 'bottom',
       },
+      scales: {
+        yAxes: [{
+          ticks: {
+            min: 0,
+            stepSize: 1,
+          }
+        }]
+      },
       plugins: {
         datalabels: {
           formatter: (value, ctx) => {
