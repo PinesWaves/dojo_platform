@@ -308,6 +308,7 @@ class MultipleFileField(forms.FileField):
 class UploadDocumentsForm(forms.Form):
     document_type = forms.ChoiceField(choices=DocumentType.choices)
     title = forms.CharField(max_length=100, required=False)
+    description = forms.CharField(max_length=500, required=False, widget=forms.Textarea(attrs={'rows': 3}))
     files = MultipleFileField(label='Archivos')
 
 
