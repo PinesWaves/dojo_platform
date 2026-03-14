@@ -373,9 +373,6 @@
 <script src="{% static 'dist/js/adminlte.js' %}"></script>
 
 {% block js %}{% endblock %}
-<!-- AdminLTE for demo purposes -->
-{#<script src="{% static 'plugins/js/demo.js' %}"></script>#}
-<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
-{#<script src="{% static 'plugins/js/dashboard/dashboard.js' %}"></script>#}
+{% include 'cookie_banner.html' %}
 </body>
 </html>
