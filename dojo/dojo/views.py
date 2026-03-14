@@ -19,7 +19,7 @@ def rename_images_in_galery():
 
 def landing_page(request):
     galery_path = Path(settings.STATIC_ROOT) / 'img' / 'galery'
-    galery_images = [static('img/galery/' + f.name) for f in galery_path.iterdir() if f.suffix.lower() in ('.png', '.jpg', '.jpeg')]
+    galery_images = [static('img/galery/' + f.name) for f in galery_path.iterdir() if f.suffix.lower() in ('.png', '.jpg', '.jpeg')][::-1]
 
     ctx = {
         'galery': galery_images,

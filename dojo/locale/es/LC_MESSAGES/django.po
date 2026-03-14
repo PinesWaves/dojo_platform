@@ -93,16 +93,20 @@ msgstr ""
 "aceptación?"
 
 #: user_management/forms.py:77 user_management/forms.py:84
-msgid "I accept the "
-msgstr "Acepto el "
+msgid "I accept: "
+msgstr "Acepto: "
 
 #: user_management/forms.py:78
-msgid "Regulations"
-msgstr "Reglamento"
+msgid "The Regulations"
+msgstr "El Reglamento"
 
 #: user_management/forms.py:85
-msgid "Informed consent"
-msgstr "Consentimiento informado"
+msgid "The Informed consent"
+msgstr "El Consentimiento informado"
+
+#: user_management/forms.py:92
+msgid "The Privacy Policy"
+msgstr "La Política de Privacidad"
 
 #: user_management/forms.py:177 user_management/forms.py:343
 msgid "Passwords do not match."

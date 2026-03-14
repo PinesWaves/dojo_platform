@@ -150,6 +150,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     payment_status = models.BooleanField(default=True)
     accept_regulations = models.BooleanField(default=False)
     accept_inf_cons = models.BooleanField(default=False)
+    accept_priv_pol = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
