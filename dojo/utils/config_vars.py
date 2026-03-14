@@ -1,7 +1,10 @@
 from django.db import models
 
-regulations = "https://drive.google.com/file/d/1ZpVOlsm9EvjMCfV0xy3tbckCbaJ33lFd/view?usp=drive_link"
-informed_consent = "https://drive.google.com/file/d/1ZpVOlsm9EvjMCfV0xy3tbckCbaJ33lFd/view?usp=drive_link"
+regulations = "https://drive.google.com/file/d/1icNlzCpdu7W1xKFh6aHBjxU7zv81qLk3/view"
+informed_consent = "https://drive.google.com/file/d/1GtKn4HxgYQJv2XKKw-Px0P3A4TYKzDpv/view"
+privacy_policy = "https://drive.google.com/file/d/1FebS6GFDgr9oVSBrkM5GsoG02vZpY-yc/view"
+privacy_policy_web_page = "https://drive.google.com/file/d/1xHAnEg2LZoOx_-soq4QLUlslfDr-VvNC/view"
+catalog = "https://drive.google.com/file/d/11heTdubo63aokj0ZC4_B9bvf7XyiEbZs/view"
 
 class Ranges(models.TextChoices):
     K10 = '10k', 'Beginner'
