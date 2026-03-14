@@ -34,6 +34,13 @@
 <div class="content">
   <div class="container">
     <!-- Progress indicator card -->
+    {% if not user.is_authenticated %}
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">&times;</button>
+      <i class="fas fa-info-circle"></i>
+      <a href="{% url 'login' %}" class="alert-link">Inicia sesión</a> para llevar seguimiento de tu progreso y marcar actividades como completadas.
+    </div>
+    {% endif %}
     {% if user.is_authenticated and student.category == 'ST' %}
     <div class="card card-outline {% if lesson_completed %}card-success{% else %}card-info{% endif %} mb-3">
       <div class="card-body">
