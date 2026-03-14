@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from utils.widgets import CustomSwitchWidget, CustomDateTimePickerWidget
-from utils.config_vars import regulations, informed_consent
+from utils.config_vars import regulations, informed_consent, privacy_policy
 from .models import User, Category, DocumentType
 
 
@@ -74,15 +74,22 @@ class UserRegisterForm(forms.ModelForm):
     )
     accept_regulations = forms.BooleanField(
         widget=CustomSwitchWidget(
-            label_text=_("I accept the "),
-            a_tag=(_('Regulations'), regulations)
+            label_text=_("I accept: "),
+            a_tag=(_('The Regulations'), regulations)
         ),
         required=True
     )
     accept_inf_cons = forms.BooleanField(
         widget=CustomSwitchWidget(
-            label_text=_("I accept the "),
-            a_tag=(_('Informed consent'), informed_consent)
+            label_text=_("I accept: "),
+            a_tag=(_('The Informed consent'), informed_consent)
+        ),
+        required=True
+    )
+    accept_priv_pol = forms.BooleanField(
+        widget=CustomSwitchWidget(
+            label_text=_("I accept: "),
+            a_tag=(_('The Privacy Policy'), privacy_policy)
         ),
         required=True
     )
@@ -101,7 +108,7 @@ class UserRegisterForm(forms.ModelForm):
             'email', 'phone_number', 'country', 'city', 'address', 'parent', 'parent_phone_number', 'password1',
             'password2', 'eps', 'date_joined', 'physical_cond', 'medical_cond', 'drug_cons', 'allergies',
             'other_activities', 'cardio_prob', 'injuries', 'physical_limit', 'lost_cons', 'sec_recom', 'agreement',
-            'accept_regulations', 'accept_inf_cons'
+            'accept_regulations', 'accept_inf_cons', 'accept_priv_pol'
         ]
         labels = {
             'birth_date': '',
@@ -117,7 +124,8 @@ class UserRegisterForm(forms.ModelForm):
             'sec_recom': '',
             'agreement': '',
             'accept_regulations': '',
-            'accept_inf_cons': ''
+            'accept_inf_cons': '',
+            'accept_priv_pol': ''
         }
 
     def __init__(self, *args, **kwargs):
@@ -161,7 +169,7 @@ class UserRegisterForm(forms.ModelForm):
             'birth_date', 'birth_place', 'profession', 'email', 'phone_number',
             'country', 'city', 'address', 'date_joined', 'eps',
             'physical_cond', 'medical_cond',
-            'sec_recom', 'agreement', 'accept_inf_cons', 'accept_regulations',
+            'sec_recom', 'agreement', 'accept_inf_cons', 'accept_regulations', 'accept_priv_pol',
             'password1', 'password2',
         ]
 
