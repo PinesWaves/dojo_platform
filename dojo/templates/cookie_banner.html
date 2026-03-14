@@ -1,0 +1,29 @@
+<!-- Cookie Banner -->
+<div id="cookie-banner" style="display:none; position:fixed; bottom:0; left:0; right:0; z-index:9999; background:#212121; color:#f5f5f5; padding:1rem 1.5rem;">
+  <div style="max-width:960px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem;">
+    <p style="margin:0; font-size:0.9rem; flex:1; min-width:200px;">
+      Este sitio web usa cookies para mejorar tu experiencia. Al continuar navegando, aceptas nuestra
+      <a href="https://drive.google.com/file/d/1xHAnEg2LZoOx_-soq4QLUlslfDr-VvNC/view"
+         target="_blank" rel="noopener noreferrer"
+         style="color:#ef5350; font-weight:bold;">Política de Tratamiento de Datos Personales</a>.
+      Puedes ejercer tus derechos de acceso, corrección o supresión escribiendo a
+      <a href="mailto:seishindojokaratedo@gmail.com" style="color:#ef5350;">seishindojokaratedo@gmail.com</a>.
+    </p>
+    <button id="cookie-accept-btn"
+            style="background:#dc3545; color:#fff; border:none; padding:0.45rem 1.2rem; border-radius:4px; cursor:pointer; white-space:nowrap; font-size:0.9rem;">
+      Aceptar
+    </button>
+  </div>
+</div>
+<script>
+  (function () {
+    var banner = document.getElementById('cookie-banner');
+    if (!localStorage.getItem('cookieConsent')) {
+      banner.style.display = 'block';
+    }
+    document.getElementById('cookie-accept-btn').addEventListener('click', function () {
+      localStorage.setItem('cookieConsent', '1');
+      banner.style.display = 'none';
+    });
+  })();
+</script>

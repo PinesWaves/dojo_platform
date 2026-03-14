@@ -108,6 +108,9 @@
   <a class="nav-link" href="/#contacto">Contacto</a>
 </li>
 <li class="nav-item">
+  <a class="nav-link" href="{% url 'library' %}">Biblioteca</a>
+</li>
+<li class="nav-item">
   <a href="{% url 'login' %}" class="btn btn-danger">Login</a>
 </li>
 {% endblock %}
@@ -150,20 +153,42 @@
   </div>
 </section>
 
-<!-- Instructor Section -->
+<!-- Dojo Section -->
 <section id="conocenos" class="bg-light py-3">
   <div class="container">
     <h1 class="mb-4 text-bold text-center">Conócenos</h1>
     <div class="row align-items-center min-vh-80">
+      <div class="col-md-12">
+        <h5>
+          Bienvenido a SEISHIN JKA DOJO Karate-Do Shotokan. <br><br>
+          Nuestro principal objetivo es específico en la práctica del
+          arte marcial tradicional japonés y su filosofía, mediante ejercicios de coordinación, desarrollo de
+          habilidades motrices siendo una actividad física como parte de su vida diaria. <br><br>
+          La práctica del Karate-Do lleva a crear habilidades y destrezas específicas, ayuda a la concentración,
+          reforzar valores para beneficio de su entorno social y a su vez, aprendiendo a defender su integridad.
+        </h5><br>
+      </div>
+    </div>
+    <div class="col-md-12 justify-content-center">
+      <img src="{% static 'img/about-dojo.jpg' %}" alt="Sensei" class="img-fluid d-flex justify-content-center mx-auto mb-3 border border-danger rounded">
+    </div>
+  </div>
+</section>
+
+<!-- Instructor Section -->
+<section id="nuestro-sensei" class="bg-light py-3">
+  <div class="container">
+    <h1 class="mb-4 text-bold text-center">Nuestro Sensei</h1>
+    <div class="row align-items-center min-vh-80">
       <div class="col-md-6">
-        <img src="{% static 'img/about.jpg' %}" alt="Sensei" class="img-fluid d-flex justify-content-center mx-auto mb-3 border border-danger rounded">
+        <img src="{% static 'img/about-sensei.jpg' %}" alt="Sensei" class="img-fluid d-flex justify-content-center mx-auto mb-3 border border-danger rounded">
       </div>
       <div class="col-md-6">
         <h3>SENSEI CESAR A. PEÑA CH.</h3><br>
-        <p>Inició la práctica del Karate-Do en 1989 a la edad de 4 años con el Maestro Jairo A. Rozo B. y el maestro Jaime Fernández Garzón.<br><br>
+        <h5>Inició la práctica del Karate-Do en 1989 a la edad de 4 años con el Maestro Jairo A. Rozo B. y el maestro Jaime Fernández Garzón.<br><br>
         Practicó en ligas deportivas de Karate a nivel nacional. Sub-Oficial del Ejército Nacional de Colombia con el rango de Cabo 3<sup>o</sup> (R).<br><br>
-        Actualmente, 3<sup>er</sup> Dan de karate JKA otorgado por el sensei Mitsuo Inoue, 8<sup>o</sup> Dan JKA/HQ, presidente de la JKA Sudamericana.<br><br>
-        Dojo afiliado a la JKA/WF Colombia a cargo del sensei Armando Vargas R. 6<sup>o</sup> Dan JKA, Chief Instructor JKA/ WF Colombia.</p>
+        Actualmente, 4<sup>o</sup> Dan de karate JKA otorgado por el sensei Mitsuo Inoue, 8<sup>o</sup> Dan JKA/HQ, presidente de la JKA Sudamericana.<br><br>
+        Dojo afiliado a la JKA/WF Colombia a cargo del sensei Armando Vargas R. 6<sup>o</sup> Dan JKA, Chief Instructor JKA/ WF Colombia.</h5>
       </div>
     </div>
     <div class="row justify-content-center">
