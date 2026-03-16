@@ -253,7 +253,8 @@ class UserUpdateForm(forms.ModelForm):
             user_category = getattr(self.request.user, 'category', None)
             if user_category != Category.SENSEI:
                 self.fields.pop('level', None)
-                self.fields.pop('category', None)
+                self.fields['category'].widget = forms.HiddenInput()
+                self.fields['category'].disabled = True
 
         if self.instance and self.instance.pk:
             country_code = self.instance.country
