@@ -11,9 +11,9 @@
       <div class="modal-body text-center">
         <label for="modal-student-list-{{ t.id }}">Students:</label>
         <div id="modal-student-list-{{ t.id }}">
-          {% for at in t.attendances.all %}
+          {% for at in t.attendances.all|dictsort:"student.last_name" %}
             {% if at.status == "P" %}
-              {{ at.student.first_name }} {{ at.student.last_name }}<br>
+              {{ at.student.last_name }} {{ at.student.first_name }}<br>
             {% endif %}
           {% empty %}
           No students attended
