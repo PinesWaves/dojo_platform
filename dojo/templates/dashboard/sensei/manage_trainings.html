@@ -44,7 +44,7 @@
               <button type="button" class="btn btn-danger m-1" data-toggle="modal" data-target="#modal-new-schedule">
                 New Schedule
               </button>
-              <button type="button" class="btn btn-danger m-1" data-toggle="modal" data-target="#modal-new-training">
+              <button type="button" class="btn btn-danger m-1" id="btn-new-training">
                 New Training
               </button>
             </div>
@@ -137,7 +137,21 @@
               {% for t in trainings %}
                 <tr>
 {#                  https://docs.djangoproject.com/en/5.2/ref/templates/builtins/#date#}
-                  <td>{{ t.date|date:"Y/m/d G:i (l)" }}</td>
+                  <td>
+                    <button type="button" class="btn btn-link p-0 text-left btn-edit-training"
+                        data-training-id="{{ t.id }}"
+                        data-training-date="{{ t.date|date:'Y-m-d H:i' }}"
+                        data-training-duration="{{ t.duration.total_seconds|floatformat:0 }}"
+                        data-training-type="{{ t.type }}"
+                        data-training-status="{{ t.status }}"
+                        data-training-sempai="{{ t.sempai_id|default:'' }}"
+                        data-training-techniques="{% for tech in t.techniques.all %}{{ tech.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                        data-training-katas="{% for k in t.katas.all %}{{ k.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                        data-training-kumites="{% for k in t.kumites.all %}{{ k.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                        data-training-details="{{ t.details|default:''|escapejs }}">
+                      {{ t.date|date:"Y/m/d G:i (l)" }}
+                    </button>
+                  </td>
                   <td>
                     {{ t.get_status_display }}
                   </td>
@@ -260,6 +274,59 @@
                   $('.modal-body').html($(xhr.responseText).find('.modal-body').html());
               }
           });
+      });
+
+      // New Training button — reset modal to create mode
+      $('#btn-new-training').on('click', function() {
+          $('[name="action"]').val('new_training');
+          $('#training-id-input').val('');
+          $('#modalNewTrainingLabel').text('Create training');
+          $('#id_date').val('');
+          $('#id_duration').val('');
+          $('#id_type').val($('#id_type option:first').val());
+          $('#id_status').val($('#id_status option:first').val());
+          $('#id_sempai').val('');
+          $('#id_details').val('');
+          $('#id_techniques').val([]);
+          $('#id_katas').val([]);
+          $('#id_kumites').val([]);
+          $('.duallistbox').bootstrapDualListbox('refresh', true);
+          $('#modal-new-training').modal('show');
+      });
+
+      // Edit Training — click on date in table
+      $(document).on('click', '.btn-edit-training', function() {
+          var btn = $(this);
+          var trainingDate = btn.data('training-date');
+          var durationSecs = parseInt(btn.data('training-duration')) || 0;
+          var durationH = Math.floor(durationSecs / 3600);
+          var durationM = Math.floor((durationSecs % 3600) / 60);
+          var durationStr = String(durationH).padStart(2, '0') + ':' + String(durationM).padStart(2, '0');
+          var techniques = btn.data('training-techniques') ? String(btn.data('training-techniques')).split(',') : [];
+          var katas = btn.data('training-katas') ? String(btn.data('training-katas')).split(',') : [];
+          var kumites = btn.data('training-kumites') ? String(btn.data('training-kumites')).split(',') : [];
+
+          $('[name="action"]').val('update_training');
+          $('#training-id-input').val(btn.data('training-id'));
+          $('#modalNewTrainingLabel').text('Edit training — ' + trainingDate);
+
+          $('#id_date').val(trainingDate);
+          $('#date_datetimepicker').datetimepicker('date', moment(trainingDate, 'YYYY-MM-DD HH:mm'));
+
+          $('#id_duration').val(durationStr);
+          $('#duration_timepicker').datetimepicker('date', moment(durationStr, 'HH:mm'));
+
+          $('#id_type').val(btn.data('training-type'));
+          $('#id_status').val(btn.data('training-status'));
+          $('#id_sempai').val(btn.data('training-sempai') || '');
+          $('#id_details').val(btn.data('training-details') || '');
+
+          $('#id_techniques').val(techniques);
+          $('#id_katas').val(katas);
+          $('#id_kumites').val(kumites);
+          $('.duallistbox').bootstrapDualListbox('refresh', true);
+
+          $('#modal-new-training').modal('show');
       });
 
     });

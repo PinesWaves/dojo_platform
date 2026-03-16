@@ -5,9 +5,10 @@
     <div class="modal-content bg-default">
       <form id="form-new-training" action="{% url 'manage_trainings' %}">
         <input type="hidden" name="action" value="new_training">
+        <input type="hidden" name="training_id" id="training-id-input" value="">
         {% csrf_token %}
         <div class="modal-header bg-danger">
-          <h5 class="modal-title" id="modalNewTrainingLabel">Create training - {% now 'Y b j' %}</h5>
+          <h5 class="modal-title" id="modalNewTrainingLabel">Create training</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
