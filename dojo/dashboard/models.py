@@ -247,9 +247,9 @@ class TrainingStatus(models.TextChoices):
 
 
 class TrainingType(models.TextChoices):
+    KIHON = "KIHON", "Kihon"
     KATA = "KATA", "Kata"
     KUMITE = "KUMITE", "Kumite"
-    TECHNIQUE = "TECH", "Technique"
     PHYSICAL = "PHYS", "Physical Preparation"
     MIXED = "MIXED", "Mixed"
 
