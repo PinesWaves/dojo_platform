@@ -163,7 +163,11 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        trainings = Training.objects.prefetch_related('attendances', 'techniques').filter(date__lte=timezone.now() + timedelta(days=1)).order_by('-date')
+        trainings = Training.objects.prefetch_related(
+            'attendances', 'techniques'
+        ).filter(
+            date__lte=timezone.now() + timedelta(days=30)
+        ).order_by('-date')
         training_form = TrainingForm()
         scheduling_form = TrainingSchedulingForm()
         schedules = TrainingScheduling.objects.all()
