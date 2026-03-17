@@ -22,6 +22,7 @@ def user_document_path(instance, filename):
 class IDType(models.TextChoices):
     CITIZENSHIP_CARD = 'CC', _('Citizenship card')
     IDENTITY_CARD = 'IC', _('Identity Card')
+    CIVIL_REG = 'CR', _('Civil Registration')
     ALIEN_CARD = 'AR', _('Alien Registration Card')
     PASSPORT = 'PA', _('Passport')
     OTHER = 'OT', _('Other')

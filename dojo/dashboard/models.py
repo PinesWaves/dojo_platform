@@ -17,7 +17,7 @@ LEVEL_CHOICES = [
 
 class Dojo(models.Model):
     name = models.CharField(max_length=100)
-    image = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
+    image = models.ImageField(upload_to='dojo/', blank=True, null=True)
     description = models.TextField()
     sensei: User = models.OneToOneField(User, related_name="sensei", on_delete=models.DO_NOTHING)
     students = models.ManyToManyField(User, related_name="students", blank=True)
