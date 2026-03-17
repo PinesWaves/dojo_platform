@@ -163,7 +163,11 @@ class ManageTrainings(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        trainings = Training.objects.prefetch_related('attendances', 'techniques').filter(date__lte=timezone.now() + timedelta(days=1)).order_by('-date')
+        trainings = Training.objects.prefetch_related(
+            'attendances', 'techniques'
+        ).filter(
+            date__lte=timezone.now() + timedelta(days=30)
+        ).order_by('-date')
         training_form = TrainingForm()
         scheduling_form = TrainingSchedulingForm()
         schedules = TrainingScheduling.objects.all()
@@ -430,11 +434,10 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         elif self.request.FILES.get('picture'):
             # Handle picture upload
             if student.picture:
-                student.picture.delete(save=False)
+                student.picture.storage.delete(student.picture.name)
 
             uploaded_file = self.request.FILES['picture']
-            ext = uploaded_file.name.rsplit('.')[-1]
-            student.picture.save(f'{pk}.{ext}', self.request.FILES['picture'], save=True)
+            student.picture.save(f'{student.id_number}.png', uploaded_file, save=True)
             form = UserUpdateForm(self.request.POST, self.request.FILES, instance=student, request=request)
             ctx = {
                 'form': form,
@@ -639,12 +642,11 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
         student = request.user
         if 'picture' in request.FILES:
             uploaded_file = request.FILES['picture']
-            ext = uploaded_file.name.rsplit('.')[-1]
 
             if student.picture:
-                student.picture.delete(save=False)
+                student.picture.storage.delete(student.picture.name)
 
-            student.picture.save(f'{student.pk}.{ext}', uploaded_file, save=True)
+            student.picture.save(f'{student.id_number}.png', uploaded_file, save=True)
 
             messages.success(request, "Picture updated correctly.")
             return redirect('profile')

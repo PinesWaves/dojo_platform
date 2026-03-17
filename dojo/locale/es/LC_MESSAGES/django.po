@@ -132,13 +132,17 @@ msgstr "Confirmar Nueva Contraseña"
 msgid "Current Password"
 msgstr "Contraseña Actual"
 
-#: user_management/models.py:24
+#: user_management/models.py:23
 msgid "Citizenship card"
 msgstr "Cédula de ciudadanía"
 
-#: user_management/models.py:25
+#: user_management/models.py:24
 msgid "Identity Card"
 msgstr "Tarjeta de identidad"
+
+#: user_management/models.py:25
+msgid "Civil Registration"
+msgstr "Registro civil"
 
 #: user_management/models.py:26
 msgid "Alien Registration Card"
