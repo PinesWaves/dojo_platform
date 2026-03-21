@@ -277,27 +277,71 @@
     $('#qrScannerModal').modal('show');
   });
 
-  $('#qrScannerModal').on('shown.bs.modal', function () {
-    document.getElementById('qr-scan-result').innerHTML = '';
+  function stopScanner() {
+    if (!html5QrCode) return Promise.resolve();
+    var qr = html5QrCode;
+    html5QrCode = null;
+    return qr.stop().then(function () { qr.clear(); }).catch(function () {});
+  }
+
+  function populateCameraSelector(selectedId) {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+    navigator.mediaDevices.enumerateDevices().then(function (devices) {
+      var videoDevices = devices.filter(function (d) { return d.kind === 'videoinput'; });
+      var cameraSelect = document.getElementById('camera-select');
+      var cameraContainer = document.getElementById('camera-selector-container');
+      if (videoDevices.length > 1) {
+        cameraSelect.innerHTML = '';
+        videoDevices.forEach(function (dev, idx) {
+          var opt = document.createElement('option');
+          opt.value = dev.deviceId;
+          opt.textContent = dev.label || ('Cámara ' + (idx + 1));
+          if (selectedId && dev.deviceId === selectedId) opt.selected = true;
+          cameraSelect.appendChild(opt);
+        });
+        cameraContainer.style.display = 'block';
+      } else {
+        cameraContainer.style.display = 'none';
+      }
+    }).catch(function () {});
+  }
+
+  function startScanner(cameraId) {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      document.getElementById('qr-scan-result').innerHTML =
+        '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle mr-1"></i>' +
+        'La cámara requiere conexión segura (HTTPS). Accede al sitio usando HTTPS.</div>';
+      return;
+    }
+    var constraint = cameraId ? { deviceId: { exact: cameraId } } : { facingMode: 'environment' };
     html5QrCode = new Html5Qrcode('qr-reader-view');
     html5QrCode.start(
-      { facingMode: 'environment' },
+      constraint,
       { fps: 10, qrbox: { width: 260, height: 260 } },
       onQrSuccess,
       null
-    ).catch(function (err) {
+    ).then(function () {
+      populateCameraSelector(cameraId);
+    }).catch(function (err) {
+      html5QrCode = null;
       document.getElementById('qr-scan-result').innerHTML =
         '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle mr-1"></i>Camera error: ' + err + '</div>';
     });
+  }
+
+  $('#qrScannerModal').on('shown.bs.modal', function () {
+    document.getElementById('qr-scan-result').innerHTML = '';
+    document.getElementById('camera-selector-container').style.display = 'none';
+    startScanner(null);
+  });
+
+  document.getElementById('camera-select').addEventListener('change', function () {
+    var selectedId = this.value;
+    stopScanner().then(function () { startScanner(selectedId); });
   });
 
   $('#qrScannerModal').on('hide.bs.modal', function () {
-    if (html5QrCode) {
-      html5QrCode.stop().then(function () {
-        html5QrCode.clear();
-        html5QrCode = null;
-      }).catch(function () {});
-    }
+    stopScanner();
   });
 
   function onQrSuccess(qrData) {

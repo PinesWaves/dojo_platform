@@ -27,7 +27,7 @@ SECRET_KEY = config("DJANGO_SECRET_KEY", default="", cast=str)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=0, cast=bool)
 ALLOW_ADMIN = config("ALLOW_ADMIN", default=0, cast=bool)
-ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default="", cast=str).split()
+ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default="*", cast=str).split()
 if not DEBUG:
     CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=str).split()
 else:
