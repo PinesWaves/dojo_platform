@@ -159,13 +159,11 @@
                     <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-list-details-{{ t.id }}">
                       List
                     </button>
-                    {% include 'dashboard/sensei/modal_list_details.html' with training=t %}
                   </td>
                   <td>
                     <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-list-students-{{ t.id }}">
                       List
                     </button>
-                    {% include 'dashboard/sensei/modal_list_students.html' with training=t %}
                   </td>
                   <td>
                     <div class="d-flex">
@@ -212,6 +210,10 @@
     <!-- /.row (main row) -->
   </div><!-- /.container-fluid -->
 </section>
+{% for t in trainings %}
+  {% include 'dashboard/sensei/modal_list_details.html' %}
+  {% include 'dashboard/sensei/modal_list_students.html' %}
+{% endfor %}
 {% include 'dashboard/sensei/modal_new_schedule.html' %}
 {% include 'dashboard/sensei/modal_set_training.html' %}
 <!-- /.content -->
