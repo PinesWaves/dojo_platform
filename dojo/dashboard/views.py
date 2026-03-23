@@ -1,4 +1,5 @@
 import calendar
+from collections import defaultdict
 from datetime import date, datetime, timedelta
 from secrets import token_urlsafe
 import json
@@ -916,16 +917,27 @@ class TrainingAttendance(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
         for att in attendance_qs:
             attendance_map.setdefault(att.student_id, set()).add(att.training_id)
 
+        # Group training IDs by local date (days with multiple sessions count as one)
+        training_date_map = defaultdict(list)
+        for training in trainings:
+            local_date = timezone.localtime(training.date).date()
+            training_date_map[local_date].append(training.id)
+        total_unique_days = len(training_date_map)
+
         # Build student rows
         student_rows = []
         for student in students:
             attended_ids = attendance_map.get(student.id, set())
-            missed = len(training_ids) - len(attended_ids)
+            # A day is attended if the student attended at least one session that day
+            days_attended = sum(
+                1 for day_ids in training_date_map.values()
+                if any(tid in attended_ids for tid in day_ids)
+            )
             student_rows.append({
                 'student': student,
                 'attended_ids': list(attended_ids),
-                't_attend': len(attended_ids),
-                't_missed': missed,
+                't_attend': days_attended,
+                't_missed': total_unique_days - days_attended,
             })
 
         # Pagination: all 12 months of the selected year
