@@ -105,6 +105,61 @@
     padding: 2rem;
     color: #888;
   }
+
+  /* QR modal: siempre restringido al viewport */
+  #qrScannerModal .modal-dialog {
+    max-height: 100vh;
+    max-height: 100dvh;
+    margin: 0 auto;
+  }
+  #qrScannerModal .modal-content {
+    max-height: 100vh;
+    max-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #qrScannerModal .modal-header { flex-shrink: 0; }
+  #qrScannerModal .modal-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  #qrScannerModal .modal-footer { flex-shrink: 0; }
+  #qr-reader-view {
+    max-height: 55vh;
+    max-height: 55dvh;
+    overflow: hidden;
+  }
+
+  /* Landscape en móvil: layout horizontal y compacto */
+  @media (max-height: 500px) {
+    #qrScannerModal .modal-header {
+      padding: 0.4rem 1rem;
+    }
+    #qrScannerModal .modal-body {
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    #qrScannerModal .modal-footer {
+      display: none;
+    }
+    #camera-selector-container {
+      margin-bottom: 0.4rem;
+    }
+    #qr-reader-view {
+      flex-shrink: 0;
+      max-height: 80vh;
+      max-height: 80dvh;
+    }
+    #qr-scan-result {
+      flex: 1;
+      margin-top: 0 !important;
+    }
+  }
 </style>
 {% endblock %}
 
@@ -219,7 +274,7 @@
 {% endblock %}
 
 {% block js %}
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="{% static 'plugins/html5-qrcode/html5-qrcode.min.js' %}"></script>
 <script>
   const TOGGLE_URL = "{% url 'toggle_attendance' %}";
   const QR_ATTENDANCE_URL = "{% url 'register_qr_attendance' %}";
@@ -272,10 +327,16 @@
   // ── QR Scanner ──────────────────────────────────────────────────────────
   let html5QrCode = null;
   let scanCooldown = false;
+  let orientationCleanup = null;
 
   document.getElementById('qr_reader').addEventListener('click', function () {
     $('#qrScannerModal').modal('show');
   });
+
+  function getQrBoxSize() {
+    var size = Math.floor(Math.min(window.innerWidth, window.innerHeight) * 0.65);
+    return Math.max(150, Math.min(size, 300));
+  }
 
   function stopScanner() {
     if (!html5QrCode) return Promise.resolve();
@@ -284,7 +345,21 @@
     return qr.stop().then(function () { qr.clear(); }).catch(function () {});
   }
 
-  function populateCameraSelector(selectedId) {
+  function getActiveTrackSettings() {
+    var video = document.querySelector('#qr-reader-view video');
+    if (video && video.srcObject) {
+      var tracks = video.srcObject.getVideoTracks();
+      if (tracks.length > 0) return tracks[0].getSettings();
+    }
+    return null;
+  }
+
+  function applyMirror(isFront) {
+    var video = document.querySelector('#qr-reader-view video');
+    if (video) video.style.transform = isFront ? 'scaleX(-1)' : '';
+  }
+
+  function populateCameraSelector(activeDeviceId) {
     if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
     navigator.mediaDevices.enumerateDevices().then(function (devices) {
       var videoDevices = devices.filter(function (d) { return d.kind === 'videoinput'; });
@@ -296,7 +371,7 @@
           var opt = document.createElement('option');
           opt.value = dev.deviceId;
           opt.textContent = dev.label || ('Cámara ' + (idx + 1));
-          if (selectedId && dev.deviceId === selectedId) opt.selected = true;
+          if (activeDeviceId && dev.deviceId === activeDeviceId) opt.selected = true;
           cameraSelect.appendChild(opt);
         });
         cameraContainer.style.display = 'block';
@@ -315,13 +390,18 @@
     }
     var constraint = cameraId ? { deviceId: { exact: cameraId } } : { facingMode: 'environment' };
     html5QrCode = new Html5Qrcode('qr-reader-view');
+    var qbSize = getQrBoxSize();
     html5QrCode.start(
       constraint,
-      { fps: 10, qrbox: { width: 260, height: 260 } },
+      { fps: 10, qrbox: { width: qbSize, height: qbSize } },
       onQrSuccess,
       null
     ).then(function () {
-      populateCameraSelector(cameraId);
+      var settings = getActiveTrackSettings();
+      var activeDeviceId = settings ? settings.deviceId : cameraId;
+      var isFront = settings ? settings.facingMode === 'user' : false;
+      applyMirror(isFront);
+      populateCameraSelector(activeDeviceId);
     }).catch(function (err) {
       html5QrCode = null;
       document.getElementById('qr-scan-result').innerHTML =
@@ -333,6 +413,52 @@
     document.getElementById('qr-scan-result').innerHTML = '';
     document.getElementById('camera-selector-container').style.display = 'none';
     startScanner(null);
+
+    if (!/firefox/i.test(navigator.userAgent)) {
+      var rotateTimer = null;
+
+      function restartCamera() {
+        var cameraId = document.getElementById('camera-select').value || null;
+        var view = document.getElementById('qr-reader-view');
+        if (html5QrCode) {
+          var qr = html5QrCode;
+          html5QrCode = null;
+          qr.stop().then(function () {
+            view.innerHTML = '';
+            startScanner(cameraId);
+          }).catch(function () {
+            view.innerHTML = '';
+            startScanner(cameraId);
+          });
+        } else {
+          view.innerHTML = '';
+          startScanner(cameraId);
+        }
+      }
+
+      function scheduleRestart() {
+        clearTimeout(rotateTimer);
+        rotateTimer = setTimeout(restartCamera, 400);
+      }
+
+      var mq = window.matchMedia('(orientation: landscape)');
+      if (mq.addEventListener) {
+        mq.addEventListener('change', scheduleRestart);
+      } else {
+        mq.addListener(scheduleRestart);
+      }
+      window.addEventListener('orientationchange', scheduleRestart);
+
+      orientationCleanup = function () {
+        if (mq.removeEventListener) {
+          mq.removeEventListener('change', scheduleRestart);
+        } else {
+          mq.removeListener(scheduleRestart);
+        }
+        window.removeEventListener('orientationchange', scheduleRestart);
+        clearTimeout(rotateTimer);
+      };
+    }
   });
 
   document.getElementById('camera-select').addEventListener('change', function () {
@@ -342,6 +468,10 @@
 
   $('#qrScannerModal').on('hide.bs.modal', function () {
     stopScanner();
+    if (orientationCleanup) {
+      orientationCleanup();
+      orientationCleanup = null;
+    }
   });
 
   function onQrSuccess(qrData) {
