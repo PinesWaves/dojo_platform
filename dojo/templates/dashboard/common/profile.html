@@ -209,11 +209,11 @@
                       <i class="fas fa-folder-open"></i> My Documents
                     </h3>
                     <div class="card-tools">
-                      <span class="badge badge-danger">{{ user.documents.count }}</span>
+                      <span class="badge badge-danger">{{ student.documents.count }}</span>
                     </div>
                   </div>
                   <div class="card-body p-0">
-                    {% if user.documents.all %}
+                    {% if student.documents.all %}
                       <table class="table table-striped">
                         <thead>
                           <tr>
@@ -225,7 +225,7 @@
                           </tr>
                         </thead>
                         <tbody>
-                          {% for doc in user.documents.all %}
+                          {% for doc in student.documents.all %}
                             <tr>
                               <td>
                                 {% if doc.document_type == 'DI' %}
