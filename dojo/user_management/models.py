@@ -174,11 +174,12 @@ class UserDocument(models.Model):
     document_type = models.CharField(
         max_length=2,
         choices=DocumentType.choices,
-        default=DocumentType.OTHER
+        default=DocumentType.OTHER,
+        verbose_name='Document Type'
     )
     file = models.FileField(upload_to=user_document_path)
-    title = models.CharField(max_length=100, blank=True)  # Ej: "Cinturón Negro 1er Dan"
-    description = models.TextField(blank=True)
+    title = models.CharField(max_length=100, blank=True, verbose_name='Title')
+    description = models.TextField(blank=True, verbose_name='Description')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

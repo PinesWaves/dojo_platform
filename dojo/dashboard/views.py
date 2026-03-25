@@ -446,23 +446,10 @@ class ManageProfile(LoginRequiredMixin, AdminRequiredMixin, TemplateView):
             }
             return render(request, self.template_name, context=ctx)
         elif self.request.POST.get('action') == 'docs':
-            docs_form = UploadDocumentsForm(request.POST)
-            if docs_form.is_valid() and request.FILES.getlist('files'):
-                files = request.FILES.getlist('files')
-                document_type = docs_form.cleaned_data['document_type']
-                title = docs_form.cleaned_data['title']
-                description = docs_form.cleaned_data['description']
-
-                for file in files:
-                    UserDocument.objects.create(
-                        user=student,  # Fixed: Upload for the student, not the sensei
-                        document_type=document_type,
-                        title=title or file.name,
-                        description=description,
-                        file=file
-                    )
-
-                messages.success(request, f"{len(files)} document(s) uploaded successfully!")
+            docs_form = UploadDocumentsForm(request.POST, request.FILES)
+            if docs_form.is_valid():
+                docs = docs_form.save_documents(user=student)
+                messages.success(request, f"{len(docs)} document(s) uploaded successfully!")
                 return redirect('manage_profile', pk=pk)
             else:
                 messages.error(request, "Please select at least one file and fill in the required fields.")
@@ -675,23 +662,10 @@ class StudentProfile(LoginRequiredMixin, TemplateView):
                 return render(request, self.template_name, context)
 
         elif request.POST.get('action') == 'docs':
-            docs_form = UploadDocumentsForm(request.POST)
-            if docs_form.is_valid() and request.FILES.getlist('files'):
-                files = request.FILES.getlist('files')
-                document_type = docs_form.cleaned_data['document_type']
-                title = docs_form.cleaned_data['title']
-                description = docs_form.cleaned_data['description']
-
-                for file in files:
-                    UserDocument.objects.create(
-                        user=student,
-                        document_type=document_type,
-                        title=title or file.name,
-                        description=description,
-                        file=file
-                    )
-
-                messages.success(request, f"{len(files)} document(s) uploaded successfully!")
+            docs_form = UploadDocumentsForm(request.POST, request.FILES)
+            if docs_form.is_valid():
+                docs = docs_form.save_documents(user=student)
+                messages.success(request, f"{len(docs)} document(s) uploaded successfully!")
                 return redirect('profile')
             else:
                 messages.error(request, "Please select at least one file and fill in the required fields.")

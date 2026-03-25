@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 from utils.widgets import CustomSwitchWidget, CustomDateTimePickerWidget
 from utils.config_vars import regulations, informed_consent, privacy_policy
-from .models import User, Category, DocumentType
+from .models import User, Category, DocumentType, UserDocument
 
 
 class UserRegisterForm(forms.ModelForm):
@@ -314,11 +314,48 @@ class MultipleFileField(forms.FileField):
         return result
 
 
-class UploadDocumentsForm(forms.Form):
-    document_type = forms.ChoiceField(choices=DocumentType.choices)
+class UploadDocumentsForm(forms.ModelForm):
     title = forms.CharField(max_length=100, required=False)
     description = forms.CharField(max_length=500, required=False, widget=forms.Textarea(attrs={'rows': 3}))
     files = MultipleFileField(label='Archivos')
+
+    class Meta:
+        model = UserDocument
+        fields = ["document_type", "title", "description"]
+        labels = {
+            'document_type': 'Document Type',
+            'title': 'Title',
+            'description': 'Description',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['document_type'].widget.attrs['class'] = 'form-control select2'
+
+        for field_name, field in self.fields.items():
+            class_attr = field.widget.attrs.get('class', '')
+            if 'form-control' not in class_attr:
+                field.widget.attrs['class'] = (class_attr + ' form-control').strip()
+            if field_name in self.errors:
+                field.widget.attrs['class'] += ' is-invalid'
+
+    def save_documents(self, user, commit=True):
+        files = self.cleaned_data['files']
+        if not isinstance(files, list):
+            files = [files]
+        documents = []
+        for file in files:
+            doc = UserDocument(
+                user=user,
+                document_type=self.cleaned_data['document_type'],
+                title=self.cleaned_data.get('title') or file.name,
+                description=self.cleaned_data.get('description', ''),
+                file=file,
+            )
+            if commit:
+                doc.save()
+            documents.append(doc)
+        return documents
 
 
 class ForgotPassForm(forms.Form):
