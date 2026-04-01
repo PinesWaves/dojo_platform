@@ -474,6 +474,15 @@
     }
   });
 
+  function showQrResult(icon, iconColor, name, message) {
+    document.getElementById('qr-result-icon').innerHTML =
+      '<i class="' + icon + '" style="color:' + iconColor + ';"></i>';
+    document.getElementById('qr-result-name').textContent = name;
+    document.getElementById('qr-result-msg').textContent = message;
+    $('#qrResultModal').modal('show');
+    setTimeout(function () { $('#qrResultModal').modal('hide'); }, 5000);
+  }
+
   function onQrSuccess(qrData) {
     if (scanCooldown) return;
     scanCooldown = true;
@@ -485,24 +494,17 @@
     })
       .then(function (response) { return response.json(); })
       .then(function (data) {
-        var resultDiv = document.getElementById('qr-scan-result');
         if (data.error) {
-          resultDiv.innerHTML =
-            '<div class="alert alert-danger"><i class="fas fa-times-circle mr-1"></i>' + data.error + '</div>';
+          showQrResult('fas fa-times-circle', '#dc3545', 'Error', data.error);
         } else if (data.status === 'already') {
-          resultDiv.innerHTML =
-            '<div class="alert alert-warning"><i class="fas fa-info-circle mr-1"></i>' +
-            data.student_name + ' already registered.</div>';
+          showQrResult('fas fa-info-circle', '#ffc107', data.student_name, 'Already registered.');
         } else {
-          resultDiv.innerHTML =
-            '<div class="alert alert-success"><i class="fas fa-check-circle mr-1"></i>' +
-            data.student_name + ' registered successfully.</div>';
+          showQrResult('fas fa-check-circle', '#28a745', data.student_name, 'Registered successfully.');
           updateTableRow(data.student_id, data.training_id);
         }
       })
       .catch(function (err) {
-        document.getElementById('qr-scan-result').innerHTML =
-          '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle mr-1"></i>Request failed.</div>';
+        showQrResult('fas fa-exclamation-triangle', '#dc3545', 'Error', 'Request failed.');
         console.error('QR attendance error:', err);
       })
       .finally(function () {

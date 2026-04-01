@@ -1,4 +1,17 @@
 {% load static %}
+<!-- QR Result Modal -->
+<div class="modal fade" id="qrResultModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index:1100;">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content text-center py-4 px-3">
+      <div class="modal-body">
+        <div id="qr-result-icon" class="mb-2" style="font-size:2.5rem;"></div>
+        <h2 id="qr-result-name" class="font-weight-bold mb-2" style="font-size:2rem;word-break:break-word;"></h2>
+        <p id="qr-result-msg" class="text-muted mb-0" style="font-size:1.1rem;"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- QR Scanner Modal -->
 <div class="modal fade" id="qrScannerModal" tabindex="-1" role="dialog" aria-labelledby="qrScannerModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
