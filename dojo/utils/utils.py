@@ -45,6 +45,6 @@ def get_next_closest_day(st_date: date, week_day: int) -> date:
         date: The next closest date that falls on the specified day of the week.
     """
     days_ahead = (week_day - st_date.weekday() + 7) % 7
-    days_ahead = days_ahead if days_ahead != week_day else 7
+    days_ahead = days_ahead if days_ahead != 0 else 7
     closest_date = st_date + timedelta(days=days_ahead)
     return closest_date
