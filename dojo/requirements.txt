@@ -8,7 +8,7 @@ Faker==40.11.0
 gunicorn==25.1.0
 jmespath==1.1.0
 packaging==26.0
-pillow==12.1.1
+pillow==12.2.0
 psycopg2-binary==2.9.11
 python-dateutil==2.9.0.post0
 python-decouple==3.8
